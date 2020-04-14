@@ -1,0 +1,10 @@
+# folders
+.vscode/
+ex_data/
+
+**/test/**
+
+# extensions
+*.log
+*.png
+*.pkl

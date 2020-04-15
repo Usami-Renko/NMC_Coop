@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-14 20:14:42
+@LastEditTime: 2020-04-15 09:59:29
 @Description  : process postvar
 '''
 import numpy as np
@@ -72,7 +72,7 @@ def plot_data(post_data, iarea):
         map.drawmeridians(np.arange(-180, 181, 20), linewidth=1, dashes=[4, 3], labels=[1, 1, 1, 1])
     elif iarea == 'South_P':
         map = Basemap(projection='spstere', boundinglat=elat, lon_0=0, resolution='i', ax=ax_cf)
-        map.drawparallels(np.arange(-90, elat, 10), linewidth=1, dashes=[4, 3])
+        map.drawparallels(np.arange(-90, elat+1, 10), linewidth=1, dashes=[4, 3])
         map.drawmeridians(np.arange(-180, 181, 20), linewidth=1, dashes=[4, 3], labels=[1, 1, 1, 1])
     elif iarea == 'Tropics':
         map = Basemap(projection='cyl',llcrnrlat=slat,urcrnrlat=elat, llcrnrlon=slon, urcrnrlon=elon, resolution='i', ax=ax_cf)

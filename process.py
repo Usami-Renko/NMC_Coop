@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-17 11:43:06
+@LastEditTime: 2020-04-17 11:47:16
 @Description  : process postvar
 '''
 import numpy as np
@@ -193,9 +193,7 @@ if __name__ == "__main__":
 
             for iarea in ['North_P','South_P', 'Tropics', 'E_Asia']:
                 
-                fcst_range_str = '{} day'.format(itime)
-                level_str = '{} hPa'.format(level)
+                fcst_range_str = '{}_day'.format(time_index)
+                level_str = '{}_hPa'.format(level)
                 
                 plot_data(post_data, iarea, fcst_range_str, level_str)
-
-                exit()

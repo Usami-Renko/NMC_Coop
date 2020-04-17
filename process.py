@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-17 11:47:16
+@LastEditTime: 2020-04-17 17:11:17
 @Description  : process postvar
 '''
 import numpy as np
@@ -45,20 +45,48 @@ def tick_lats(map, lat_labels, ax, xoffset=250000, yoffset=0, rl='r'):
             
         ax.text(x, y+yoffset, text, fontsize=11, ha='center', va='center')
 
-def plot_data(post_data, iarea, fcst_range_str, level_str):
+def add_title(ax, title, subtitle):
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    ax.text(0.5, 0.50, title, fontsize=25, ha='center', va='center')
+    ax.text(0.5, 0.00, subtitle, fontsize=16, ha='center', va='center')
+
+def plot_data(post_data, iarea, time_index, level):
     
     slat,elat,slon,elon = area_region(iarea)
+
+    fcst_range_str = '{}hr'.format(time_index*24)
+    level_str = '{}hPa'.format(int(level))
     
     if iarea in ['North_P', 'South_P']:
-        figsize = (10,10)
+        figsize = (10,12)
     elif iarea == 'Tropics':
-        figsize = (20,2.5)
+        figsize = (20,4.0)
     elif iarea == 'E_Asia':
-        figsize = (10,7)
+        figsize = (10,7.7)
 
     fig = plt.figure(figsize=figsize)
 
-    ax_cf = fig.add_axes([0.1, 0.12, 0.85, 0.85])
+    if iarea == 'Tropics':
+        ax_title = fig.add_axes([0.1, 0.80, 0.82, 0.18])
+    else:
+        ax_title = fig.add_axes([0.1, 0.90, 0.82, 0.08])
+        
+    title = 'Prediction of {} {} Temperature'.format(fcst_range_str, level_str)
+    subtitle = 'Init: {} UTC - {} UTC'.format(start_datatime, end_datetime)
+    add_title(ax_title, title, subtitle)
+    
+    if iarea == 'Tropics':
+        ax_cf = fig.add_axes([0.1, 0.08, 0.85, 0.60])
+    else:
+        ax_cf = fig.add_axes([0.1, 0.08, 0.85, 0.80])
+
     if iarea in ['North_P', 'South_P']:
         ax_cb = fig.add_axes([0.1, 0.05, 0.85, 0.03])
     if iarea == 'Tropics':
@@ -119,6 +147,8 @@ def plot_data(post_data, iarea, fcst_range_str, level_str):
     CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal')
     CB.set_label("Temperature [K]", fontsize=14)
 
+    # ax_cf.set_title()
+
     plt.savefig('./pic/{}_{}_{}.png'.format(iarea, fcst_range_str, level_str), bbox_inches='tight', dpi=500)
     plt.close()
 
@@ -129,12 +159,18 @@ def glob_dir(datadir, datasuffix):
     allfiles = os.listdir(datadir)
     
     datafiles = list()
+    timestamps = list()
     for allfile in allfiles:
         if re.search(regex, allfile) is not None:
             datafile = os.path.join(datadir, allfile)
             datafiles.append(datafile)
+            timestamps.append(allfile.split('.')[0].strip('postvar'))
     
     print(u'{} *.{} datafiles found under directory {}'.format(len(datafiles), datasuffix, datadir))
+    
+    timestamps = np.asarray(timestamps, dtype='int')
+    global start_datatime, end_datetime
+    start_datatime, end_datetime = min(timestamps), max(timestamps)
 
     return datafiles
 
@@ -148,6 +184,8 @@ if __name__ == "__main__":
     levels = [1000, 850]
     
     datafiles = glob_dir(data_dir, data_suffix)
+
+    plt.rcParams['font.family'] = 'serif'
 
     # 1.0 读取postvar数据
     data_list = list() 
@@ -193,7 +231,6 @@ if __name__ == "__main__":
 
             for iarea in ['North_P','South_P', 'Tropics', 'E_Asia']:
                 
-                fcst_range_str = '{}_day'.format(time_index)
-                level_str = '{}_hPa'.format(level)
-                
-                plot_data(post_data, iarea, fcst_range_str, level_str)
+                plot_data(post_data, iarea, time_index, level)
+        
+            exit()

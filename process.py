@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-15 09:59:29
+@LastEditTime: 2020-04-17 11:43:06
 @Description  : process postvar
 '''
 import numpy as np
@@ -12,8 +12,8 @@ from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 import time
 from netCDF4 import Dataset
-import matplotlib.path as mpath
-import cartopy.crs as ccrs
+import os
+import re
 
 def area_region(area):
     if area == 'South_P':
@@ -45,7 +45,7 @@ def tick_lats(map, lat_labels, ax, xoffset=250000, yoffset=0, rl='r'):
             
         ax.text(x, y+yoffset, text, fontsize=11, ha='center', va='center')
 
-def plot_data(post_data, iarea):
+def plot_data(post_data, iarea, fcst_range_str, level_str):
     
     slat,elat,slon,elon = area_region(iarea)
     
@@ -119,42 +119,83 @@ def plot_data(post_data, iarea):
     CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal')
     CB.set_label("Temperature [K]", fontsize=14)
 
-    plt.savefig('./pic/{}.png'.format(iarea), bbox_inches='tight', dpi=500)
+    plt.savefig('./pic/{}_{}_{}.png'.format(iarea, fcst_range_str, level_str), bbox_inches='tight', dpi=500)
     plt.close()
 
+def glob_dir(datadir, datasuffix):
+
+    regex = '\w*\.{}$'.format(datasuffix)
+    
+    allfiles = os.listdir(datadir)
+    
+    datafiles = list()
+    for allfile in allfiles:
+        if re.search(regex, allfile) is not None:
+            datafile = os.path.join(datadir, allfile)
+            datafiles.append(datafile)
+    
+    print(u'{} *.{} datafiles found under directory {}'.format(len(datafiles), datasuffix, datadir))
+
+    return datafiles
 
 if __name__ == "__main__":
 
     data_dir  = './ex_data/'
-    ctlfiles  = ['postvar2016010112.nc','postvar2016010212.nc']
-    fili      = ['fili0','fili1']
-    data_filenames = ['pdata0','pdata1']
+    data_suffix = 'nc'
+    var = 't'
+    
+    time_indices = [0, 3, 5] # 0d, 3d, 5d
+    levels = [1000, 850]
+    
+    datafiles = glob_dir(data_dir, data_suffix)
 
     # 1.0 读取postvar数据
+    data_list = list() 
     print(u'1.0 开始读取postvar数据')
     t0_readpostvar = time.time()
-    for ifile,idata in zip(ctlfiles, data_filenames):
-        locals()[idata] = Dataset(data_dir+ifile, 'r')
-        # print(locals()[idata])
+    for datafile in datafiles:
+        data = Dataset(datafile, 'r')
+        data_list.append(data)
 
     t1_readpostvar = time.time()
     print(u'postvar数据读取结束, 用时{} seconds.'.format(str(t1_readpostvar-t0_readpostvar)[:7]))
 
-    lat, lon = pdata0.variables['latitude'][:],pdata0.variables['longitude'][:]
-    # print(len(lat), len(lon))
+    lat, lon = data_list[0].variables['latitude'][:], data_list[0].variables['longitude'][:]
+    levels = data_list[0].variables['levels'][:].tolist()    
+    # print(levels)
+
+    # 2.0 对指定高度和指定的预报时效做平均
+
+    print(u'2.0 对指定预报面高度列表和指定的预报时效列表做平均')
+    t0_readpostvar = time.time()
+    
+    tmp_datatable = np.zeros((len(data_list), len(time_indices), len(levels), len(lat), len(lon)), dtype='float32')
+
+    for itime, time_index in enumerate(time_indices):
+        for ilevel, level in enumerate(levels):
+            level_index = levels.index(level)
+            for idata, data in enumerate(data_list):
+                tmp_datatable[idata, itime, ilevel, ...] = data.variables[var][time_index, level_index, ...]
+    
+    # (times, levels, lats, lons)
+    datatable = np.average(tmp_datatable, axis=0)
+    
+    t1_readpostvar = time.time()
+    print(u'对指定预报面高度列表和指定的预报时效列表做平均结束, 用时{} seconds.'.format(str(t1_readpostvar-t0_readpostvar)[:7]))
 
     TLON,TLAT = np.meshgrid(lon,lat)
-    # print(np.shape(lats))
-    levels = pdata0.variables['levels'][:].tolist()
-    print(levels)
-
-    # assign time and level
-    it = 0
-    ilevel = 1000
-
-    index = levels.index(ilevel)
-    post_data = (pdata0.variables['t'][it,index,:,:] + pdata1.variables['t'][it,index,:,:])/2
-
+    
     # begin to plot
-    for iarea in ['North_P','South_P', 'Tropics', 'E_Asia']:
-        plot_data(post_data, iarea)
+    for itime, time_index in enumerate(time_indices):
+        for ilevel, level in enumerate(levels):
+            
+            post_data = datatable[itime, ilevel, ...]
+
+            for iarea in ['North_P','South_P', 'Tropics', 'E_Asia']:
+                
+                fcst_range_str = '{} day'.format(itime)
+                level_str = '{} hPa'.format(level)
+                
+                plot_data(post_data, iarea, fcst_range_str, level_str)
+
+                exit()

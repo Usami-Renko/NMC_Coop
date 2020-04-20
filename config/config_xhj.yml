@@ -1,6 +1,6 @@
 # 时间信息
 start_ddate: '2016010112'  # yyyymndd
-end_ddate  : '2016010112'  # yyyymndd
+end_ddate  : '2016010412'  # yyyymndd
 
 # 数据路径 
 ctlfile_dir: '/mnt/f/NMC_Coop/87_fcst_ctl/'
@@ -15,3 +15,10 @@ st_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
 # 图片类型
 pic_prefix: 'png'
 make_gif: False
+
+# 画图设置
+clevel_step:
+  u: 2
+  v: 2
+  t: 4
+  h: 10

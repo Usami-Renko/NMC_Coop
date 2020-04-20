@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-20 18:55:23
+@LastEditTime: 2020-04-20 23:26:35
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -32,6 +32,14 @@ def area_region(area):
         rlon, qlon =   0., 360.
 
     return rlat, qlat, rlon, qlon
+
+def float_index(float_ls, myfloat):
+    if myfloat < float_ls[0]:
+        return 0
+    for ifloat, float in enumerate(float_ls):
+        if ifloat < len(float_ls) - 1 and float <= myfloat <= float_ls[ifloat+1] :
+            return ifloat
+    return len(float_ls) - 1
 
 def _tick_lats(map, lat_labels, ax, xoffset=250000, yoffset=0, rl='r'):
 
@@ -59,12 +67,33 @@ def _add_title(ax, title, subtitle):
     ax.text(0.5, 0.50, title, fontsize=25, ha='center', va='center')
     ax.text(0.5, 0.00, subtitle, fontsize=16, ha='center', va='center')
 
-def plot_data(post_data, TLON, TLAT, iarea, title, subtitle, pic_file):
+def _find_clevels(iarea, data, lon, lat, dlevel):
+    
+    slat,elat,slon,elon = area_region(iarea)
+
+    if elon == 360.0:
+        elon = 359.75
+
+    lon_index = [float_index(lon, slon), float_index(lon, elon)]
+    lat_index = [float_index(lat, slat), float_index(lat, elat)]
+
+    data_visible = data[lat_index[0]:lat_index[1]+1, lon_index[0]:lon_index[1]+1]
+
+    data_max, data_min = int(data_visible.max()), int(data_visible.min())
+
+    clevels = np.arange(data_min, data_max, dlevel)
+
+    return clevels
+
+def plot_data(post_data, varname, lon, lat, iarea, title, subtitle, pic_file, dlevel):
     
     plt.rcParams['font.family'] = 'serif'
 
-    slat,elat,slon,elon = area_region(iarea)
+    TLON,TLAT = np.meshgrid(lon,lat)
     
+    clevels = _find_clevels(iarea, post_data, lon, lat, dlevel)
+    slat,elat,slon,elon = area_region(iarea)
+
     if iarea == 'Global':
         figsize = (12,8.0)
     elif iarea in ['North_P', 'South_P']:
@@ -142,22 +171,22 @@ def plot_data(post_data, TLON, TLAT, iarea, title, subtitle, pic_file):
 
     origin = 'lower'
    
-    if iarea == 'Global':
-        clevels = np.arange(240, 300, 5)
-    if iarea == 'E_Asia':
-        clevels = np.arange(240, 300, 5)
-    if iarea == 'North_P':
-        clevels = np.arange(240, 290, 5)
-    if iarea == 'South_P':
-        clevels = np.arange(260, 285, 3)
-    if iarea == 'Tropics':
-        clevels = np.arange(270, 310, 3)
+    # if iarea == 'Global':
+    #     clevels = np.arange(240, 300, 5)
+    # if iarea == 'E_Asia':
+    #     clevels = np.arange(240, 300, 5)
+    # if iarea == 'North_P':
+    #     clevels = np.arange(240, 290, 5)
+    # if iarea == 'South_P':
+    #     clevels = np.arange(260, 285, 3)
+    # if iarea == 'Tropics':
+    #     clevels = np.arange(270, 310, 3)
 
     CF = map.contourf(x, y, post_data.T, levels=clevels, cmap='jet', origin=origin, extend="both")
     # CF = map.contourf(x, y, post_data.T, cmap='jet', origin=origin, extend="both")
     
     CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal')
-    CB.set_label("Temperature [K]", fontsize=14)
+    CB.set_label(varname, fontsize=14)
 
     plt.savefig('./pic/{}'.format(pic_file), bbox_inches='tight', dpi=500)
     plt.close()

@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-20 18:55:38
+@LastEditTime: 2020-04-20 23:26:10
 @Description  : process postvar
 '''
 import sys
@@ -39,14 +39,16 @@ if __name__ == "__main__":
     st_vars        = cong['st_vars']
     st_levels      = cong['st_levels']
     make_gif       = cong['make_gif']
+    clevel_step    = cong['clevel_step']
     
     # 参数设置
     fcst_step   = 24  # hours
     timelines   = gen_timelines(start_ddate, end_ddate, fcst_step)
     
     time_indices = [0] #[0, 3, 5] # 0d, 3d, 5d
-    var = 't'
-    var_name = {'t':'Temperature'}
+    variables = ['t', 'u', 'v', 'h']
+    # variables = ['t']
+    variable_name = {'t':'Temperature [K]', 'u':'U Wind [m/s]', 'v':'V wind [m/s]', 'h':'Geopotential Height [gpm]'}
 
     ncfiles     = ['postvar{}.nc'.format(itime) for itime in timelines]
 
@@ -63,19 +65,19 @@ if __name__ == "__main__":
     lat, lon = data_list[0].variables['latitude'][:], data_list[0].variables['longitude'][:]
     # levels   = data_list[0].variables['levels'][:].tolist()
     levels = [1000]
-
-    TLON,TLAT = np.meshgrid(lon,lat)
     
     # 2.0 对指定高度和指定的预报时效做平均
     print(u'2.0 对指定预报面高度列表和指定的预报时效列表做平均')
     t0_readpostvar = time.time()
 
-    tmp_datatable = np.zeros((len(data_list), len(time_indices), len(levels), len(lat), len(lon)), dtype='float32')
-    for itime, time_index in enumerate(time_indices):
-        for ilevel, level in enumerate(levels):
-            level_index = levels.index(level)
-            for idata, data in enumerate(data_list):
-                tmp_datatable[idata, itime, ilevel, ...] = data.variables[var][time_index, level_index, ...]
+    tmp_datatable = np.zeros((len(data_list), len(variables), len(time_indices), len(levels), len(lat), len(lon)), dtype='float32')
+    
+    for ivar, var in enumerate(variables):
+        for itime, time_index in enumerate(time_indices):
+            for ilevel, level in enumerate(levels):
+                level_index = levels.index(level)
+                for idata, data in enumerate(data_list):
+                    tmp_datatable[idata, ivar, itime, ilevel, ...] = data.variables[var][time_index, level_index, ...]
 
     datatable = np.average(tmp_datatable, axis=0)
     
@@ -85,21 +87,24 @@ if __name__ == "__main__":
     # begin to plot
     for iarea in ['North_P']: #['Global', 'E_Asia', 'North_P', 'South_P']:
         for itime, time_index in enumerate(time_indices):
-            p = Pool(len(levels))
-            for ilevel,level in enumerate(levels):
-                post_data = datatable[itime, ilevel, ...]
+            for ivar, var in enumerate(variables):
+                varname = variable_name[var]
+                dlevel = clevel_step[var]
 
-                title    = 'Prediction of {}hr {}hPa {}'.format(itime*24, int(level), var_name[var])
-                subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
-                pic_file = '{}_{}hr_{}hpa.png'.format(iarea, itime*24, int(level))
-                p.apply_async(plot_data, args=(post_data, iarea, title, subtitle, pic_file))
-                plot_data(post_data, TLON, TLAT, iarea, title, subtitle, pic_file)
+                p = Pool(len(levels))
+                for ilevel,level in enumerate(levels):
+                    post_data = datatable[ivar, itime, ilevel, ...]
 
-            print('Waiting for all subprocesses done...')
-            p.close()
-            p.join()
-            print('All subprocesses done.')
-            
+                    title    = 'Prediction of {}hr {}hPa {}'.format(itime*24, int(level), varname)
+                    subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
+                    pic_file = '{}_{}hr_{}hpa_{}.png'.format(iarea, itime*24, int(level), var)
+                    p.apply_async(plot_data, args=(post_data, varname, lon, lat, iarea, title, subtitle, pic_file, dlevel))
+                    plot_data(post_data, varname, lon, lat, iarea, title, subtitle, pic_file, dlevel)
+                print('Waiting for all subprocesses done...')
+                p.close()
+                p.join()
+                print('All subprocesses done.')
+
     # 合成图片
     if make_gif:
         print('开始合成gif')

@@ -1,10 +1,14 @@
 # folders
 .vscode/
 ex_data/
+ctl_des/
 
 **/test/**
+**/grads/**
 
 # extensions
 *.log
 *.png
 *.pkl
+*.docx
+*.zip

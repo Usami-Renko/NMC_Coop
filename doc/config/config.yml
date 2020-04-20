@@ -1,0 +1,16 @@
+# 时间信息
+start_ddate: '2016010112'  # yyyymndd
+end_ddate  : '2016010512'  # yyyymndd
+
+# 数据路径 
+ctlfile_dir: '/g3/wanghao/Python/phys/87_fcst_ctl/'
+
+# 数据转换路径
+exdata_dir: '/g3/wanghao/Python/phys/ex_data/'
+
+# 统计变量和统计等压层
+st_vars  : ['u','v','t','h']
+st_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
+
+# 图片类型
+pic_prefix: 'png'

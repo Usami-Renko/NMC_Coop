@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-20 16:40:34
+@LastEditTime: 2020-04-20 18:07:16
 @Description  : process postvar
 '''
 import sys
@@ -56,52 +56,55 @@ def tick_lats(map, lat_labels, ax, xoffset=250000, yoffset=0, rl='r'):
             
         ax.text(x, y+yoffset, text, fontsize=11, ha='center', va='center')
 
-def add_title(ax, irea, title, subtitle):
+def add_title(ax, title, subtitle):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.spines['left'].set_visible(False)
     ax.spines['bottom'].set_visible(False)
-                
+
     ax.set_xticks([])
     ax.set_yticks([])
-                    
-    if irea in ['North_P', 'South_P']:
-        ax.text(0.5, 0.30, title, fontsize=25, ha='center', va='center')
-        ax.text(0.5, 0.30, subtitle, fontsize=16, ha='center', va='center')
+
+    ax.text(0.5, 0.50, title, fontsize=25, ha='center', va='center')
+    ax.text(0.5, 0.00, subtitle, fontsize=16, ha='center', va='center')
 
 def plot_data(post_data, iarea, title, subtitle, pic_file):
     
     slat,elat,slon,elon = area_region(iarea)
     
     if iarea == 'Global':
-        figsize = (12,8)
-    elif iarea == 'E_Asia':
-        figsize = (10,7.7)
+        figsize = (12,8.0)
     elif iarea in ['North_P', 'South_P']:
         figsize = (10,12)
     elif iarea == 'Tropics':
-        figsize = (20,2.5)
+        figsize = (20,4.0)
+    elif iarea == 'E_Asia':
+        figsize = (10,7.7)
 
     fig = plt.figure(figsize=figsize)
     
     if iarea == 'Tropics':
         ax_title = fig.add_axes([0.1, 0.80, 0.82, 0.18])
-    if iarea in ['North_P','South_P']:
-        ax_title = fig.add_axes([0.1, 0.90, 0.82, 0.05])
     else:
         ax_title = fig.add_axes([0.1, 0.90, 0.82, 0.08])
     
-    add_title(ax_title, irea, title, subtitle)
+    add_title(ax_title, title, subtitle)
 
-    ax_cf = fig.add_axes([0.1, 0.12, 0.85, 0.85])
+    if iarea == 'Tropics':
+        ax_cf = fig.add_axes([0.1, 0.10, 0.85, 0.60])
+    elif iarea == 'Global':
+        ax_cf = fig.add_axes([0.1, 0.12, 0.85, 0.80])
+    else:
+        ax_cf = fig.add_axes([0.1, 0.10, 0.85, 0.80])
+    
     if iarea == 'Global':
         ax_cb = fig.add_axes([0.1, 0.12, 0.85, 0.03])
-    if iarea == 'E_Asia':
-        ax_cb = fig.add_axes([0.1, 0.05, 0.85, 0.03])
     if iarea in ['North_P', 'South_P']:
         ax_cb = fig.add_axes([0.1, 0.05, 0.85, 0.03])
     if iarea == 'Tropics':
         ax_cb = fig.add_axes([0.4, 0.05, 0.2, 0.03])
+    if iarea == 'E_Asia':
+        ax_cb = fig.add_axes([0.1, 0.05, 0.85, 0.03])
 
     if iarea == 'Global':
         map = Basemap(projection='cyl', llcrnrlat=slat, urcrnrlat=elat, llcrnrlon=slon, urcrnrlon=elon, resolution='l', ax=ax_cf)
@@ -157,13 +160,13 @@ def plot_data(post_data, iarea, title, subtitle, pic_file):
     if iarea == 'Tropics':
         clevels = np.arange(270, 310, 3)
 
-    # CF = map.contourf(x, y, post_data.T, levels=clevels, cmap='jet', origin=origin, extend="both")
-    CF = map.contourf(x, y, post_data.T, cmap='jet', origin=origin, extend="both")
+    CF = map.contourf(x, y, post_data.T, levels=clevels, cmap='jet', origin=origin, extend="both")
+    # CF = map.contourf(x, y, post_data.T, cmap='jet', origin=origin, extend="both")
     
     CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal')
-    # CB.set_label("Temperature [K]", fontsize=14)
+    CB.set_label("Temperature [K]", fontsize=14)
 
-    plt.savefig('./pic/{}'.format(pic_file), dpi=300)
+    plt.savefig('./pic/{}'.format(pic_file), bbox_inches='tight', dpi=500)
     plt.close()
 
 # Main Program
@@ -181,12 +184,15 @@ if __name__ == "__main__":
     exdata_dir     = cong['exdata_dir']
     st_vars        = cong['st_vars']
     st_levels      = cong['st_levels']
+    make_gif       = cong['make_gif']
+
+    plt.rcParams['font.family'] = 'serif'
     
     # 参数设置
     fcst_step   = 24  # hours
     timelines   = gen_timelines(start_ddate, end_ddate, fcst_step)
     
-    time_indices = [0] #[0, 3, 5] # 0d, 3d, 5d
+    time_indices = [0, 3, 5] #[0, 3, 5] # 0d, 3d, 5d
     var = 't'
     var_name = {'t':'Temperature'}
 
@@ -204,6 +210,7 @@ if __name__ == "__main__":
 
     lat, lon = data_list[0].variables['latitude'][:], data_list[0].variables['longitude'][:]
     levels   = data_list[0].variables['levels'][:].tolist()
+    # levels = [1000]
 
     TLON,TLAT = np.meshgrid(lon,lat)
     
@@ -224,7 +231,7 @@ if __name__ == "__main__":
     print(u'对指定预报面高度列表和指定的预报时效列表做平均结束, 用时{} seconds.'.format(str(t1_readpostvar-t0_readpostvar)[:7]))
 
     # begin to plot
-    for iarea in ['North_P']: #['Global', 'E_Asia', 'North_P', 'South_P']:
+    for iarea in ['Global', 'E_Asia', 'North_P', 'South_P', 'Tropics']: #['Global', 'E_Asia', 'North_P', 'South_P']:
         for itime, time_index in enumerate(time_indices):
             p = Pool(len(levels))
             for ilevel,level in enumerate(levels):
@@ -234,7 +241,7 @@ if __name__ == "__main__":
                 subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
                 pic_file = '{}_{}hr_{}hpa.png'.format(iarea, itime*24, int(level))
                 p.apply_async(plot_data, args=(post_data, iarea, title, subtitle, pic_file))
-                #plot_data(post_data, iarea, title, subtitle, pic_file)
+                plot_data(post_data, iarea, title, subtitle, pic_file)
 
             print('Waiting for all subprocesses done...')
             p.close()
@@ -242,17 +249,18 @@ if __name__ == "__main__":
             print('All subprocesses done.')
             
     # 合成图片
-    #print('开始合成gif')
-    #for iarea in ['Global', 'E_Asia', 'North_P', 'South_P']:
-    #    for itime, time_index in enumerate(time_indices):
-    #        gif_file = './pic/{}_{}hr_pres.gif'.format(iarea, itime*24)
-    #        pic_files = []
-    #        for ilevel,level in enumerate(levels):
-    #            pic_files.append('./pic/{}_{}hr_{}hpa.png'.format(iarea, itime*24,int(level)))
-            
-    #        imgs = []
-    #        for ipic in pic_files:
-    #            temp = Image.open(ipic)
-    #            imgs.append(temp)
-    #            # os.system('rm {}'.format(ipic))
-    #        imgs[0].save(gif_file,save_all=True,append_images=imgs,duration=2)
+    if make_gif:
+        print('开始合成gif')
+        for iarea in ['Global', 'Tropics', 'E_Asia', 'North_P', 'South_P']:
+        for itime, time_index in enumerate(time_indices):
+            gif_file = './pic/{}_{}hr_pres.gif'.format(iarea, itime*24)
+            pic_files = []
+            for ilevel,level in enumerate(levels):
+                pic_files.append('./pic/{}_{}hr_{}hpa.png'.format(iarea, itime*24,int(level)))
+                
+            imgs = []
+            for ipic in pic_files:
+                temp = Image.open(ipic)
+                imgs.append(temp)
+                # os.system('rm {}'.format(ipic))
+            imgs[0].save(gif_file,save_all=True,append_images=imgs,duration=2)

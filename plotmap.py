@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-20 23:26:35
+@LastEditTime: 2020-04-21 11:08:07
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -80,6 +80,10 @@ def _find_clevels(iarea, data, lon, lat, dlevel):
     data_visible = data[lat_index[0]:lat_index[1]+1, lon_index[0]:lon_index[1]+1]
 
     data_max, data_min = int(data_visible.max()), int(data_visible.min())
+
+    if dlevel >= 10:
+        data_max = data_max // 10 * 10
+        data_min = data_min // 10 * 10
 
     clevels = np.arange(data_min, data_max, dlevel)
 
@@ -170,17 +174,6 @@ def plot_data(post_data, varname, lon, lat, iarea, title, subtitle, pic_file, dl
     x, y = map(TLON.T, TLAT.T)
 
     origin = 'lower'
-   
-    # if iarea == 'Global':
-    #     clevels = np.arange(240, 300, 5)
-    # if iarea == 'E_Asia':
-    #     clevels = np.arange(240, 300, 5)
-    # if iarea == 'North_P':
-    #     clevels = np.arange(240, 290, 5)
-    # if iarea == 'South_P':
-    #     clevels = np.arange(260, 285, 3)
-    # if iarea == 'Tropics':
-    #     clevels = np.arange(270, 310, 3)
 
     CF = map.contourf(x, y, post_data.T, levels=clevels, cmap='jet', origin=origin, extend="both")
     # CF = map.contourf(x, y, post_data.T, cmap='jet', origin=origin, extend="both")

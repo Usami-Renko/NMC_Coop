@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-20 23:26:10
+@LastEditTime: 2020-04-21 10:50:55
 @Description  : process postvar
 '''
 import sys
@@ -63,8 +63,7 @@ if __name__ == "__main__":
     print(u'postvar数据读取结束, 用时{} seconds.'.format(str(t1_readpostvar-t0_readpostvar)[:7]))
 
     lat, lon = data_list[0].variables['latitude'][:], data_list[0].variables['longitude'][:]
-    # levels   = data_list[0].variables['levels'][:].tolist()
-    levels = [1000]
+    levels   = data_list[0].variables['levels'][:].tolist()
     
     # 2.0 对指定高度和指定的预报时效做平均
     print(u'2.0 对指定预报面高度列表和指定的预报时效列表做平均')

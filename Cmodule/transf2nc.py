@@ -3,13 +3,10 @@
 @Author: wanghao
 @Date: 2019-01-22 15:31:50
 @LastEditors: wanghao
-@LastEditTime: 2019-01-22 17:20:30
+@LastEditTime: 2020-04-21 21:57:38
 @Description: 转换数据在一个文件中的数据
 '''
 import sys
-sys.path.append('/g3/wanghao/Python/Cmodule/CTLReader/CTLReader_Py')
-#sys.path.append('/home/wanghao/Python/Cmodule/CTLReader_Py')
-
 from CTLReader import CTLReader
 from netCDF4 import Dataset
 import numpy as np
@@ -20,7 +17,6 @@ class transf2nc(object):
     def __init__(self,ctlname,nc_filename,var=-1):
         
         data = CTLReader(ctlname)
-        #print data.variables['time']
         times_tmp = [itime.strftime("%Y%m%d%H%M") for itime in data.variables['time']]
 
         # 提取维度信息
@@ -65,8 +61,9 @@ class transf2nc(object):
         latitude.units  = 'degree_north'
         longitude.units = 'degree_east'
         levels.units    = 'hPa'
-        times.units = 'days since 2000-01-01 00:00:00'
-        times.calendar = 'gregorian'
+        times.units     = 'days since 2000-01-01 00:00:00'
+        times.calendar  = 'gregorian'
+        times.incr      = '{}'.format(data.crement['time'].seconds/3600)
 
         # Global Attributes
         ncfile.description = 'Transf postvar data to NC'

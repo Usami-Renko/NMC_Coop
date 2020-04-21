@@ -5,6 +5,7 @@ ctl_des/
 
 **/test/**
 **/grads/**
+**/doc/**
 
 # extensions
 *.log

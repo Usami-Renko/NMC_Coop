@@ -1,1 +1,3 @@
-ceshi git command
+ceshi git command (a line need conflict resolve) 
+
+A line added by hejun xie

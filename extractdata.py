@@ -5,10 +5,11 @@ Extract data from Grads data
 @author:wanghao
 """
 import sys
-sys.path.append('/g3/wanghao/Python/Cmodule/CTLReader/CTLReader_Py')
-sys.path.append('/g3/wanghao/Python/Cmodule/CTLExtract')
-sys.path.append('/g3/wanghao/Python/Cmodule/Transf2nc')
-sys.path.append('/g3/wanghao/Python/Cmodule/gen_info')
+#sys.path.append('/g3/wanghao/Python/Cmodule/CTLReader/CTLReader_Py')
+#sys.path.append('/g3/wanghao/Python/Cmodule/CTLExtract')
+#sys.path.append('/g3/wanghao/Python/Cmodule/Transf2nc')
+#sys.path.append('/g3/wanghao/Python/Cmodule/gen_info')
+sys.path.append('./Cmodule')
 from CTLExtract import CTLExtract
 from CTLReader import CTLReader
 from transf2nc import transf2nc

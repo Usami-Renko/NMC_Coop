@@ -22,3 +22,9 @@ clevel_step:
   v: 2
   t: 4
   h: 30
+
+variable_name:
+  t:  'Temperature [K]'
+  u:  'U Wind [m/s]'
+  v:  'V wind [m/s]'
+  h:  'Geopotential Height [gpm]'

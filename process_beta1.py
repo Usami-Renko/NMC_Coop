@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-21 10:50:55
+@LastEditTime: 2020-04-21 11:32:04
 @Description  : process postvar
 '''
 import sys
@@ -40,16 +40,16 @@ if __name__ == "__main__":
     st_levels      = cong['st_levels']
     make_gif       = cong['make_gif']
     clevel_step    = cong['clevel_step']
+    variable_name  = cong['variable_name']
     
     # 参数设置
     fcst_step   = 24  # hours
     timelines   = gen_timelines(start_ddate, end_ddate, fcst_step)
     
     time_indices = [0] #[0, 3, 5] # 0d, 3d, 5d
-    variables = ['t', 'u', 'v', 'h']
+    variables = st_vars
     # variables = ['t']
-    variable_name = {'t':'Temperature [K]', 'u':'U Wind [m/s]', 'v':'V wind [m/s]', 'h':'Geopotential Height [gpm]'}
-
+    
     ncfiles     = ['postvar{}.nc'.format(itime) for itime in timelines]
 
     # 1.0 读取postvar数据

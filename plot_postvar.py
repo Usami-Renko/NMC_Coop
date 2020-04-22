@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-22 11:24:11
+@LastEditTime: 2020-04-22 12:05:42
 @Description  : process postvar
 '''
 import sys
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     levels    = data_list[0].variables['levels'][:].tolist()
     time_incr = int(float(data_list[0].variables['times'].incr))
     
-    time_indices = [i/time_incr-1 if i > 0 else i for i in fcst] 
+    time_indices = [int(i/time_incr) for i in fcst]
 
     # 2.0 对指定高度和指定的预报时效做平均
     print(u'2.0 对指定预报面高度列表和指定的预报时效列表做平均')
@@ -86,8 +86,6 @@ if __name__ == "__main__":
     # begin to plot
     for iarea in plot_areas:
         for itime,time_index in enumerate(time_indices):
-            if time_index > 0:
-                time_index = time_index + 1
             for ivar, var in enumerate(st_vars):
                 varname = variable_name[var]
                 dlevel = clevel_step[var]
@@ -111,8 +109,6 @@ if __name__ == "__main__":
         print('开始合成gif')
         for iarea in plot_areas:
             for itime, time_index in enumerate(time_indices):
-                if time_index > 0:
-                    time_index = time_index + 1
                 for ivar, var in enumerate(st_vars):
                     gif_file = './pic/{}_{}hr_{}_pres.gif'.format(iarea, time_index*time_incr, var)
                     pic_files = []

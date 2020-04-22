@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-22 11:09:06
+@LastEditTime: 2020-04-22 11:24:11
 @Description  : process postvar
 '''
 import sys
@@ -113,7 +113,7 @@ if __name__ == "__main__":
             for itime, time_index in enumerate(time_indices):
                 if time_index > 0:
                     time_index = time_index + 1
-                for ivar, var in enumerate(variables):
+                for ivar, var in enumerate(st_vars):
                     gif_file = './pic/{}_{}hr_{}_pres.gif'.format(iarea, time_index*time_incr, var)
                     pic_files = []
                     for ilevel,level in enumerate(st_levels):

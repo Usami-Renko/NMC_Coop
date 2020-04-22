@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-22 20:55:40
+@LastEditTime: 2020-04-22 22:00:23
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -67,7 +67,7 @@ def _add_title(ax, title, subtitle):
     ax.text(0.5, 0.50, title, fontsize=25, ha='center', va='center')
     ax.text(0.5, 0.00, subtitle, fontsize=16, ha='center', va='center')
 
-def _find_clevels(iarea, data, lon, lat, dlevel):
+def _find_clevels(iarea, data, lon, lat, dlevel, plot_type):
     
     slat,elat,slon,elon = area_region(iarea)
 
@@ -85,7 +85,16 @@ def _find_clevels(iarea, data, lon, lat, dlevel):
         data_max = data_max // 10 * 10
         data_min = data_min // 10 * 10
 
-    clevels = np.arange(data_min, data_max, dlevel)
+    if plot_type == 'PMF':
+        if abs(data_max) > abs(data_min):
+            data_min = - data_max
+        else:
+            data_max = - data_min
+    
+    if (data_max - data_min) % dlevel != 0:
+        data_max = ((data_max - data_min) // dlevel + 1) * dlevel + data_min
+
+    clevels = np.arange(data_min, data_max + dlevel, dlevel)
 
     return clevels
 
@@ -95,7 +104,7 @@ def plot_data(post_data, plot_type, varname, lon, lat, iarea, title, subtitle, p
 
     TLON,TLAT = np.meshgrid(lon,lat)
     
-    clevels = _find_clevels(iarea, post_data, lon, lat, dlevel)
+    clevels = _find_clevels(iarea, post_data, lon, lat, dlevel, plot_type)
     slat,elat,slon,elon = area_region(iarea)
 
     if iarea == 'Global':

@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-22 20:54:10
+@LastEditTime: 2020-04-22 21:53:22
 @Description  : process postvar
 '''
 import sys
@@ -38,6 +38,9 @@ def get_GRAPES_data():
     t0_readpostvar = time.time()
     data_list = []
     for ifile in ncfiles:
+        if not os.path.exists(exdata_dir+ifile):
+            print('Error: {} file not found under dir {}'.format(ifile, exdata_dir))
+            sys.exit()
         data_list.append(nc.Dataset(exdata_dir+ifile, 'r'))
 
     t1_readpostvar = time.time()
@@ -97,7 +100,10 @@ def get_FNL_data():
     for fnl_datetime in fnl_datetime_set:
         fnl_filename = fnl_datetime.strftime("fnl_%Y%m%d_%H_00.grib2")
         fnl_timestr = fnl_datetime.strftime("%Y%m%d%H")
-        
+
+        if not os.path.exists(fnl_dir+fnl_filename):
+            print('Error: {} file not found under dir {}'.format(fnl_filename, fnl_dir))
+            sys.exit()
         fnl_data_dic[fnl_timestr] = Nio.open_file(fnl_dir+fnl_filename, 'r')
 
     t1_readpostvar = time.time()
@@ -139,7 +145,7 @@ def get_FNL_data():
     [1000.0, 925.0, 850.0, 700.0, 600.0, 500.0, 400.0, 300.0, 200.0, 100.0, 50.0, 10.0]
     '''
 
-    tmp_datatable = np.zeros((len(data_list), len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
+    tmp_datatable = np.zeros((len(timelines), len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
     
     # we use a data cache to avoid repeated interpolation for the same dataset
     data_cache = dict()

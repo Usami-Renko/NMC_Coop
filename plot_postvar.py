@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-22 21:53:22
+@LastEditTime: 2020-04-22 22:40:41
 @Description  : process postvar
 '''
 import sys
@@ -21,7 +21,7 @@ from multiprocessing import Pool
 from PIL import Image
 from scipy.interpolate import griddata
 
-from plotmap import plot_data
+from plotmap import plot_data, find_clevels
 from utils import DATAdecorator
 
 
@@ -248,12 +248,21 @@ if __name__ == "__main__":
                         elif plot_type == 'PMF':
                             data = datatable_grapes[ivar, itime, ilevel, ...] - \
                                 datatable_fnl[ivar, itime, ilevel, ...]
+                        
+                        if plot_type in ['P', 'F']:
+                            clevel_data = datatable_grapes[ivar, itime, ilevel, ...]
+                        elif plot_type in ['PMF']:
+                            # the biggest forecast range have large clevels
+                            clevel_data = datatable_grapes[ivar, -1, ilevel, ...] - \
+                                datatable_fnl[ivar, -1, ilevel, ...]
+                        clevels = find_clevels(iarea, clevel_data, lon, lat, dlevel, plot_type)
 
                         title    = '{} of {}hr {}hPa {}'.format(plot_types_name[plot_type], time_index*time_incr, int(level), varname)
                         subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
                         pic_file = '{}_{}_{}hr_{}hpa_{}.png'.format(plot_type, iarea, time_index*time_incr, int(level), var)
-                        p.apply_async(plot_data, args=(data, plot_type, varname, lon, lat, iarea, title, subtitle, pic_file, dlevel))
-                        plot_data(data, plot_type, varname, lon, lat, iarea, title, subtitle, pic_file, dlevel)
+                        
+                        p.apply_async(plot_data, args=(data, plot_type, varname, lon, lat, iarea, title, subtitle, pic_file, clevels))
+                        plot_data(data, plot_type, varname, lon, lat, iarea, title, subtitle, pic_file, clevels)
                     print('Waiting for all subprocesses done...')
                     p.close()
                     p.join()

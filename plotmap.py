@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-22 22:00:23
+@LastEditTime: 2020-04-22 22:31:54
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -67,7 +67,7 @@ def _add_title(ax, title, subtitle):
     ax.text(0.5, 0.50, title, fontsize=25, ha='center', va='center')
     ax.text(0.5, 0.00, subtitle, fontsize=16, ha='center', va='center')
 
-def _find_clevels(iarea, data, lon, lat, dlevel, plot_type):
+def find_clevels(iarea, data, lon, lat, dlevel, plot_type):
     
     slat,elat,slon,elon = area_region(iarea)
 
@@ -98,13 +98,11 @@ def _find_clevels(iarea, data, lon, lat, dlevel, plot_type):
 
     return clevels
 
-def plot_data(post_data, plot_type, varname, lon, lat, iarea, title, subtitle, pic_file, dlevel):
+def plot_data(post_data, plot_type, varname, lon, lat, iarea, title, subtitle, pic_file, clevels):
     
     plt.rcParams['font.family'] = 'serif'
 
     TLON,TLAT = np.meshgrid(lon,lat)
-    
-    clevels = _find_clevels(iarea, post_data, lon, lat, dlevel, plot_type)
     slat,elat,slon,elon = area_region(iarea)
 
     if iarea == 'Global':

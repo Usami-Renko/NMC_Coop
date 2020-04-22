@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-21 11:08:07
+@LastEditTime: 2020-04-22 20:55:40
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -89,7 +89,7 @@ def _find_clevels(iarea, data, lon, lat, dlevel):
 
     return clevels
 
-def plot_data(post_data, varname, lon, lat, iarea, title, subtitle, pic_file, dlevel):
+def plot_data(post_data, plot_type, varname, lon, lat, iarea, title, subtitle, pic_file, dlevel):
     
     plt.rcParams['font.family'] = 'serif'
 
@@ -175,7 +175,12 @@ def plot_data(post_data, varname, lon, lat, iarea, title, subtitle, pic_file, dl
 
     origin = 'lower'
 
-    CF = map.contourf(x, y, post_data.T, levels=clevels, cmap='jet', origin=origin, extend="both")
+    if plot_type == 'PMF':
+        cmap = 'RdBu'
+    else:
+        cmap = 'jet'
+
+    CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend="both")
     # CF = map.contourf(x, y, post_data.T, cmap='jet', origin=origin, extend="both")
     
     CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal')

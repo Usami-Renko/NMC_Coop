@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-22 22:40:41
+@LastEditTime: 2020-04-22 23:35:03
 @Description  : process postvar
 '''
 import sys
@@ -209,6 +209,8 @@ if __name__ == "__main__":
     st_levels      = cong['st_levels']
     fcst           = cong['fcst']
     make_gif       = cong['make_gif']
+    make_png       = cong['make_png']
+    make_concat    = cong['make_concat']
     clevel_step    = cong['clevel_step']
     clevel_step_PMF= cong['clevel_step_PMF']
     variable_name  = cong['variable_name']
@@ -227,46 +229,67 @@ if __name__ == "__main__":
     datatable_fnl = get_FNL_data()
 
     # begin to plot
-    for plot_type in plot_types:
+    if make_png:
+        for plot_type in plot_types:
+            for iarea in plot_areas:
+                for itime,time_index in enumerate(time_indices):
+                    for ivar, var in enumerate(st_vars):
+                        varname = variable_name[var]
+                        
+                        if plot_type in ['P', 'F']:    
+                            dlevel = clevel_step[var]
+                        elif plot_type == 'PMF':
+                            dlevel = clevel_step_PMF[var]
+
+                        p = Pool(len(st_levels))
+                        for ilevel,level in enumerate(st_levels):
+
+                            if plot_type == 'P':
+                                data = datatable_grapes[ivar, itime, ilevel, ...]
+                            elif plot_type == 'F':
+                                data = datatable_fnl[ivar, itime, ilevel, ...]
+                            elif plot_type == 'PMF':
+                                data = datatable_grapes[ivar, itime, ilevel, ...] - \
+                                    datatable_fnl[ivar, itime, ilevel, ...]
+                            
+                            if plot_type in ['P', 'F']:
+                                clevel_data = datatable_grapes[ivar, itime, ilevel, ...]
+                            elif plot_type in ['PMF']:
+                                # the biggest forecast range have large clevels
+                                clevel_data = datatable_grapes[ivar, -1, ilevel, ...] - \
+                                    datatable_fnl[ivar, -1, ilevel, ...]
+                            clevels = find_clevels(iarea, clevel_data, lon, lat, dlevel, plot_type)
+
+                            title    = '{} of {}hr {}hPa {}'.format(plot_types_name[plot_type], time_index*time_incr, int(level), varname)
+                            subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
+                            pic_file = '{}_{}_{}hr_{}hpa_{}.png'.format(plot_type, iarea, time_index*time_incr, int(level), var)
+                            
+                            p.apply_async(plot_data, args=(data, plot_type, varname, lon, lat, iarea, title, subtitle, pic_file, clevels))
+                            plot_data(data, plot_type, varname, lon, lat, iarea, title, subtitle, pic_file, clevels)
+                        print('Waiting for all subprocesses done...')
+                        p.close()
+                        p.join()
+                        print('All subprocesses done.')
+    
+    if make_concat:
+        print('开始合成拼图')
         for iarea in plot_areas:
             for itime,time_index in enumerate(time_indices):
                 for ivar, var in enumerate(st_vars):
-                    varname = variable_name[var]
-                    
-                    if plot_type in ['P', 'F']:    
-                        dlevel = clevel_step[var]
-                    elif plot_type == 'PMF':
-                        dlevel = clevel_step_PMF[var]
-
-                    p = Pool(len(st_levels))
                     for ilevel,level in enumerate(st_levels):
-
-                        if plot_type == 'P':
-                            data = datatable_grapes[ivar, itime, ilevel, ...]
-                        elif plot_type == 'F':
-                            data = datatable_fnl[ivar, itime, ilevel, ...]
-                        elif plot_type == 'PMF':
-                            data = datatable_grapes[ivar, itime, ilevel, ...] - \
-                                datatable_fnl[ivar, itime, ilevel, ...]
+                        pic_dir = './pic/'
+                        pic_files = ['{}_{}_{}hr_{}hpa_{}.png'.format(plot_type, iarea, time_index*time_incr, int(level), var) for plot_type in plot_types]
+                        p = Image.open(pic_dir + pic_files[0])
+                        f = Image.open(pic_dir + pic_files[1])
+                        pmf = Image.open(pic_dir + pic_files[2])
                         
-                        if plot_type in ['P', 'F']:
-                            clevel_data = datatable_grapes[ivar, itime, ilevel, ...]
-                        elif plot_type in ['PMF']:
-                            # the biggest forecast range have large clevels
-                            clevel_data = datatable_grapes[ivar, -1, ilevel, ...] - \
-                                datatable_fnl[ivar, -1, ilevel, ...]
-                        clevels = find_clevels(iarea, clevel_data, lon, lat, dlevel, plot_type)
+                        d = Image.new('RGB', (p.size[0]*3, p.size[1]))
+                        d.paste(p, (0, 0))
+                        d.paste(f, (p.size[0], 0))
+                        d.paste(pmf, (p.size[0]*2, 0))
 
-                        title    = '{} of {}hr {}hPa {}'.format(plot_types_name[plot_type], time_index*time_incr, int(level), varname)
-                        subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
-                        pic_file = '{}_{}_{}hr_{}hpa_{}.png'.format(plot_type, iarea, time_index*time_incr, int(level), var)
-                        
-                        p.apply_async(plot_data, args=(data, plot_type, varname, lon, lat, iarea, title, subtitle, pic_file, clevels))
-                        plot_data(data, plot_type, varname, lon, lat, iarea, title, subtitle, pic_file, clevels)
-                    print('Waiting for all subprocesses done...')
-                    p.close()
-                    p.join()
-                    print('All subprocesses done.')
+                        comp_file = 'comp_{}_{}hr_{}hpa_{}.png'.format(iarea, time_index*time_incr, int(level), var)
+                        d.save(pic_dir+comp_file)
 
     # 合成图片
     if make_gif:

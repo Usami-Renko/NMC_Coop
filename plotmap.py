@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-22 22:31:54
+@LastEditTime: 2020-04-22 23:12:49
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -64,7 +64,7 @@ def _add_title(ax, title, subtitle):
     ax.set_xticks([])
     ax.set_yticks([])
 
-    ax.text(0.5, 0.50, title, fontsize=25, ha='center', va='center')
+    ax.text(0.5, 0.50, title, fontsize=22, ha='center', va='center')
     ax.text(0.5, 0.00, subtitle, fontsize=16, ha='center', va='center')
 
 def find_clevels(iarea, data, lon, lat, dlevel, plot_type):

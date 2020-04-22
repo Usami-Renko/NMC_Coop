@@ -1,6 +1,7 @@
 # folders
 .vscode/
 ex_data/
+fnl_data/
 ctl_des/
 
 **/test/**

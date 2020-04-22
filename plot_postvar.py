@@ -3,8 +3,8 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: wanghao
-@LastEditTime: 2020-04-21 22:07:58
+@LastEditors: Hejun Xie
+@LastEditTime: 2020-04-22 11:09:06
 @Description  : process postvar
 '''
 import sys
@@ -41,12 +41,11 @@ if __name__ == "__main__":
     make_gif       = cong['make_gif']
     clevel_step    = cong['clevel_step']
     variable_name  = cong['variable_name']
+    plot_areas     = cong['plot_areas']
     
     # 参数设置
     fcst_step   = 24  # hours
     timelines   = gen_timelines(start_ddate, end_ddate, fcst_step)
-   
-    variables = st_vars
     
     ncfiles     = ['postvar{}.nc'.format(itime) for itime in timelines]
 
@@ -62,7 +61,7 @@ if __name__ == "__main__":
 
     lat, lon  = data_list[0].variables['latitude'][:], data_list[0].variables['longitude'][:]
     levels    = data_list[0].variables['levels'][:].tolist()
-    time_incr = int(data_list[0].variables['times'].incr)
+    time_incr = int(float(data_list[0].variables['times'].incr))
     
     time_indices = [i/time_incr-1 if i > 0 else i for i in fcst] 
 
@@ -70,11 +69,11 @@ if __name__ == "__main__":
     print(u'2.0 对指定预报面高度列表和指定的预报时效列表做平均')
     t0_readpostvar = time.time()
 
-    tmp_datatable = np.zeros((len(data_list), len(variables), len(time_indices), len(levels), len(lat), len(lon)), dtype='float32')
+    tmp_datatable = np.zeros((len(data_list), len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
     
-    for ivar, var in enumerate(variables):
+    for ivar, var in enumerate(st_vars):
         for itime, time_index in enumerate(time_indices):
-            for ilevel, level in enumerate(levels):
+            for ilevel, level in enumerate(st_levels):
                 level_index = levels.index(level)
                 for idata, data in enumerate(data_list):
                     tmp_datatable[idata, ivar, itime, ilevel, ...] = data.variables[var][time_index, level_index, ...]
@@ -85,16 +84,16 @@ if __name__ == "__main__":
     print(u'对指定预报面高度列表和指定的预报时效列表做平均结束, 用时{} seconds.'.format(str(t1_readpostvar-t0_readpostvar)[:7]))
 
     # begin to plot
-    for iarea in ['Global', 'E_Asia', 'North_P', 'South_P']:
+    for iarea in plot_areas:
         for itime,time_index in enumerate(time_indices):
             if time_index > 0:
                 time_index = time_index + 1
-            for ivar, var in enumerate(variables):
+            for ivar, var in enumerate(st_vars):
                 varname = variable_name[var]
                 dlevel = clevel_step[var]
 
-                p = Pool(len(levels))
-                for ilevel,level in enumerate(levels):
+                p = Pool(len(st_levels))
+                for ilevel,level in enumerate(st_levels):
                     post_data = datatable[ivar, itime, ilevel, ...]
                         
                     title    = 'Prediction of {}hr {}hPa {}'.format(time_index*time_incr, int(level), varname)
@@ -110,14 +109,14 @@ if __name__ == "__main__":
     # 合成图片
     if make_gif:
         print('开始合成gif')
-        for iarea in ['Global', 'E_Asia', 'North_P', 'South_P']:
+        for iarea in plot_areas:
             for itime, time_index in enumerate(time_indices):
                 if time_index > 0:
                     time_index = time_index + 1
                 for ivar, var in enumerate(variables):
                     gif_file = './pic/{}_{}hr_{}_pres.gif'.format(iarea, time_index*time_incr, var)
                     pic_files = []
-                    for ilevel,level in enumerate(levels):
+                    for ilevel,level in enumerate(st_levels):
                         pic_files.append('./pic/{}_{}hr_{}hpa_{}.png'.format(iarea, time_index*time_incr,int(level), var))
                     
                     imgs = []

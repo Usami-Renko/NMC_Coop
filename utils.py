@@ -6,12 +6,14 @@
 @Author: Hejun Xie
 @Date: 2020-04-22 18:55:54
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-23 09:30:05
+@LastEditTime: 2020-04-23 11:45:41
 '''
 # -*- coding: utf-8 -*-
 
 import numpy as np
 import os
+import sys
+import yaml
 import pickle
 from functools import wraps 
 
@@ -52,3 +54,13 @@ def makenewdir(mydir):
     if not os.path.exists(mydir):
         os.system("mkdir {}".format(mydir))
         os.system("chmod -R o-w {}".format(mydir))
+
+
+def config():
+    curPath       = os.path.dirname(os.path.realpath(__file__))
+    cong_yamlPath = os.path.join(curPath+"/config/", "config.yml")
+    if sys.version_info[0] < 3:
+        cong = yaml.load(open(cong_yamlPath))
+    elif sys.version_info[0] >= 3:
+        cong = yaml.load(open(cong_yamlPath), Loader=yaml.FullLoader)
+    return cong

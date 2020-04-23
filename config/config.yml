@@ -21,9 +21,11 @@ st_vars  : ['u','v','t','h']
 # st_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
 st_levels: [500.]
 
+# 起报时间间隔
+fcst_step: 24 # hours
 # 预报时长
-fcst: [0,72] #hours
-# fcst: [0] #hours
+fcst: [0,72] # hours
+# fcst: [0] # hours
 
 # 图片类型
 pic_prefix: 'png'

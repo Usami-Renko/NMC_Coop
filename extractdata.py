@@ -17,28 +17,17 @@ from gen_timelines import gen_timelines
 import os
 import datetime
 import time
-import yaml
+from utils import config
 
 # Main Program
 if __name__ == '__main__':
     # read the config file
-    curPath       = os.path.dirname(os.path.realpath(__file__))
-    cong_yamlPath = os.path.join(curPath+"/config/", "config.yml")
-    if sys.version_info[0] < 3:
-        cong = yaml.load(open(cong_yamlPath))
-    elif sys.version_info[0] >= 3:
-        cong = yaml.load(open(cong_yamlPath), Loader=yaml.FullLoader)
     
-    start_ddate    = cong['start_ddate'] #yyyymnddhh
-    end_ddate      = cong['end_ddate']   #yyyymnddhh
-    ctlfile_dir    = cong['ctlfile_dir']
-    exdata_dir     = cong['exdata_dir']
-    st_vars        = cong['st_vars']
-    st_levels      = cong['st_levels']
-    pic_prefix     = cong['pic_prefix'] 
+    cong = config()
+    for key, value in cong.items():
+        locals()[key] = value
     
     # 参数设置
-    fcst_step   = 24  # hours
     timelines   = gen_timelines(start_ddate, end_ddate, fcst_step)
     
     if not os.path.exists(exdata_dir):

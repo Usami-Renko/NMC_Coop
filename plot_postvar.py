@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-23 09:35:08
+@LastEditTime: 2020-04-23 11:44:57
 @Description  : process postvar
 '''
 import sys
@@ -16,13 +16,12 @@ import time
 import datetime as dt
 from gen_timelines import gen_timelines
 import os
-import yaml
 from multiprocessing import Pool
 from PIL import Image
 from scipy.interpolate import griddata
 
 from plotmap import plot_data, find_clevels
-from utils import DATAdecorator
+from utils import DATAdecorator, config
 
 
 # pickle the data for ploting
@@ -57,7 +56,7 @@ def get_GRAPES_data():
     print(u'2.0 对指定预报面高度列表和指定的预报时效列表做平均')
     t0_readpostvar = time.time()
 
-    tmp_datatable = np.zeros((len(data_list), len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
+    tmp_datatable = np.zeros((len(timelines), len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
     
     for ivar, var in enumerate(st_vars):
         for itime, time_index in enumerate(time_indices):
@@ -193,35 +192,13 @@ def get_FNL_data():
 # Main Program
 if __name__ == "__main__":
     # read the config file
-    curPath       = os.path.dirname(os.path.realpath(__file__))
-    cong_yamlPath = os.path.join(curPath+"/config/", "config.yml")
-    if sys.version_info[0] < 3:
-        cong = yaml.load(open(cong_yamlPath))
-    elif sys.version_info[0] >= 3:
-        cong = yaml.load(open(cong_yamlPath), Loader=yaml.FullLoader)
+    cong = config()
 
-    start_ddate    = cong['start_ddate'] #yyyymnddhh
-    end_ddate      = cong['end_ddate']   #yyyymnddhh 
-    exdata_dir     = cong['exdata_dir']
-    fnl_dir        = cong['fnl_dir']
-    fnl_varname    = cong['fnl_varname']
-    st_vars        = cong['st_vars']
-    st_levels      = cong['st_levels']
-    fcst           = cong['fcst']
-    make_gif       = cong['make_gif']
-    make_png       = cong['make_png']
-    make_concat    = cong['make_concat']
-    clevel_step    = cong['clevel_step']
-    clevel_step_PMF= cong['clevel_step_PMF']
-    variable_name  = cong['variable_name']
-    plot_areas     = cong['plot_areas']
-    plot_types     = cong['plot_types']
-    plot_types_name= cong['plot_types_name']
+    for key, value in cong.items():
+        locals()[key] = value
     
     # 参数设置
-    fcst_step   = 24  # hours
     timelines   = gen_timelines(start_ddate, end_ddate, fcst_step)
-    
     ncfiles     = ['postvar{}.nc'.format(itime) for itime in timelines]
 
     # datatable dimension: (ninittimes, nvars, nfcsrtimes, nlevels, nlat, nlon)

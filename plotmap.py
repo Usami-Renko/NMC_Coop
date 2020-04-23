@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-22 23:12:49
+@LastEditTime: 2020-04-23 09:22:37
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -183,7 +183,7 @@ def plot_data(post_data, plot_type, varname, lon, lat, iarea, title, subtitle, p
     origin = 'lower'
 
     if plot_type == 'PMF':
-        cmap = 'RdBu'
+        cmap = 'RdBu_r'
     else:
         cmap = 'jet'
 

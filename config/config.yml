@@ -28,7 +28,7 @@ fcst: [0,72] #hours
 # 图片类型
 pic_prefix: 'png'
 make_png: True
-make_gif: False
+make_gif: True
 make_concat: True
 
 # 画图设置

@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-22 23:35:03
+@LastEditTime: 2020-04-23 09:35:08
 @Description  : process postvar
 '''
 import sys
@@ -231,6 +231,7 @@ if __name__ == "__main__":
     # begin to plot
     if make_png:
         for plot_type in plot_types:
+            print('开始作图{}'.format(plot_types_name[plot_type]))
             for iarea in plot_areas:
                 for itime,time_index in enumerate(time_indices):
                     for ivar, var in enumerate(st_vars):
@@ -297,10 +298,10 @@ if __name__ == "__main__":
         for iarea in plot_areas:
             for itime, time_index in enumerate(time_indices):
                 for ivar, var in enumerate(st_vars):
-                    gif_file = './pic/{}_{}hr_{}_pres.gif'.format(iarea, time_index*time_incr, var)
+                    gif_file = './pic/comp_{}_{}hr_{}_pres.gif'.format(iarea, time_index*time_incr, var)
                     pic_files = []
                     for ilevel,level in enumerate(st_levels):
-                        pic_files.append('./pic/{}_{}hr_{}hpa_{}.png'.format(iarea, time_index*time_incr,int(level), var))
+                        pic_files.append('./pic/comp_{}_{}hr_{}hpa_{}.png'.format(iarea, time_index*time_incr,int(level), var))
                     
                     imgs = []
                     for ipic in pic_files:

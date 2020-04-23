@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-22 18:55:54
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-22 19:48:55
+@LastEditTime: 2020-04-23 09:30:05
 '''
 # -*- coding: utf-8 -*-
 
@@ -37,11 +37,13 @@ class DATAdecorator(object):
         return wrapped_worker
             
     def pickle_dump(self, DATA):
+        print('Dump data at {}'.format(self.pickle_filename))
         makenewdir(os.path.dirname(self.pickle_filename))
         with open(self.pickle_filename, "wb") as f:
             pickle.dump(DATA, f)
 
     def pickle_load(self):
+        print('Load data at {}'.format(self.pickle_filename))
         with open(self.pickle_filename, "rb") as f:
             DATA = pickle.load(f)
         return DATA

@@ -3,6 +3,7 @@
 ex_data/
 fnl_data/
 ctl_des/
+pic/
 
 **/test/**
 **/grads/**
@@ -10,7 +11,6 @@ ctl_des/
 
 # extensions
 *.log
-*.png
 *.pkl
 *.docx
 *.zip

@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-23 09:22:37
+@LastEditTime: 2020-04-26 18:08:24
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -124,7 +124,7 @@ def plot_data(post_data, plot_type, varname, lon, lat, iarea, title, subtitle, p
     _add_title(ax_title, title, subtitle)
 
     if iarea == 'Tropics':
-        ax_cf = fig.add_axes([0.1, 0.10, 0.85, 0.60])
+        ax_cf = fig.add_axes([0.1, 0.12, 0.85, 0.60])
     elif iarea == 'Global':
         ax_cf = fig.add_axes([0.1, 0.12, 0.85, 0.80])
     else:
@@ -158,7 +158,7 @@ def plot_data(post_data, plot_type, varname, lon, lat, iarea, title, subtitle, p
     elif iarea == 'Tropics':
         map = Basemap(projection='cyl',llcrnrlat=slat,urcrnrlat=elat, llcrnrlon=slon, urcrnrlon=elon, resolution='l', ax=ax_cf)
         map.drawparallels(np.arange(slat, elat+1, 20), linewidth=1, dashes=[4, 3], labels=[1, 1, 1, 1])
-        map.drawmeridians(np.arange(slon, elon+1, 20), linewidth=1, dashes=[4, 3], labels=[0, 0, 1, 0])
+        map.drawmeridians(np.arange(slon, elon+1, 20), linewidth=1, dashes=[4, 3], labels=[0, 0, 1, 1])
 
     map.drawcoastlines()
     

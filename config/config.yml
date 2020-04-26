@@ -25,13 +25,11 @@ st_levels: [500.]
 fcst_step: 24 # hours
 # 预报时长
 fcst: [0,72] # hours
-# fcst: [0] # hours
+# 预报时间步长: 不作用于出图脚本，只是为了方便生成动图和拼接图片的脚本
+time_incr: 12
 
 # 图片类型
 pic_prefix: 'png'
-make_png: True
-make_gif: True
-make_concat: True
 
 # 画图设置
 # plot_areas: ['Global', 'E_Asia', 'North_P', 'South_P']

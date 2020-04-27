@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-27 15:45:43
+@LastEditTime: 2020-04-27 20:19:23
 @Description  : process postvar
 '''
 import sys
@@ -20,7 +20,7 @@ from multiprocessing import Pool
 from scipy.interpolate import griddata
 import hashlib
 
-from plotmap import plot_data, find_clevels
+from plotmap import plot_data, find_clevels, plot_case
 from utils import DATAdecorator, config
 from derived_vars import derived_vars, get_derived_var
 from asciiio import read_obs
@@ -31,10 +31,10 @@ cong = config()
 for key, value in cong.items():
     globals()[key] = value
 
-GRAPES_DATA_PKLNAME = './pkl/GRAPES_{}_{}_{}.pkl'.format(start_ddate, end_ddate, int(fcst_step))
-FNL_DATA_PKLNAME = './pkl/FNL_{}_{}_{}.pkl'.format(start_ddate, end_ddate, int(fcst_step))
 CASES_HASH = hashlib.md5((str(case_ini_times) + str(case_fcst_hours)).encode()).hexdigest()
 OBS_DATA_PKLNAME = './pkl/OBS_{}.pkl'.format(CASES_HASH)
+GRAPES_DATA_PKLNAME = './pkl/GRAPES_{}_{}_{}_{}.pkl'.format(start_ddate, end_ddate, int(fcst_step), CASES_HASH)
+FNL_DATA_PKLNAME = './pkl/FNL_{}_{}_{}.pkl'.format(start_ddate, end_ddate, int(fcst_step))
 
 
 # pickle the data for ploting
@@ -98,6 +98,16 @@ def get_GRAPES_data():
                     
     datatable = np.average(tmp_datatable, axis=0)
 
+    datatable_case = np.zeros((len(case_ini_times), len(case_fcst_hours), len(lat), len(lon)), dtype='float32')
+
+    for iinit, case_ini_time in enumerate(case_ini_times):
+        for ifcst, case_fcst_hour in enumerate(case_fcst_hours):
+            init_index = timelines.index(case_ini_time)
+            fcst_index = case_fcst_hour // time_incr
+            data = data_list[init_index]
+            var_table = get_derived_var(data, '24hrain')            
+            datatable_case[iinit, ifcst, ...] = var_table[fcst_index, ...]
+
     # close the netCDF file handles and nc package for nasty issues with Nio
     for data in data_list:
         data.close()
@@ -114,7 +124,7 @@ def get_GRAPES_data():
     for global_name in global_names:
         global_package[global_name] = locals()[global_name]
 
-    return global_package, datatable
+    return global_package, datatable, datatable_case
 
 # pickle the data for ploting
 @DATAdecorator('./', True, FNL_DATA_PKLNAME)
@@ -262,15 +272,24 @@ if __name__ == "__main__":
     ncfiles     = ['postvar{}.nc'.format(itime) for itime in timelines]
 
     # datatable dimension: (nvars, nfcsrtimes, nlevels, nlat, nlon)
-    global_package, datatable_grapes = get_GRAPES_data()
+    global_package, datatable_grapes, datatable_case_grapes = get_GRAPES_data()
     for global_name in global_package.keys():
         globals()[global_name] = global_package[global_name]
     datatable_fnl = get_FNL_data()
     datatable_obs = get_OBS_data()
 
     if plot_cases:
-       pass 
-    exit()
+        for iinit, case_ini_time in enumerate(case_ini_times):
+            for ifcst, case_fcst_hour in enumerate(case_fcst_hours):
+                dataframe_obs = datatable_obs[case_ini_time][case_fcst_hour]
+                dataframe_grapes = datatable_case_grapes[iinit, ifcst, ...]
+                title    = 'Prediction and Observation of {}hr 24hours precipitation [mm]'.format(case_fcst_hour)
+                subtitle = 'Init: {} UTC'.format(case_ini_time)
+                pic_file = 'case_{}_{}hr_24hrain.png'.format(case_ini_time, case_fcst_hour)
+
+                plot_case(dataframe_grapes, dataframe_obs, lon, lat, title, subtitle, pic_file, newcolorscheme)
+
+    # exit()
 
     # begin to plot
     for plot_type in plot_types:

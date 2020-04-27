@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-27 11:07:21
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-27 12:32:32
+@LastEditTime: 2020-04-27 18:32:42
 '''
 
 import os
@@ -31,7 +31,7 @@ def read_obs(filename):
     header = _probe_header(filename)
 
     dataframe = pd.read_table(filename, delim_whitespace=True, skiprows=header, skipfooter=0, 
-    names=['stationid', 'longitude', 'latitude', 'altitude', 'preciptation'])
+    names=['stationid', 'longitude', 'latitude', 'altitude', 'precipitation'])
     
     return dataframe
 

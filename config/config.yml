@@ -72,4 +72,5 @@ variable_name:
 plot_cases: True
 obs_dir: './nmc_obs/'
 case_ini_times: ['2016010112']
-case_fcst_hours: [12]
+case_fcst_hours: [12,36,60]
+newcolorscheme: False

@@ -67,3 +67,9 @@ variable_name:
   v:  'V wind [m/s]'
   h:  'Geopotential Height [gpm]'
   24hrain: '24hours precipitation [mm]'
+
+# 个例画图
+plot_cases: True
+obs_dir: './nmc_obs/'
+case_ini_times: ['2016010112']
+case_fcst_hours: [12]

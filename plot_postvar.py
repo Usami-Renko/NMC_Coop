@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-27 09:18:04
+@LastEditTime: 2020-04-27 15:45:43
 @Description  : process postvar
 '''
 import sys
@@ -18,11 +18,12 @@ from gen_timelines import gen_timelines
 import os
 from multiprocessing import Pool
 from scipy.interpolate import griddata
+import hashlib
 
 from plotmap import plot_data, find_clevels
 from utils import DATAdecorator, config
 from derived_vars import derived_vars, get_derived_var
-
+from asciiio import read_obs
 
 # read the config file
 cong = config()
@@ -32,14 +33,13 @@ for key, value in cong.items():
 
 GRAPES_DATA_PKLNAME = './pkl/GRAPES_{}_{}_{}.pkl'.format(start_ddate, end_ddate, int(fcst_step))
 FNL_DATA_PKLNAME = './pkl/FNL_{}_{}_{}.pkl'.format(start_ddate, end_ddate, int(fcst_step))
+CASES_HASH = hashlib.md5((str(case_ini_times) + str(case_fcst_hours)).encode()).hexdigest()
+OBS_DATA_PKLNAME = './pkl/OBS_{}.pkl'.format(CASES_HASH)
+
 
 # pickle the data for ploting
-@DATAdecorator('./', False, GRAPES_DATA_PKLNAME)
+@DATAdecorator('./', True, GRAPES_DATA_PKLNAME)
 def get_GRAPES_data():
-
-    global time_indices, time_incr, time_indices_rain
-    global levels, TLON, TLAT, lon, lat
-    global var_ndims
 
     # 1.0 读取postvar数据
     print(u'1.0 开始读取postvar数据')
@@ -107,7 +107,14 @@ def get_GRAPES_data():
     t1_readpostvar = time.time()
     print(u'对指定预报面高度列表和指定的预报时效列表做平均结束, 用时{} seconds.'.format(str(t1_readpostvar-t0_readpostvar)[:7]))
 
-    return datatable
+    global_package = dict()
+    global_names = ['time_indices', 'time_incr', 'time_indices_rain', 
+                    'levels', 'TLON', 'TLAT', 'lon', 'lat', 
+                    'var_ndims']
+    for global_name in global_names:
+        global_package[global_name] = locals()[global_name]
+
+    return global_package, datatable
 
 # pickle the data for ploting
 @DATAdecorator('./', True, FNL_DATA_PKLNAME)
@@ -222,6 +229,31 @@ def get_FNL_data():
 
     return datatable
 
+
+@DATAdecorator('./', True, OBS_DATA_PKLNAME)
+def get_OBS_data():
+
+    # 3.0 读取FNL数据
+    print(u'5.0 开始读取OBS数据')
+    t0_readpostvar = time.time()
+    
+    datatable = dict()
+    for case_ini_time in case_ini_times:
+        datatable[case_ini_time] = dict()
+        for case_fcst_hour in case_fcst_hours:
+            obs_utc_dt = dt.datetime.strptime(case_ini_time, '%Y%m%d%H') + dt.timedelta(hours=case_fcst_hour)
+            obs_bjt_dt = obs_utc_dt + dt.timedelta(hours=8)
+            obs_timestamp = obs_bjt_dt.strftime('%Y%m%d%H')
+            obs_filename = obs_dir + 'rr24{}/{}/{}.000'.format(obs_utc_dt.strftime('%H'), obs_utc_dt.strftime('%Y'), \
+            obs_bjt_dt.strftime('%y%m%d%H'))
+
+            datatable[case_ini_time][case_fcst_hour] = read_obs(obs_filename)
+
+    t1_readpostvar = time.time()
+    print(u'读取OBS数据结束, 用时{} seconds.'.format(str(t1_readpostvar-t0_readpostvar)[:7]))
+
+    return datatable
+
 # Main Program
 if __name__ == "__main__":
     
@@ -229,9 +261,16 @@ if __name__ == "__main__":
     timelines   = gen_timelines(start_ddate, end_ddate, fcst_step)
     ncfiles     = ['postvar{}.nc'.format(itime) for itime in timelines]
 
-    # datatable dimension: (ninittimes, nvars, nfcsrtimes, nlevels, nlat, nlon)
-    datatable_grapes = get_GRAPES_data()
+    # datatable dimension: (nvars, nfcsrtimes, nlevels, nlat, nlon)
+    global_package, datatable_grapes = get_GRAPES_data()
+    for global_name in global_package.keys():
+        globals()[global_name] = global_package[global_name]
     datatable_fnl = get_FNL_data()
+    datatable_obs = get_OBS_data()
+
+    if plot_cases:
+       pass 
+    exit()
 
     # begin to plot
     for plot_type in plot_types:
@@ -295,3 +334,4 @@ if __name__ == "__main__":
                     p.close()
                     p.join()
                     print('All subprocesses done.')
+

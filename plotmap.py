@@ -6,13 +6,14 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-26 18:13:06
+@LastEditTime: 2020-04-27 10:10:22
 '''
 
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 import numpy as np
-
+from matplotlib import colors
+from numpy import ma
 
 def area_region(area):
     if area == 'South_P':
@@ -98,7 +99,7 @@ def find_clevels(iarea, data, lon, lat, dlevel, plot_type):
 
     return clevels
 
-def plot_data(post_data, plot_type, varname, lon, lat, iarea, title, subtitle, pic_file, clevels):
+def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels):
     
     plt.rcParams['font.family'] = 'serif'
 
@@ -135,7 +136,7 @@ def plot_data(post_data, plot_type, varname, lon, lat, iarea, title, subtitle, p
     if iarea in ['North_P', 'South_P']:
         ax_cb = fig.add_axes([0.1, 0.05, 0.85, 0.03])
     if iarea == 'Tropics':
-        ax_cb = fig.add_axes([0.4, 0.05, 0.2, 0.03])
+        ax_cb = fig.add_axes([0.3, 0.05, 0.4, 0.03])
     if iarea == 'E_Asia':
         ax_cb = fig.add_axes([0.1, 0.05, 0.85, 0.03])
 
@@ -182,15 +183,31 @@ def plot_data(post_data, plot_type, varname, lon, lat, iarea, title, subtitle, p
 
     origin = 'lower'
 
+    # some settings 
+    
     if plot_type == 'PMF':
         cmap = 'RdBu_r'
     else:
         cmap = 'jet'
-
-    CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend="both")
-    # CF = map.contourf(x, y, post_data.T, cmap='jet', origin=origin, extend="both")
     
-    CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal')
+    if var in ['24hrain']:
+        norm = colors.LogNorm()
+    else:
+        norm = None
+    
+    if var in ['24hrain']:
+        post_data = ma.masked_where(post_data <= 0.01, post_data)
+    
+    if clevels[-1] - clevels[-2] != clevels[1] - clevels[0]:
+        ticks = clevels
+        ticklabels = [str(clevel) for clevel in clevels]
+    else:
+        ticks = None
+
+    CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend="both", norm=norm)
+    CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal', ticks=ticks)
+    if 'ticklabels' in locals().keys():
+        CB.ax.set_xticklabels(ticklabels)
     CB.set_label(varname, fontsize=14)
 
     plt.savefig('./pic/{}'.format(pic_file), bbox_inches='tight', dpi=500)

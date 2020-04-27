@@ -46,14 +46,14 @@ if __name__ == '__main__':
         t0_time = time.time()
         # 1.0 Extract need variables 
         print(u'--- 1.0 开始数据提取 ---')
-        CTLExtract(ctlfilename,st_vars,st_levels,ex_ctl,ex_data)
+        CTLExtract(ctlfilename,ex_vars,st_levels,ex_ctl,ex_data)
 
         os.system('rm extract.gs')
         print(u'数据提取结束!')
 
         # 2.0 Transfer to NetCDF Format 
         print(u'--- 2.0 开始数据转换 ---')
-        transf2nc(ex_ctl,ex_nc,st_vars)
+        transf2nc(ex_ctl,ex_nc,ex_vars)
         os.system('rm {} {}'.format(ex_ctl, ex_data))
         print(u'数据转换结束!')
         t1_time = time.time()

@@ -16,8 +16,11 @@ fnl_varname:
   t: 'TMP_P0_L100_GLL0'
   h: 'HGT_P0_L100_GLL0'
 
-# 统计变量和统计等压层
-st_vars  : ['u','v','t','h']
+# 提取变量和统计变量
+ex_vars  : ['u','v','t','h','rainc','rainnc']
+st_vars  : ['u','v','t','h','24hrain']
+
+# 统计等压层
 # st_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
 st_levels: [500.]
 
@@ -33,10 +36,11 @@ pic_prefix: 'png'
 
 # 画图设置
 # plot_areas: ['Global', 'E_Asia', 'North_P', 'South_P']
-plot_areas: ['North_P']
+plot_areas: ['Tropics']
  
-plot_types: ['P', 'F', 'PMF']
-# plot_types: ['PMF']
+# plot_types: ['P', 'F', 'PMF']
+plot_types: ['P']
+
 plot_types_name:
   P:    'Prediction'
   F:    'FNL'
@@ -54,8 +58,12 @@ clevel_step_PMF:
   t: 1
   h: 10
 
+clevel_custom:
+  24hrain: [1, 2, 4, 6, 8, 10, 12, 16, 20, 32, 64]
+
 variable_name:
   t:  'Temperature [K]'
   u:  'U Wind [m/s]'
   v:  'V wind [m/s]'
   h:  'Geopotential Height [gpm]'
+  24hrain: '24hours precipitation [mm]'

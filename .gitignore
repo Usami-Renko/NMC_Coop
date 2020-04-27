@@ -6,6 +6,7 @@ ctl_des/
 nmc_obs/
 pic/
 pic_eg/
+doc/
 
 **/test/**
 **/grads/**

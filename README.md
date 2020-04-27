@@ -3,7 +3,7 @@
  * @Author: Hejun Xie
  * @Date: 2020-04-23 20:31:50
  * @LastEditors: Hejun Xie
- * @LastEditTime: 2020-04-23 21:35:37
+ * @LastEditTime: 2020-04-27 22:05:30
  -->
 # GRAPES预报场与FNL分析场诊断画图脚本V1.0
 
@@ -31,7 +31,21 @@ utils.py
 
 读取配置文件的函数 config。
 
-## 4. 绘图脚本模块
+## 4. ASCII数据I/O模块
+
+asciio.py
+
+主要负责ASCII编码的观测数据的读取和分析
+
+## 5. 导出量模块
+
+derived_var.py
+
+主要负责生成由原始预报量导出的导出预报量
+
+## 6. 绘图脚本模块
+
+plot_postvar.py
 
 目的
 ----------
@@ -42,8 +56,8 @@ utils.py
 层次结构
 ----------
 
-包含两个形式上的函数, 和一个主程序脚本
-get_GRAPES_data， get_FNL_data
+包含三个形式上的函数, 和一个主程序脚本
+get_GRAPES_data, get_FNL_data, get_OBS_data
 
 get_GRAPES_data 
 读取GRAPES提取出的nc格式的数据，并计算起报时间集合下不同预报时效的平均预报场
@@ -51,7 +65,11 @@ get_GRAPES_data
 get_FNL_data
 读取FNL再分析数据，并线性插值到GRAPES网格下,计算起报时间集合下不同预报时效的平均预报场
 
-主程序对两个场分别进行画图，并分析两者的差值画图
+get_OBS_data
+读取NMC观测数据
+
+主程序对GRAPES预报场和FNL再分析场分别进行画图，并分析两者的差值画图
+主程序还可以读取观测数据进行个例降水的比较画图
 
 目前将所需修改的内容提取到配置文件中，存放在同级目录的config文件夹下，包含一个配置文件：config.yml
 
@@ -80,27 +98,24 @@ fnl_varname:
   t: 'TMP_P0_L100_GLL0'
   h: 'HGT_P0_L100_GLL0'
 
-# 统计变量和统计等压层
-st_vars  : ['u','v','t','h']
-st_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
+# 提取变量和统计变量
+ex_vars  : ['u','v','t','h','rainc','rainnc']
+st_vars  : ['u','v','t','h','24hrain']
+
+# 提取等压层和统计等压层
+ex_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
+st_levels: [500.]
 
 # 预报时长
 fcst: [0,72] # hours
+# 预报时间步长: 不作用于出图脚本，只是为了方便生成动图和拼接图片的脚本
+time_incr: 12
 
 # 图片类型
 pic_prefix: 'png'
 
-# 是否绘制单个图
-make_png: True
-
-# 是否绘制不同高度的动图
-make_gif: True
-
-# 是否绘制用于比较的拼图
-make_concat: True
-
 # 画图区域设置
-plot_areas: ['Global', 'E_Asia', 'North_P', 'South_P']
+plot_areas: ['Global', 'E_Asia', 'North_P', 'South_P', 'Tropics']
 
 # 画图类型设置 
 plot_types: ['P', 'F', 'PMF']
@@ -130,6 +145,18 @@ variable_name:
   u:  'U Wind [m/s]'
   v:  'V wind [m/s]'
   h:  'Geopotential Height [gpm]'
+  24hrain: '24hours precipitation [mm]'
+
+# 个例画图
+plot_cases: True
+# 观测文件路径
+obs_dir: './nmc_obs/'
+# 个例起报时间
+case_ini_times: ['2016010112']
+# 个例预报时间
+case_fcst_hours: [12,36,60]
+# 是否使用新配色方案
+newcolorscheme: False
 ```
 
 使用方式
@@ -148,6 +175,20 @@ python extractdata.py
 python plot_postvar.py
 ```
 
+3. 制作用于比较的拼图
+手动添加 ./pic/目录
+修改./config/config.yml后，运行python make_comp.py即可，
+```python
+python make_comp.py
+```
+
+4. 制作动图
+手动添加 ./pic/目录
+修改./config/config.yml后，运行python make_gif.py即可，
+```python
+python make_gif.py
+```
+
 图形展示
 ----------
 - Prediction
@@ -159,6 +200,16 @@ python plot_postvar.py
 
 - Composite for comparison
 ![avatar](./pic_eg/comp_North_P_72hr_500hpa_u.png)
+
+- Precipitation
+![avatar](./pic_eg/P_Tropics_12hr_24hrain.png)
+
+- observation vs prediction precipitation (old color scheme) 
+![avatar](./pic_eg/case_2016010112_12hr_24hrain_oldscheme.png)
+
+- observation vs prediction precipitation (new color scheme) 
+![avatar](./pic_eg/case_2016010112_12hr_24hrain_newscheme.png)
+
 
 ----------
 Developers and Contributors

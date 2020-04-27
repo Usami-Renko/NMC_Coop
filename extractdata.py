@@ -46,7 +46,7 @@ if __name__ == '__main__':
         t0_time = time.time()
         # 1.0 Extract need variables 
         print(u'--- 1.0 开始数据提取 ---')
-        CTLExtract(ctlfilename,ex_vars,st_levels,ex_ctl,ex_data)
+        CTLExtract(ctlfilename,ex_vars,ex_levels,ex_ctl,ex_data)
 
         os.system('rm extract.gs')
         print(u'数据提取结束!')

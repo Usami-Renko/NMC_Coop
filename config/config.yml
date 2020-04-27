@@ -2,14 +2,19 @@
 start_ddate: '2016010112'  # yyyymndd
 end_ddate  : '2016010512'  # yyyymndd
 
-# 数据路径 
+# 起报时间间隔
+fcst_step: 24 # hours
+
+# GRAPES数据路径 
 ctlfile_dir: './87_fcst_ctl/'
 
-# 数据转换路径
+# GRAPES数据转换路径
 exdata_dir: './ex_data/'
 
 # FNL数据路径
 fnl_dir: './fnl_data/'
+
+# FNL数据变量名
 fnl_varname:
   u: 'UGRD_P0_L100_GLL0'
   v: 'VGRD_P0_L100_GLL0'
@@ -20,12 +25,10 @@ fnl_varname:
 ex_vars  : ['u','v','t','h','rainc','rainnc']
 st_vars  : ['u','v','t','h','24hrain']
 
-# 统计等压层
-# st_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
+# 提取等压层和统计等压层
+ex_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
 st_levels: [500.]
 
-# 起报时间间隔
-fcst_step: 24 # hours
 # 预报时长
 fcst: [0,72] # hours
 # 预报时间步长: 不作用于出图脚本，只是为了方便生成动图和拼接图片的脚本
@@ -70,7 +73,11 @@ variable_name:
 
 # 个例画图
 plot_cases: True
+# 观测文件路径
 obs_dir: './nmc_obs/'
+# 个例起报时间
 case_ini_times: ['2016010112']
+# 个例预报时间
 case_fcst_hours: [12,36,60]
-newcolorscheme: False
+# 是否使用新配色方案
+newcolorscheme: True

@@ -7,10 +7,9 @@ nmc_obs/
 pic/
 pic_eg/
 doc/
+grads/
 
 **/test/**
-**/grads/**
-**/doc/**
 
 # extensions
 *.log

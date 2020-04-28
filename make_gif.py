@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 15:27:26
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-26 15:31:12
+@LastEditTime: 2020-04-28 21:09:54
 '''
 
 
@@ -30,10 +30,19 @@ if __name__ == "__main__":
     for iarea in plot_areas:
         for itime, time_index in enumerate(time_indices):
             for ivar, var in enumerate(st_vars):
-                gif_file = './pic/comp_{}_{}hr_{}_pres.gif'.format(iarea, time_index*time_incr, var)
+                
+                if var in noFNL_vars:
+                    gif_type = 'P'
+                else:
+                    gif_type = 'comp'
+                
+                if var in moist_vars and time_index == 0:
+                    continue
+                
+                gif_file = './pic/{}_{}_{}hr_{}_pres.gif'.format(gif_type, iarea, time_index*time_incr, var)
                 pic_files = []
                 for ilevel,level in enumerate(st_levels):
-                    pic_files.append('./pic/comp_{}_{}hr_{}hpa_{}.png'.format(iarea, time_index*time_incr,int(level), var))
+                    pic_files.append('./pic/{}_{}_{}hr_{}hpa_{}.png'.format(gif_type, iarea, time_index*time_incr,int(level), var))
                 
                 imgs = []
                 for ipic in pic_files:

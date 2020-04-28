@@ -6,12 +6,12 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 18:57:38
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-26 21:02:03
+@LastEditTime: 2020-04-28 17:36:33
 '''
 
 import numpy as np
 
-derived_vars = ['24hrain']
+derived_vars = ['24hrain', 'w_cm2s']
 
 def get_derived_var(filehandle, varname):
     derived_var = None
@@ -28,7 +28,8 @@ def get_derived_var(filehandle, varname):
 
         for itime in range(ntimes - ndiff):
             derived_var[itime, ...] = total_rain[itime + ndiff, ...] - total_rain[itime, ...]
-
+    elif varname == 'w_cm2s':
+        derived_var = filehandle.variables['w'][:] * 100 # [m/s] --> [cm/s]
     else:
         raise ValueError('Could not compute derived variable, please specify a valid variable name')
         

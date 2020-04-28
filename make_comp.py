@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 15:11:40
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-26 15:26:21
+@LastEditTime: 2020-04-28 21:05:52
 '''
 
 
@@ -30,6 +30,10 @@ if __name__ == "__main__":
     for iarea in plot_areas:
             for itime,time_index in enumerate(time_indices):
                 for ivar, var in enumerate(st_vars):
+
+                    if var in noFNL_vars:
+                        continue
+                    
                     for ilevel,level in enumerate(st_levels):
                         pic_dir = './pic/'
                         pic_files = ['{}_{}_{}hr_{}hpa_{}.png'.format(plot_type, iarea, time_index*time_incr, int(level), var) for plot_type in plot_types]

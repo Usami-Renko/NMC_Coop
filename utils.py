@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-22 18:55:54
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-23 11:45:41
+@LastEditTime: 2020-04-28 20:25:24
 '''
 # -*- coding: utf-8 -*-
 
@@ -15,6 +15,7 @@ import os
 import sys
 import yaml
 import pickle
+import hashlib
 from functools import wraps 
 
 class DATAdecorator(object):
@@ -64,3 +65,10 @@ def config():
     elif sys.version_info[0] >= 3:
         cong = yaml.load(open(cong_yamlPath), Loader=yaml.FullLoader)
     return cong
+
+def hashlist(objectlist):
+    obj_string = ''
+    for object in objectlist:
+        obj_string += str(object)
+    
+    return hashlib.md5(obj_string.encode()).hexdigest()

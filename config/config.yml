@@ -22,8 +22,19 @@ fnl_varname:
   h: 'HGT_P0_L100_GLL0'
 
 # 提取变量和统计变量
-ex_vars  : ['u','v','t','h','rainc','rainnc']
-st_vars  : ['u','v','t','h','24hrain']
+ex_vars  : ['u','v','t','h','w','q2','rainc','rainnc']
+# st_vars  : ['u','v','t','h','w_cm2s','q2',24hrain']
+st_vars  : ['w_cm2s', 'q2', 't', 'h']
+
+# avoid ploting initial
+moist_vars : ['q2']
+
+# avoid ploting FNL
+noFNL_vars: ['24hrain', 'w_cm2s', 'q2']
+
+# align with 00z vars
+align_vars: ['24hrain']
+
 
 # 提取等压层和统计等压层
 ex_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
@@ -38,11 +49,13 @@ time_incr: 12
 pic_prefix: 'png'
 
 # 画图设置
+clean_plot: True
+
 # plot_areas: ['Global', 'E_Asia', 'North_P', 'South_P']
-plot_areas: ['Tropics']
- 
-# plot_types: ['P', 'F', 'PMF']
-plot_types: ['P']
+plot_areas: ['North_P']
+
+plot_types: ['P', 'F', 'PMF']
+# plot_types: ['P']
 
 plot_types_name:
   P:    'Prediction'
@@ -54,12 +67,16 @@ clevel_step:
   v: 2
   t: 3
   h: 30
+  w_cm2s: 0.04
+  q2: 0.2
 
 clevel_step_PMF:
   u: 1
   v: 1
   t: 1
   h: 10
+  w_cm2s: 0.01
+  q2: 0.05
 
 clevel_custom:
   24hrain: [1, 2, 4, 6, 8, 10, 12, 16, 20, 32, 64]
@@ -69,10 +86,12 @@ variable_name:
   u:  'U Wind [m/s]'
   v:  'V wind [m/s]'
   h:  'Geopotential Height [gpm]'
+  w_cm2s:  'Vertical Velocity [cm/s]'
+  q2: 'Specific Humidity [g/kg]'
   24hrain: '24hours precipitation [mm]'
 
 # 个例画图
-plot_cases: True
+plot_cases: False
 # 观测文件路径
 obs_dir: './nmc_obs/'
 # 个例起报时间

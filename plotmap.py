@@ -6,13 +6,14 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-27 20:16:28
+@LastEditTime: 2020-04-28 19:36:32
 '''
 
 from mpl_toolkits.basemap import Basemap
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+import copy as cp
 from matplotlib import colors
 from numpy import ma
 
@@ -72,8 +73,8 @@ def _add_title(ax, title, subtitle):
     ax.text(0.5, 0.50, title, fontsize=22, ha='center', va='center')
     ax.text(0.5, 0.00, subtitle, fontsize=16, ha='center', va='center')
 
-def find_clevels(iarea, data, lon, lat, dlevel, plot_type):
-    
+def _clip_data(iarea, data, lon, lat):
+
     slat,elat,slon,elon = area_region(iarea)
 
     if elon == 360.0:
@@ -84,7 +85,22 @@ def find_clevels(iarea, data, lon, lat, dlevel, plot_type):
 
     data_visible = data[lat_index[0]:lat_index[1]+1, lon_index[0]:lon_index[1]+1]
 
-    data_max, data_min = int(data_visible.max()), int(data_visible.min())
+    return data_visible
+
+
+def _find_clevels_rec(data, dlevel, plot_type):
+
+    
+    if dlevel < 1.0:
+        data *= 10
+        dlevel *= 10
+        clevels = _find_clevels_rec(data, dlevel, plot_type) / 10
+        return clevels
+    
+    # remove float here
+    dlevel = int(dlevel)
+    
+    data_max, data_min = int(data.max()), int(data.min())
 
     if dlevel >= 10:
         data_max = data_max // 10 * 10
@@ -100,7 +116,12 @@ def find_clevels(iarea, data, lon, lat, dlevel, plot_type):
         data_max = ((data_max - data_min) // dlevel + 1) * dlevel + data_min
 
     clevels = np.arange(data_min, data_max + dlevel, dlevel)
+    return clevels
 
+def find_clevels(iarea, data, lon, lat, dlevel, plot_type):
+    data_visible = _clip_data(iarea, data, lon, lat)
+    data_visible_copy = cp.copy(data_visible)
+    clevels = _find_clevels_rec(data_visible_copy, dlevel, plot_type)
     return clevels
 
 def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels):
@@ -202,7 +223,7 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     if var in ['24hrain']:
         post_data = ma.masked_where(post_data <= 0.01, post_data)
     
-    if clevels[-1] - clevels[-2] != clevels[1] - clevels[0]:
+    if abs((clevels[-1] - clevels[-2]) - (clevels[1] - clevels[0])) > 1e-5:
         ticks = clevels
         ticklabels = [str(clevel) for clevel in clevels]
     else:
@@ -320,3 +341,10 @@ def plot_case(data_field, data_obs, lon, lat, title, subtitle, pic_file, newcolo
     plt.savefig('./pic/{}'.format(pic_file), bbox_inches='tight', dpi=500)
     plt.close()
 
+# unit test
+if __name__ == "__main__":
+    a = np.linspace(-0.05, 0.05, 100)
+    dlevel = 0.01
+    clevels = _find_clevels_rec(a, dlevel, 'P')
+    print(clevels)
+    

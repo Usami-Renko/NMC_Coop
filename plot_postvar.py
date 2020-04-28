@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-27 20:19:23
+@LastEditTime: 2020-04-28 20:49:41
 @Description  : process postvar
 '''
 import sys
@@ -21,7 +21,7 @@ from scipy.interpolate import griddata
 import hashlib
 
 from plotmap import plot_data, find_clevels, plot_case
-from utils import DATAdecorator, config
+from utils import DATAdecorator, config, hashlist
 from derived_vars import derived_vars, get_derived_var
 from asciiio import read_obs
 
@@ -31,10 +31,11 @@ cong = config()
 for key, value in cong.items():
     globals()[key] = value
 
-CASES_HASH = hashlib.md5((str(case_ini_times) + str(case_fcst_hours)).encode()).hexdigest()
-OBS_DATA_PKLNAME = './pkl/OBS_{}.pkl'.format(CASES_HASH)
-GRAPES_DATA_PKLNAME = './pkl/GRAPES_{}_{}_{}_{}.pkl'.format(start_ddate, end_ddate, int(fcst_step), CASES_HASH)
-FNL_DATA_PKLNAME = './pkl/FNL_{}_{}_{}.pkl'.format(start_ddate, end_ddate, int(fcst_step))
+OBS_HASH = hashlist([case_ini_times, case_fcst_hours])
+GRAPES_HASH = hashlist([st_vars, st_levels, fcst, start_ddate, end_ddate, fcst_step, OBS_HASH])
+OBS_DATA_PKLNAME = './pkl/OBS_{}.pkl'.format(OBS_HASH)
+GRAPES_DATA_PKLNAME = './pkl/GRAPES_{}.pkl'.format(GRAPES_HASH)
+FNL_DATA_PKLNAME = './pkl/FNL_{}.pkl'.format(GRAPES_HASH)
 
 
 # pickle the data for ploting
@@ -75,9 +76,16 @@ def get_GRAPES_data():
 
     tmp_datatable = np.zeros((len(timelines), len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
     var_ndims = dict()
+    var_time_indices = dict()
 
-    for ivar, var in enumerate(st_vars):        
-        time_indices_var = time_indices_rain if var in ['24hrain'] else time_indices
+    for ivar, var in enumerate(st_vars):
+        
+        time_indices_var = list(time_indices_rain if var in align_vars else time_indices)
+        # moist vars skip for initial filed
+        if var in moist_vars:
+            time_indices_var.remove(0)
+        
+        var_time_indices[var] = time_indices_var
              
         for itime, time_index in enumerate(time_indices_var):
             for idata, data in enumerate(data_list):
@@ -120,7 +128,7 @@ def get_GRAPES_data():
     global_package = dict()
     global_names = ['time_indices', 'time_incr', 'time_indices_rain', 
                     'levels', 'TLON', 'TLAT', 'lon', 'lat', 
-                    'var_ndims']
+                    'var_ndims', 'var_time_indices']
     for global_name in global_names:
         global_package[global_name] = locals()[global_name]
 
@@ -207,8 +215,7 @@ def get_FNL_data():
                     tmp_datatable[data_cache[fnl_datetime][0], :, data_cache[fnl_datetime][1], :, ...] 
             else:
                 for ivar, var in enumerate(st_vars):
-                    # No FNL data for '24hrain'
-                    if var == '24hrain':
+                    if var in noFNL_vars:
                         continue
                     for ilevel, level in enumerate(st_levels):
                         level_index = fnl_levels.index(level)
@@ -278,6 +285,16 @@ if __name__ == "__main__":
     datatable_fnl = get_FNL_data()
     datatable_obs = get_OBS_data()
 
+    # print(datatable_grapes.shape)
+    # data = datatable_grapes[0, 1, 0, ...] 
+    # print(data.max())
+    # print(data.min())
+
+    # exit()
+
+    if clean_plot:
+        os.system('rm -rf ./pic/*')
+    
     if plot_cases:
         for iinit, case_ini_time in enumerate(case_ini_times):
             for ifcst, case_fcst_hour in enumerate(case_fcst_hours):
@@ -293,16 +310,18 @@ if __name__ == "__main__":
 
     # begin to plot
     for plot_type in plot_types:
-        print('开始作图{}'.format(plot_types_name[plot_type]))
+        print('开始作图: {}'.format(plot_types_name[plot_type]))
         for ivar, var in enumerate(st_vars):
+            print('\t变量: {}'.format(var))
             # No FNL data for '24hrain'
-            if var == '24hrain' and plot_type in ['F', 'PMF']:
+            if var in noFNL_vars and plot_type in ['F', 'PMF']:
                 continue
             varname = variable_name[var]
 
-            time_indices_var = time_indices_rain if var in ['24hrain'] else time_indices
+            time_indices_var = var_time_indices[var] 
 
             for iarea in plot_areas:
+                print('\t\t区域: {}'.format(iarea))
                 for itime,time_index in enumerate(time_indices_var):
                     
                     if var not in clevel_custom.keys():
@@ -338,7 +357,9 @@ if __name__ == "__main__":
                             title    = '{} of {}hr {}hPa {}'.format(plot_types_name[plot_type], time_index*time_incr, int(level), varname)
                             subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
                             pic_file = '{}_{}_{}hr_{}hpa_{}.png'.format(plot_type, iarea, time_index*time_incr, int(level), var)
-                            
+
+                            print('\t\t\t'+pic_file)
+
                             p.apply_async(plot_data, args=(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels))
                             plot_data(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels)
                         elif var_ndims[var] == 3:
@@ -346,11 +367,11 @@ if __name__ == "__main__":
                             subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
                             pic_file = '{}_{}_{}hr_{}.png'.format(plot_type, iarea, time_index*time_incr, var)
 
+                            print('\t\t\t'+pic_file)
+
                             plot_data(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels)
                             break
 
-                    print('Waiting for all subprocesses done...')
                     p.close()
                     p.join()
-                    print('All subprocesses done.')
 

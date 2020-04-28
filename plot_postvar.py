@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-28 20:49:41
+@LastEditTime: 2020-04-28 21:13:41
 @Description  : process postvar
 '''
 import sys
@@ -18,7 +18,6 @@ from gen_timelines import gen_timelines
 import os
 from multiprocessing import Pool
 from scipy.interpolate import griddata
-import hashlib
 
 from plotmap import plot_data, find_clevels, plot_case
 from utils import DATAdecorator, config, hashlist

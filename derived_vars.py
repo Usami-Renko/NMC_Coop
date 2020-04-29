@@ -6,14 +6,14 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 18:57:38
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-28 17:36:33
+@LastEditTime: 2020-04-29 16:05:03
 '''
 
 import numpy as np
 
 derived_vars = ['24hrain', 'w_cm2s']
 
-def get_derived_var(filehandle, varname):
+def _get_derived_var_grapes(filehandle, varname, ex_vars):
     derived_var = None
 
     # compute the total precipitation in the upcoming 24 hours of a given time
@@ -34,3 +34,12 @@ def get_derived_var(filehandle, varname):
         raise ValueError('Could not compute derived variable, please specify a valid variable name')
         
     return derived_var
+
+def get_var_grapes(filehandle, varname, ex_vars):
+    
+    if varname in ex_vars:
+        var_table = filehandle.variables[varname]
+    else:
+        var_table = _get_derived_var_grapes(filehandle, varname, ex_vars)
+
+    return var_table

@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-28 21:13:41
+@LastEditTime: 2020-04-29 16:12:53
 @Description  : process postvar
 '''
 import sys
@@ -21,7 +21,7 @@ from scipy.interpolate import griddata
 
 from plotmap import plot_data, find_clevels, plot_case
 from utils import DATAdecorator, config, hashlist
-from derived_vars import derived_vars, get_derived_var
+from derived_vars import get_var_grapes
 from asciiio import read_obs
 
 # read the config file
@@ -85,17 +85,14 @@ def get_GRAPES_data():
             time_indices_var.remove(0)
         
         var_time_indices[var] = time_indices_var
-             
-        for itime, time_index in enumerate(time_indices_var):
-            for idata, data in enumerate(data_list):
-                # get the variable table
-                if var in ex_vars:
-                    var_table = data.variables[var]
-                else:
-                    var_table = get_derived_var(data, var)
-                if var not in var_ndims.keys():
-                    var_ndims[var] = len(var_table.shape)
+       
+        for idata, data in enumerate(data_list):            
+            var_table = get_var_grapes(data, var, ex_vars)
 
+            if var not in var_ndims.keys():
+                var_ndims[var] = len(var_table.shape)
+
+            for itime, time_index in enumerate(time_indices_var):
                 if var_ndims[var] == 4:
                     for ilevel, level in enumerate(st_levels):
                         level_index = levels.index(level)
@@ -108,11 +105,12 @@ def get_GRAPES_data():
     datatable_case = np.zeros((len(case_ini_times), len(case_fcst_hours), len(lat), len(lon)), dtype='float32')
 
     for iinit, case_ini_time in enumerate(case_ini_times):
+        init_index = timelines.index(case_ini_time)
+        data = data_list[init_index]
+        var_table = get_var_grapes(data, '24hrain', ex_vars)            
+        
         for ifcst, case_fcst_hour in enumerate(case_fcst_hours):
-            init_index = timelines.index(case_ini_time)
             fcst_index = case_fcst_hour // time_incr
-            data = data_list[init_index]
-            var_table = get_derived_var(data, '24hrain')            
             datatable_case[iinit, ifcst, ...] = var_table[fcst_index, ...]
 
     # close the netCDF file handles and nc package for nasty issues with Nio

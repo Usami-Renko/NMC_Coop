@@ -91,7 +91,7 @@ variable_name:
   24hrain: '24hours precipitation [mm]'
 
 # 个例画图
-plot_cases: False
+plot_cases: True
 # 观测文件路径
 obs_dir: './nmc_obs/'
 # 个例起报时间

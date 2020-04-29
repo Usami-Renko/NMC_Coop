@@ -206,7 +206,7 @@ class CTLExtract(object):
                 if read:
                     p = re.compile('(\w+)\s+(\d+)\s+(\d+)\s+(.*)')    #目标变量行的正则范式
                     m = p.match(line)
-                    if m.group(1) in self.varname[i]:
+                    if m.group(1) == self.varname[i]:
                         if self.dimensions[m.group(1)] == 1:
                             fwrite.write(line+'\n')
                         else:

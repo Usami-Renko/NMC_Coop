@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-28 19:36:32
+@LastEditTime: 2020-04-29 23:01:26
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -89,7 +89,6 @@ def _clip_data(iarea, data, lon, lat):
 
 
 def _find_clevels_rec(data, dlevel, plot_type):
-
     
     if dlevel < 1.0:
         data *= 10
@@ -216,18 +215,18 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
         cmap = 'jet'
     
     if var in ['24hrain']:
-        norm = colors.LogNorm()
-    else:
-        norm = None
-    
-    if var in ['24hrain']:
         post_data = ma.masked_where(post_data <= 0.01, post_data)
     
-    if abs((clevels[-1] - clevels[-2]) - (clevels[1] - clevels[0])) > 1e-5:
+    if len(clevels) < 3:
+        raise ValueError('clevels too short for {}'.format(clevels))
+
+    if abs((clevels[2] - clevels[1]) - (clevels[1] - clevels[0])) > 1e-5:
         ticks = clevels
         ticklabels = [str(clevel) for clevel in clevels]
+        norm = colors.LogNorm()
     else:
         ticks = None
+        norm = None
 
     CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend="both", norm=norm)
     CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal', ticks=ticks)

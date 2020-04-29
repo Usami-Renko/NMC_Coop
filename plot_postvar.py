@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-29 21:25:08
+@LastEditTime: 2020-04-29 22:44:16
 @Description  : process postvar
 '''
 import sys
@@ -292,11 +292,6 @@ if __name__ == "__main__":
     datatable_fnl = get_FNL_data()
     datatable_obs = get_OBS_data()
 
-    # print(datatable_grapes.shape)
-    # data = datatable_grapes[0, 1, 0, ...] 
-    # print(data.max())
-    # print(data.min())
-
     # exit()
 
     if clean_plot:
@@ -347,19 +342,21 @@ if __name__ == "__main__":
                         elif plot_type == 'PMF':
                             data = datatable_grapes[ivar, itime, ilevel, ...] - \
                                 datatable_fnl[ivar, itime, ilevel, ...]
-                        
+
+                        # print(data.min())
+                        # print(data.max())
+
                         if var in clevel_custom.keys(): 
                             clevels = np.array(clevel_custom[var])
                         else:
-                            if plot_type in ['P', 'F']:
+                            if var in noFNL_vars:
+                                clevel_data = datatable_grapes[ivar, itime, ilevel, ...]
+                            elif plot_type in ['P', 'F']:
                                 clevel_data = datatable_fnl[ivar, itime, ilevel, ...]
                             elif plot_type in ['PMF']:
                                 # the biggest forecast range have large clevels
                                 clevel_data = datatable_grapes[ivar, -1, ilevel, ...] - \
                                     datatable_fnl[ivar, -1, ilevel, ...]
-                            if plot_types == ['F']:
-                                # if ploting no GRAPES data
-                                clevel_data = datatable_fnl[ivar, itime, ilevel, ...]
                             
                             clevels = find_clevels(iarea, clevel_data, lon, lat, dlevel, plot_type)
 

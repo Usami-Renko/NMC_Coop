@@ -49,22 +49,23 @@ plotable_vars: ['u','v','t','h','w','q',24hrain']
 
 # 提取变量和统计变量
 ex_vars  : ['u','v','t','h','w','q2','rainc','rainnc']
-# st_vars  : ['u','v','t','h','w','q',24hrain']
-st_vars  : ['q']
 
+st_vars  : ['w']
+
+# 提取等压层和统计等压层
+ex_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
+
+st_levels: [700.]
+
+# 一些特殊变量
 # avoid ploting initial
-moist_vars : ['q']
+moist_vars : ['q', 'w']
 
 # avoid ploting FNL
 noFNL_vars: ['24hrain', 'w']
 
 # align with 00z vars
 align_vars: ['24hrain']
-
-
-# 提取等压层和统计等压层
-ex_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
-st_levels: [700.]
 
 # 预报时长
 fcst: [0,72] # hours
@@ -93,7 +94,6 @@ clevel_step:
   v: 2
   t: 3
   h: 30
-  w_cm2s: 0.04
   q: 0.3
 
 clevel_step_PMF:
@@ -101,18 +101,18 @@ clevel_step_PMF:
   v: 1
   t: 1
   h: 10
-  w_cm2s: 0.01
   q: 0.1
 
 clevel_custom:
   24hrain: [1, 2, 4, 6, 8, 10, 12, 16, 20, 32, 64]
+  w: [1, 2, 4, 6, 8, 10, 25, 50, 100]
 
 variable_name:
   t:  'Temperature [K]'
   u:  'U Wind [m/s]'
   v:  'V wind [m/s]'
   h:  'Geopotential Height [gpm]'
-  w_cm2s:  'Vertical Velocity [cm/s]'
+  w:  'Vertical Velocity [cm/s]'
   q: 'Specific Humidity [g/kg]'
   24hrain: '24hours precipitation [mm]'
 

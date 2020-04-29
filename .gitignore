@@ -9,6 +9,8 @@ pic/
 pic_eg/
 doc/
 grads/
+__pycache__/
+Cmodule/__pycache__/
 
 **/test/**
 
@@ -18,3 +20,4 @@ grads/
 *.docx
 *.zip
 *.pdf
+*.gs

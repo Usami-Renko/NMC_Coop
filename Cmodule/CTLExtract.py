@@ -197,20 +197,22 @@ class CTLExtract(object):
             else:
                 fwrite.write(line+'\n')
 
-        for line in self.ctl.split('\n'):
+        for i in np.arange(len(self.varname)):
+            for line in self.ctl.split('\n'):
 
-            if line.startswith('endvars'):
-                fwrite.write(line+'\n')
-                read = False
-            if read:
-                p = re.compile('(\w+)\s+(\d+)\s+(\d+)\s+(.*)')    #目标变量行的正则范式
-                m = p.match(line)
-                if m.group(1) in self.varname:
-                    if self.dimensions[m.group(1)] == 1:
-                        fwrite.write(line+'\n')
-                    else:
-                        fwrite.write('{} {} {} {}\n'.format(m.group(1),len(self.Ex_levels),m.group(3),m.group(4)))
-            if line.startswith('var'):
-                read = True
-        
+                if line.startswith('endvars'):
+                    # fwrite.write(line+'\n')
+                    read = False
+                if read:
+                    p = re.compile('(\w+)\s+(\d+)\s+(\d+)\s+(.*)')    #目标变量行的正则范式
+                    m = p.match(line)
+                    if m.group(1) == self.varname[i]:
+                        if self.dimensions[m.group(1)] == 1:
+                            fwrite.write(line+'\n')
+                        else:
+                            fwrite.write('{} {} {} {}\n'.format(m.group(1),len(self.Ex_levels),m.group(3),m.group(4)))
+                if line.startswith('var'):
+                    read = True
+        fwrite.write('endvars\n')
+
         fwrite.close()

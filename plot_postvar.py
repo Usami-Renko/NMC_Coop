@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-29 16:12:53
+@LastEditTime: 2020-04-29 21:25:08
 @Description  : process postvar
 '''
 import sys
@@ -21,7 +21,7 @@ from scipy.interpolate import griddata
 
 from plotmap import plot_data, find_clevels, plot_case
 from utils import DATAdecorator, config, hashlist
-from derived_vars import get_var_grapes
+from derived_vars import FNLWorkStation, GRAPESWorkStation
 from asciiio import read_obs
 
 # read the config file
@@ -62,12 +62,12 @@ def get_GRAPES_data():
     
     time_indices = np.array([int(i/time_incr) for i in fcst], dtype='int')
 
-    # get time_indices_rain, make alignment with 00UTC
+    # get time_indices_align, make alignment with 00UTC
     if dt.datetime.strptime(timelines[0], '%Y%m%d%H').hour == 0: 
-        time_indices_rain = time_indices
+        time_indices_align = time_indices
     else:
         offset_index = (24 - dt.datetime.strptime(timelines[0], '%Y%m%d%H').hour) // time_incr
-        time_indices_rain = time_indices + offset_index
+        time_indices_align = time_indices + offset_index
 
     # 2.0 对指定高度和指定的预报时效做平均
     print(u'2.0 对指定预报面高度列表和指定的预报时效列表做平均')
@@ -77,17 +77,22 @@ def get_GRAPES_data():
     var_ndims = dict()
     var_time_indices = dict()
 
-    for ivar, var in enumerate(st_vars):
+    for idata, data in enumerate(data_list):
         
-        time_indices_var = list(time_indices_rain if var in align_vars else time_indices)
-        # moist vars skip for initial filed
-        if var in moist_vars:
-            time_indices_var.remove(0)
-        
-        var_time_indices[var] = time_indices_var
-       
-        for idata, data in enumerate(data_list):            
-            var_table = get_var_grapes(data, var, ex_vars)
+        ws = GRAPESWorkStation(data, grapes_varname)
+
+        for ivar, var in enumerate(st_vars):
+
+            var_table = ws.get_var(var)
+
+            time_indices_var = list(time_indices_align if var in align_vars else time_indices)
+            
+            # moist vars skip for initial filed
+            if var in moist_vars and 0 in time_indices_var:
+                time_indices_var.remove(0)
+
+            if var not in var_time_indices.keys():
+                var_time_indices[var] = time_indices_var
 
             if var not in var_ndims.keys():
                 var_ndims[var] = len(var_table.shape)
@@ -107,7 +112,9 @@ def get_GRAPES_data():
     for iinit, case_ini_time in enumerate(case_ini_times):
         init_index = timelines.index(case_ini_time)
         data = data_list[init_index]
-        var_table = get_var_grapes(data, '24hrain', ex_vars)            
+
+        ws = GRAPESWorkStation(data, grapes_varname)
+        var_table = ws.get_var('24hrain')            
         
         for ifcst, case_fcst_hour in enumerate(case_fcst_hours):
             fcst_index = case_fcst_hour // time_incr
@@ -123,7 +130,7 @@ def get_GRAPES_data():
     print(u'对指定预报面高度列表和指定的预报时效列表做平均结束, 用时{} seconds.'.format(str(t1_readpostvar-t0_readpostvar)[:7]))
 
     global_package = dict()
-    global_names = ['time_indices', 'time_incr', 'time_indices_rain', 
+    global_names = ['time_indices', 'time_incr', 
                     'levels', 'TLON', 'TLAT', 'lon', 'lat', 
                     'var_ndims', 'var_time_indices']
     for global_name in global_names:
@@ -211,13 +218,15 @@ def get_FNL_data():
                 tmp_datatable[iinittime, :, ifcsttime, :, ...] = \
                     tmp_datatable[data_cache[fnl_datetime][0], :, data_cache[fnl_datetime][1], :, ...] 
             else:
+                ws = FNLWorkStation(fnl_data_dic[fnl_datetime], fnl_varname)
                 for ivar, var in enumerate(st_vars):
                     if var in noFNL_vars:
                         continue
+                    var_table = ws.get_var(var)
                     for ilevel, level in enumerate(st_levels):
                         level_index = fnl_levels.index(level)
                         # (lat, lon)
-                        fnl_level_data = fnl_data_dic[fnl_datetime].variables[fnl_varname[var]][level_index, ...]
+                        fnl_level_data = var_table[level_index, ...]
 
                         # pad the data to make it cyclic
                         fnl_level_data = np.pad(fnl_level_data, ((0, 0), (0, 1)), 'constant')
@@ -229,6 +238,7 @@ def get_FNL_data():
                         tmp_datatable[iinittime, ivar, ifcsttime, ilevel, ...] = interp
                 
                 data_cache[fnl_datetime] = (iinittime, ifcsttime)
+                ws.close()
     
     datatable = np.average(tmp_datatable, axis=0)
 
@@ -342,11 +352,15 @@ if __name__ == "__main__":
                             clevels = np.array(clevel_custom[var])
                         else:
                             if plot_type in ['P', 'F']:
-                                clevel_data = datatable_grapes[ivar, itime, ilevel, ...]
+                                clevel_data = datatable_fnl[ivar, itime, ilevel, ...]
                             elif plot_type in ['PMF']:
                                 # the biggest forecast range have large clevels
                                 clevel_data = datatable_grapes[ivar, -1, ilevel, ...] - \
                                     datatable_fnl[ivar, -1, ilevel, ...]
+                            if plot_types == ['F']:
+                                # if ploting no GRAPES data
+                                clevel_data = datatable_fnl[ivar, itime, ilevel, ...]
+                            
                             clevels = find_clevels(iarea, clevel_data, lon, lat, dlevel, plot_type)
 
                         # 3D or surface vars

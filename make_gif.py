@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 15:27:26
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-30 13:23:25
+@LastEditTime: 2020-04-30 13:39:21
 '''
 
 
@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     time_indices = [int(i/time_incr) for i in fcst]
 
-    print('开始合成gif')
+    print(u"开始合成gif")
     for ivar, var in enumerate(st_vars):
         if var in noFNL_vars:
             gif_type = 'P'

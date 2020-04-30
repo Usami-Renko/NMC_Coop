@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 15:11:40
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-30 13:18:29
+@LastEditTime: 2020-04-30 13:39:06
 '''
 
 
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     
     time_indices = [int(i/time_incr) for i in fcst]
 
-    print("开始拼接图片")
+    print(u"开始拼接图片")
     for ivar, var in enumerate(st_vars):
         # 24hrain has no FNL data and in align_vars
         if var in noFNL_vars:

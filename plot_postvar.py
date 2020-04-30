@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-30 13:16:49
+@LastEditTime: 2020-04-30 16:47:16
 @Description  : process postvar
 '''
 import sys
@@ -49,7 +49,7 @@ def get_GRAPES_data():
     # 1.0 读取postvar数据
     print(u'1.0 开始读取postvar数据')
     import netCDF4 as nc
-    t0_readpostvar = time.time()
+    t0 = time.time()
     data_list = []
     for ifile in ncfiles:
         if not os.path.exists(exdata_dir+ifile):
@@ -57,14 +57,15 @@ def get_GRAPES_data():
             sys.exit()
         data_list.append(nc.Dataset(exdata_dir+ifile, 'r'))
 
-    t1_readpostvar = time.time()
-    print(u'postvar数据读取结束, 用时{} seconds.'.format(str(t1_readpostvar-t0_readpostvar)[:7]))
+    t1 = time.time()
+    print(u'postvar数据读取结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
     lat, lon  = data_list[0].variables['latitude'][:], data_list[0].variables['longitude'][:]
     TLAT, TLON  = np.meshgrid(lat, lon)
     levels    = data_list[0].variables['levels'][:].tolist()
     time_incr = int(float(data_list[0].variables['times'].incr))
     
+    # get indices for time and levels
     time_indices = np.array([int(i/time_incr) for i in fcst], dtype='int')
 
     # get time_indices_align, make alignment with 00UTC
@@ -73,10 +74,12 @@ def get_GRAPES_data():
     else:
         offset_index = (24 - dt.datetime.strptime(timelines[0], '%Y%m%d%H').hour) // time_incr
         time_indices_align = time_indices + offset_index
+    
+    level_indices = np.array([levels.index(st_level) for st_level in st_levels], dtype='int')
 
     # 2.0 对指定高度和指定的预报时效做平均
     print(u'2.0 对指定预报面高度列表和指定的预报时效列表做平均')
-    t0_readpostvar = time.time()
+    t0 = time.time()
 
     tmp_datatable = np.zeros((len(timelines), len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
     var_ndims = dict()
@@ -104,8 +107,7 @@ def get_GRAPES_data():
 
             for itime, time_index in enumerate(time_indices_var):
                 if var_ndims[var] == 4:
-                    for ilevel, level in enumerate(st_levels):
-                        level_index = levels.index(level)
+                    for ilevel, level_index in enumerate(level_indices):
                         tmp_datatable[idata, ivar, itime, ilevel, ...] = var_table[time_index, level_index, ...]
                 elif var_ndims[var] == 3:
                     tmp_datatable[idata, ivar, itime, 0, ...] = var_table[time_index, ...]
@@ -135,8 +137,8 @@ def get_GRAPES_data():
     del tmp_datatable
     del nc
 
-    t1_readpostvar = time.time()
-    print(u'对指定预报面高度列表和指定的预报时效列表做平均结束, 用时{} seconds.'.format(str(t1_readpostvar-t0_readpostvar)[:7]))
+    t1 = time.time()
+    print(u'对指定预报面高度列表和指定的预报时效列表做平均结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
     global_package = dict()
     global_names = ['time_indices', 'time_incr', 
@@ -153,7 +155,7 @@ def get_FNL_data():
 
     # 3.0 读取FNL数据
     print(u'3.0 开始读取FNL数据')
-    t0_readpostvar = time.time()
+    t0 = time.time()
 
     import Nio
     
@@ -174,12 +176,12 @@ def get_FNL_data():
             sys.exit()
         fnl_data_dic[fnl_timestr] = Nio.open_file(fnl_dir+fnl_filename, 'r')
 
-    t1_readpostvar = time.time()
-    print(u'读取FNL数据结束, 用时{} seconds.'.format(str(t1_readpostvar-t0_readpostvar)[:7]))
+    t1 = time.time()
+    print(u'读取FNL数据结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
     # 4.0 对FNL数据进行插值
     print(u'4.0 对FNL数据进行插值')
-    t0_readpostvar = time.time()
+    t0 = time.time()
     
     sample = list(fnl_data_dic.values())[0]
     fnl_lat, fnl_lon = sample.variables['lat_0'][:], sample.variables['lon_0'][:]
@@ -257,8 +259,8 @@ def get_FNL_data():
     del tmp_datatable
     del Nio
 
-    t1_readpostvar = time.time()
-    print(u'对FNL数据进行插值, 用时{} seconds.'.format(str(t1_readpostvar-t0_readpostvar)[:7]))
+    t1 = time.time()
+    print(u'对FNL数据进行插值, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
     return datatable
 
@@ -268,7 +270,7 @@ def get_OBS_data():
 
     # 3.0 读取FNL数据
     print(u'5.0 开始读取OBS数据')
-    t0_readpostvar = time.time()
+    t0 = time.time()
     
     datatable = dict()
     for case_ini_time in case_ini_times:
@@ -282,8 +284,8 @@ def get_OBS_data():
 
             datatable[case_ini_time][case_fcst_hour] = read_obs(obs_filename)
 
-    t1_readpostvar = time.time()
-    print(u'读取OBS数据结束, 用时{} seconds.'.format(str(t1_readpostvar-t0_readpostvar)[:7]))
+    t1 = time.time()
+    print(u'读取OBS数据结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
     return datatable
 

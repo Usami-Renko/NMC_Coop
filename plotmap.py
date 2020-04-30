@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-30 13:16:05
+@LastEditTime: 2020-04-30 16:53:13
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -251,7 +251,7 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
         CB.ax.set_xticklabels(ticklabels)
     CB.set_label(varname, fontsize=14)
 
-    plt.savefig('{}/{}'.format(origin_dir, pic_file), bbox_inches='tight', dpi=500)
+    plt.savefig('{}/{}'.format(origin_dir, pic_file), bbox_inches='tight', dpi=plot_dpi)
     plt.close()
 
 
@@ -354,7 +354,7 @@ def plot_case(data_field, data_obs, lon, lat, title, subtitle, pic_file, newcolo
 
     ax_cf.legend(frameon=True, loc='lower left', title='Observation')
 
-    plt.savefig('{}/{}'.format(case_dir, pic_file), bbox_inches='tight', dpi=500)
+    plt.savefig('{}/{}'.format(case_dir, pic_file), bbox_inches='tight', dpi=plot_dpi)
     plt.close()
 
 # unit test

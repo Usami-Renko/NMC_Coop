@@ -39,7 +39,7 @@ time_incr: 12
 
 # 图片类型
 pic_prefix: 'png'
-pic_dpi: 500
+plot_dpi: 500
 make_comp: True 
 make_gif: True
 

@@ -1,0 +1,54 @@
+# configure file for developers
+
+# FNL数据变量名
+fnl_varname:
+  u: 'UGRD_P0_L100_GLL0' # [m/s]
+  v: 'VGRD_P0_L100_GLL0' # [m/s]
+  t: 'TMP_P0_L100_GLL0' # [K]
+  h: 'HGT_P0_L100_GLL0' # [gpm]
+  rh: 'RH_P0_L100_GLL0' # [%]
+  p_pa: 'lv_ISBL0' # [Pa]
+
+# GRAPES数据变量名
+grapes_varname:
+  u: 'u'
+  v: 'v'
+  t: 't'
+  h: 'h'
+  w_m2s: 'w'
+  q_kg2kg: 'q2'
+  lat: 'latitude'
+  lon: 'longitude'
+  lev: 'levels'
+  time: 'times'
+  rainc: 'rainc'
+  rainnc: 'rainnc'
+
+# 可画图变量
+plotable_vars: ['u','v','t','h','w','q',24hrain']
+
+# 画图归一化参数
+symlognorm_params:
+  w:
+    linthresh: 1
+    linscale: 1.2
+    vmin: -32
+    vmax: 32
+
+lognorm_params:
+  24hrain: 
+
+# 自定义clevels
+clevel_custom:
+  24hrain: [1, 2, 4, 6, 8, 10, 12, 16, 20, 32, 64]
+  w: [-32, -16, -8, -4, -2, -1, -0.5, -0.2, 0, 0.2, 0.5, 1, 2, 4, 6, 8, 16, 32]
+
+# 一些特殊变量
+# avoid ploting initial
+moist_vars : ['q', 'w']
+
+# avoid ploting FNL
+noFNL_vars: ['24hrain', 'w']
+
+# align with 00z vars
+align_vars: ['24hrain']

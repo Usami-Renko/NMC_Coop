@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-27 11:07:21
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-27 18:32:42
+@LastEditTime: 2020-04-30 11:47:54
 '''
 
 import os
@@ -14,14 +14,22 @@ import sys
 import numpy as np
 import pandas as pd
 
-def _probe_header(filename):
-    try:
+def _read_file(filename):
+    if sys.version_info[0] < 3:
         with open(filename, 'r', encoding = 'utf-8') as fr:
             lines = fr.readlines()
-    except Exception:
-        with open(filename, 'r', encoding = 'gbk') as fr:
-            lines = fr.readlines()
+    elif sys.version_info[0] >= 3:
+        try:
+            with open(filename, 'r', encoding = 'utf-8') as fr:
+                lines = fr.readlines()
+        except Exception:
+            with open(filename, 'r', encoding = 'gbk') as fr:
+                lines = fr.readlines()
+        
+    return lines
 
+def _probe_header(filename):
+    lines = _read_file(filename)
     for iline, line in enumerate(lines):
         # header always finish with 2 elements 
         if len(line.split()) == 2 and len(lines[iline+1].split()) == 5:

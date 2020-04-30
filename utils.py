@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-22 18:55:54
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-28 20:25:24
+@LastEditTime: 2020-04-30 10:43:05
 '''
 # -*- coding: utf-8 -*-
 
@@ -57,13 +57,21 @@ def makenewdir(mydir):
         os.system("chmod -R o-w {}".format(mydir))
 
 
-def config():
+def config(config_file):
     curPath       = os.path.dirname(os.path.realpath(__file__))
-    cong_yamlPath = os.path.join(curPath+"/config/", "config.yml")
+    cong_yamlPath = os.path.join(curPath+"/config/", config_file)
     if sys.version_info[0] < 3:
         cong = yaml.load(open(cong_yamlPath))
     elif sys.version_info[0] >= 3:
         cong = yaml.load(open(cong_yamlPath), Loader=yaml.FullLoader)
+    return cong
+
+def config_list(config_files):
+    cong = dict()
+    for config_file in config_files:
+        new_cong = config(config_file)
+        cong.update(new_cong)
+    
     return cong
 
 def hashlist(objectlist):

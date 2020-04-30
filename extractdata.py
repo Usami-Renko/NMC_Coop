@@ -23,7 +23,7 @@ from utils import config
 if __name__ == '__main__':
     # read the config file
     
-    cong = config()
+    cong = config('./config.yml')
     for key, value in cong.items():
         locals()[key] = value
     

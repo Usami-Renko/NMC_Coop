@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-29 23:01:26
+@LastEditTime: 2020-04-30 12:27:17
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -16,6 +16,17 @@ import numpy as np
 import copy as cp
 from matplotlib import colors
 from numpy import ma
+import os
+
+from utils import config_list
+
+# read the config file
+cong = config_list(['devconfig.yml', 'config.yml'])
+
+for key, value in cong.items():
+    globals()[key] = value
+
+origin_dir = os.path.join(pic_dir, origin_dir)
 
 def area_region(area):
     if area == 'South_P':
@@ -220,13 +231,18 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     if len(clevels) < 3:
         raise ValueError('clevels too short for {}'.format(clevels))
 
-    if abs((clevels[2] - clevels[1]) - (clevels[1] - clevels[0])) > 1e-5:
+    if var in lognorm_params.keys():
+        norm = colors.LogNorm(**lognorm_params[var] if lognorm_params[var] is not None else {})
+    elif var in symlognorm_params.keys():
+        norm=colors.SymLogNorm(**symlognorm_params[var] if symlognorm_params[var] is not None else {})
+    else:
+        norm = None
+
+    if var in clevel_custom.keys():
         ticks = clevels
         ticklabels = [str(clevel) for clevel in clevels]
-        norm = colors.LogNorm()
     else:
         ticks = None
-        norm = None
 
     CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend="both", norm=norm)
     CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal', ticks=ticks)
@@ -234,7 +250,7 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
         CB.ax.set_xticklabels(ticklabels)
     CB.set_label(varname, fontsize=14)
 
-    plt.savefig('./pic/{}'.format(pic_file), bbox_inches='tight', dpi=500)
+    plt.savefig('{}/{}'.format(origin_dir, pic_file), bbox_inches='tight', dpi=500)
     plt.close()
 
 
@@ -337,7 +353,7 @@ def plot_case(data_field, data_obs, lon, lat, title, subtitle, pic_file, newcolo
 
     ax_cf.legend(frameon=True, loc='lower left', title='Observation')
 
-    plt.savefig('./pic/{}'.format(pic_file), bbox_inches='tight', dpi=500)
+    plt.savefig('{}/{}'.format(origin_dir, pic_file), bbox_inches='tight', dpi=500)
     plt.close()
 
 # unit test

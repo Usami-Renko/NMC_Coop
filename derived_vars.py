@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 18:57:38
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-29 22:05:39
+@LastEditTime: 2020-04-30 10:59:34
 '''
 
 import numpy as np
@@ -37,7 +37,6 @@ class _VarWorkstation(object):
         return var_table
 
     def close(self):
-        self.filehandle.close()
         del self.known_vars
 
     def _register_var(self, varname, data):

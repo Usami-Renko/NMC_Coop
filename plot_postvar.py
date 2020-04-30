@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-29 22:44:16
+@LastEditTime: 2020-04-30 12:28:27
 @Description  : process postvar
 '''
 import sys
@@ -20,15 +20,19 @@ from multiprocessing import Pool
 from scipy.interpolate import griddata
 
 from plotmap import plot_data, find_clevels, plot_case
-from utils import DATAdecorator, config, hashlist
+from utils import DATAdecorator, config_list, hashlist, makenewdir
 from derived_vars import FNLWorkStation, GRAPESWorkStation
 from asciiio import read_obs
 
 # read the config file
-cong = config()
+cong = config_list(['config.yml', 'devconfig.yml'])
 
 for key, value in cong.items():
     globals()[key] = value
+
+origin_dir = os.path.join(pic_dir, origin_dir)
+comp_dir = os.path.join(pic_dir, comp_dir)
+gif_dir = os.path.join(pic_dir, gif_dir)
 
 OBS_HASH = hashlist([case_ini_times, case_fcst_hours])
 GRAPES_HASH = hashlist([st_vars, st_levels, fcst, start_ddate, end_ddate, fcst_step, OBS_HASH])
@@ -105,6 +109,8 @@ def get_GRAPES_data():
                 elif var_ndims[var] == 3:
                     tmp_datatable[idata, ivar, itime, 0, ...] = var_table[time_index, ...]
                     
+        ws.close()
+        
     datatable = np.average(tmp_datatable, axis=0)
 
     datatable_case = np.zeros((len(case_ini_times), len(case_fcst_hours), len(lat), len(lon)), dtype='float32')
@@ -114,11 +120,13 @@ def get_GRAPES_data():
         data = data_list[init_index]
 
         ws = GRAPESWorkStation(data, grapes_varname)
-        var_table = ws.get_var('24hrain')            
+        var_table = ws.get_var('24hrain')  
         
         for ifcst, case_fcst_hour in enumerate(case_fcst_hours):
             fcst_index = case_fcst_hour // time_incr
             datatable_case[iinit, ifcst, ...] = var_table[fcst_index, ...]
+        
+        ws.close()
 
     # close the netCDF file handles and nc package for nasty issues with Nio
     for data in data_list:
@@ -294,10 +302,13 @@ if __name__ == "__main__":
 
     # exit()
 
+    makenewdir(pic_dir)
     if clean_plot:
-        os.system('rm -rf ./pic/*')
+        os.system('rm -rf {}/*'.format(pic_dir))
+    makenewdir(origin_dir)
     
     if plot_cases:
+        print(u'开始作图: 案例')
         for iinit, case_ini_time in enumerate(case_ini_times):
             for ifcst, case_fcst_hour in enumerate(case_fcst_hours):
                 dataframe_obs = datatable_obs[case_ini_time][case_fcst_hour]
@@ -306,15 +317,16 @@ if __name__ == "__main__":
                 subtitle = 'Init: {} UTC'.format(case_ini_time)
                 pic_file = 'case_{}_{}hr_24hrain.png'.format(case_ini_time, case_fcst_hour)
 
+                print(u'\t{}'.format(pic_file))
                 plot_case(dataframe_grapes, dataframe_obs, lon, lat, title, subtitle, pic_file, newcolorscheme)
 
     # exit()
 
     # begin to plot
     for plot_type in plot_types:
-        print('开始作图: {}'.format(plot_types_name[plot_type]))
+        print(u'开始作图: {}'.format(plot_types_name[plot_type]))
         for ivar, var in enumerate(st_vars):
-            print('\t变量: {}'.format(var))
+            print(u'\t变量: {}'.format(var))
             # No FNL data for '24hrain'
             if var in noFNL_vars and plot_type in ['F', 'PMF']:
                 continue
@@ -323,7 +335,7 @@ if __name__ == "__main__":
             time_indices_var = var_time_indices[var] 
 
             for iarea in plot_areas:
-                print('\t\t区域: {}'.format(iarea))
+                print(u'\t\t区域: {}'.format(iarea))
                 for itime,time_index in enumerate(time_indices_var):
                     
                     if var not in clevel_custom.keys():
@@ -366,7 +378,7 @@ if __name__ == "__main__":
                             subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
                             pic_file = '{}_{}_{}hr_{}hpa_{}.png'.format(plot_type, iarea, time_index*time_incr, int(level), var)
 
-                            print('\t\t\t'+pic_file)
+                            print(u'\t\t\t'+pic_file)
 
                             p.apply_async(plot_data, args=(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels))
                             plot_data(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels)
@@ -375,7 +387,7 @@ if __name__ == "__main__":
                             subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
                             pic_file = '{}_{}_{}hr_{}.png'.format(plot_type, iarea, time_index*time_incr, var)
 
-                            print('\t\t\t'+pic_file)
+                            print(u'\t\t\t'+pic_file)
 
                             plot_data(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels)
                             break
@@ -383,3 +395,10 @@ if __name__ == "__main__":
                     p.close()
                     p.join()
 
+    if make_comp:
+        makenewdir(comp_dir)
+        os.system('python make_comp.py')
+    
+    if make_gif:
+        makenewdir(gif_dir)
+        os.system('python make_gif.py')

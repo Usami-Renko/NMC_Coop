@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-30 12:27:17
+@LastEditTime: 2020-04-30 13:16:05
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -27,6 +27,7 @@ for key, value in cong.items():
     globals()[key] = value
 
 origin_dir = os.path.join(pic_dir, origin_dir)
+case_dir = os.path.join(pic_dir, case_dir)
 
 def area_region(area):
     if area == 'South_P':
@@ -353,7 +354,7 @@ def plot_case(data_field, data_obs, lon, lat, title, subtitle, pic_file, newcolo
 
     ax_cf.legend(frameon=True, loc='lower left', title='Observation')
 
-    plt.savefig('{}/{}'.format(origin_dir, pic_file), bbox_inches='tight', dpi=500)
+    plt.savefig('{}/{}'.format(case_dir, pic_file), bbox_inches='tight', dpi=500)
     plt.close()
 
 # unit test

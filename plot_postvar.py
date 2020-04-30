@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-30 12:28:27
+@LastEditTime: 2020-04-30 13:16:49
 @Description  : process postvar
 '''
 import sys
@@ -33,6 +33,7 @@ for key, value in cong.items():
 origin_dir = os.path.join(pic_dir, origin_dir)
 comp_dir = os.path.join(pic_dir, comp_dir)
 gif_dir = os.path.join(pic_dir, gif_dir)
+case_dir = os.path.join(pic_dir, case_dir)
 
 OBS_HASH = hashlist([case_ini_times, case_fcst_hours])
 GRAPES_HASH = hashlist([st_vars, st_levels, fcst, start_ddate, end_ddate, fcst_step, OBS_HASH])
@@ -308,6 +309,7 @@ if __name__ == "__main__":
     makenewdir(origin_dir)
     
     if plot_cases:
+        makenewdir(case_dir)
         print(u'开始作图: 案例')
         for iinit, case_ini_time in enumerate(case_ini_times):
             for ifcst, case_fcst_hour in enumerate(case_fcst_hours):

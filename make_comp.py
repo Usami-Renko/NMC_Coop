@@ -6,12 +6,13 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 15:11:40
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-30 12:44:44
+@LastEditTime: 2020-04-30 13:18:29
 '''
 
 
 from utils import config_list
 from PIL import Image
+from copy import copy
 import os
 
 
@@ -30,13 +31,17 @@ if __name__ == "__main__":
     time_indices = [int(i/time_incr) for i in fcst]
 
     print("开始拼接图片")
-    for iarea in plot_areas:
-            for itime,time_index in enumerate(time_indices):
-                for ivar, var in enumerate(st_vars):
+    for ivar, var in enumerate(st_vars):
+        # 24hrain has no FNL data and in align_vars
+        if var in noFNL_vars:
+            continue
 
-                    if var in noFNL_vars:
-                        continue
-                    
+        time_indices_var = copy(time_indices)
+        if var in moist_vars and 0 in time_indices_var:
+            time_indices_var.remove(0)
+
+        for iarea in plot_areas:
+            for itime,time_index in enumerate(time_indices_var):
                     for ilevel,level in enumerate(st_levels):
                         pic_files = ['{}_{}_{}hr_{}hpa_{}.png'.format(plot_type, iarea, time_index*time_incr, int(level), var) for plot_type in plot_types]
                         p = Image.open(os.path.join(origin_dir, pic_files[0]))

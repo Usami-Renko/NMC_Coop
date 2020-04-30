@@ -25,7 +25,7 @@ ex_vars  : ['u','v','t','h','w','q2','rainc','rainnc']
 # q [g/kg]
 # 24hrain [mm]
 # st_vars: ['u','v','t','h','w','q','24hrain']
-st_vars: ['h']
+st_vars: ['q', 'w']
 
 # 提取等压层和统计等压层
 ex_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
@@ -46,6 +46,7 @@ pic_dir: './pic'
 origin_dir: 'origin'
 comp_dir: 'comp'
 gif_dir: 'gif'
+case_dir: 'case'
 
 # 画图设置
 clean_plot: True

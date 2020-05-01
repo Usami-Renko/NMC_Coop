@@ -24,8 +24,8 @@ ex_vars  : ['u','v','t','h','w','q2','rainc','rainnc']
 # w [cm/s]
 # q [g/kg]
 # 24hrain [mm]
-st_vars: ['24hrain', 'q']
-# st_vars: ['q', 'w']
+st_vars: ['u','v','t','h','w','q','24hrain']
+# st_vars: ['24hrain', 'q', 'h']
 
 # 提取等压层和统计等压层
 ex_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
@@ -53,7 +53,7 @@ case_dir: 'case'
 clean_plot: True
 
 # plot_areas: ['Global', 'E_Asia', 'North_P', 'South_P', 'Tropics']
-plot_areas: ['E_Asia']
+plot_areas: ['Global']
 
 plot_types: ['P', 'F', 'PMF']
 # plot_types: ['F']

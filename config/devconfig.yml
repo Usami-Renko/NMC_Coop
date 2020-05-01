@@ -25,7 +25,7 @@ grapes_varname:
   rainnc: 'rainnc'
 
 # 可画图变量
-plotable_vars: ['u','v','t','h','w','q',24hrain']
+plotable_vars: ['u','v','t','h','w','q','24hrain']
 
 # 画图归一化参数
 symlognorm_params:

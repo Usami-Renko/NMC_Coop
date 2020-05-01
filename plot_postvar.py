@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-01 14:47:11
+@LastEditTime: 2020-05-01 17:15:04
 @Description  : process postvar
 '''
 import sys
@@ -153,9 +153,15 @@ def get_FNL_data():
     init_datetimes = np.array([dt.datetime.strptime(itime, "%Y%m%d%H") for itime in timelines])
 
     fnl_datetime_set = set()
-    for ifcst in fcst:
-        new = set(init_datetimes + dt.timedelta(hours=ifcst))
-        fnl_datetime_set = fnl_datetime_set.union(new)
+
+    for var in st_vars:
+        if var in noFNL_vars:
+            continue
+
+        time_indices_var = var_time_indices[var]
+        for time_index in time_indices_var:
+            new = set(init_datetimes + dt.timedelta(hours=int(time_index*time_incr)))
+            fnl_datetime_set = fnl_datetime_set.union(new)
 
     fnl_data_dic = dict()
     for fnl_datetime in fnl_datetime_set:
@@ -183,26 +189,37 @@ def get_FNL_data():
     
     # we use a data cache to avoid repeated interpolation for the same dataset
     data_cache = dict()
-     
-    for iinittime, inittime_str in enumerate(timelines): 
-        for ifcsttime, time_index in enumerate(time_indices):
-            
-            fnl_datetime = (dt.datetime.strptime(inittime_str, '%Y%m%d%H') + dt.timedelta(hours=fcst[ifcsttime])).strftime('%Y%m%d%H')
-            
-            if fnl_datetime in data_cache:
-                tmp_datatable[iinittime, :, ifcsttime, :, ...] = \
-                    tmp_datatable[data_cache[fnl_datetime][0], :, data_cache[fnl_datetime][1], :, ...] 
-            else:
-                ws = FNLWorkStation(fnl_data_dic[fnl_datetime], fnl_varname, TLAT.T, TLON.T)
-                for ivar, var in enumerate(st_vars):
-                    if var in noFNL_vars:
-                        continue
 
-                    tmp_datatable[iinittime, ivar, ifcsttime, ...] = ws.get_var(var, level_indices_fnl, interp=True).data
+    # time_indices always have the largest dimension among var_time_indices
+
+    for ivar, var in enumerate(st_vars):
+        if var in noFNL_vars:
+            continue
                 
-                ws.close()
-                data_cache[fnl_datetime] = (iinittime, ifcsttime)
-    
+        time_indices_var = var_time_indices[var]
+        ndim = var_ndims[var]
+
+        for iinittime, inittime_str in enumerate(timelines):
+            for ifcsttime, time_index in enumerate(time_indices_var):
+                fnl_datetime = (dt.datetime.strptime(inittime_str, '%Y%m%d%H') + \
+                    dt.timedelta(hours=int(time_indices_var[ifcsttime]*time_incr))).strftime('%Y%m%d%H')
+
+                data_id = fnl_datetime + var
+
+                if data_id in data_cache:
+                    tmp_datatable[iinittime, ivar, ifcsttime, ...] = \
+                    tmp_datatable[data_cache[data_id][0], data_cache[data_id][2], data_cache[data_id][1], ...]
+                else:
+                    ws = FNLWorkStation(fnl_data_dic[fnl_datetime], fnl_varname, TLAT.T, TLON.T)
+                    if ndim == 4:
+                        tmp_datatable[iinittime, ivar, ifcsttime, ...] = ws.get_var(var, level_indices_fnl, interp=True).data                
+                    elif ndim == 3:
+                        tmp_datatable[iinittime, ivar, ifcsttime, 0, ...] = ws.get_var(var, level_indices_fnl, interp=True).data
+                    ws.close()
+                
+                    data_cache[data_id] = (iinittime, ifcsttime, ivar)
+
+
     datatable = np.average(tmp_datatable, axis=0)
 
     # close the file handle    

@@ -3,9 +3,9 @@
  * @Author: Hejun Xie
  * @Date: 2020-04-23 20:31:50
  * @LastEditors: Hejun Xie
- * @LastEditTime: 2020-04-27 22:05:30
+ * @LastEditTime: 2020-05-01 17:37:38
  -->
-# GRAPES预报场与FNL分析场诊断画图脚本V1.0
+# GRAPES预报场与FNL分析场诊断画图脚本V1.3
 
 ## 1、数据提取模块
 
@@ -43,6 +43,18 @@ derived_var.py
 
 主要负责生成由原始预报量导出的导出预报量
 
+## 6. 数据类模块
+
+data.py
+
+主要负责处理基础的数据类
+
+## 7. 合成图模块
+
+data.py
+
+主要负责合成拼图和动图
+
 ## 6. 绘图脚本模块
 
 plot_postvar.py
@@ -71,7 +83,8 @@ get_OBS_data
 主程序对GRAPES预报场和FNL再分析场分别进行画图，并分析两者的差值画图
 主程序还可以读取观测数据进行个例降水的比较画图
 
-目前将所需修改的内容提取到配置文件中，存放在同级目录的config文件夹下，包含一个配置文件：config.yml
+目前将所需修改的内容提取到配置文件中，存放在同级目录的config文件夹下，包含两个配置文件：config.yml 用户配置文件
+devconfig.yml 开发者配置文件
 
 - config.yml, 画图设置和提取数据设置。
 ```
@@ -91,16 +104,17 @@ exdata_dir: './ex_data/'
 # FNL数据路径
 fnl_dir: './fnl_data/'
 
-# FNL数据变量名
-fnl_varname:
-  u: 'UGRD_P0_L100_GLL0'
-  v: 'VGRD_P0_L100_GLL0'
-  t: 'TMP_P0_L100_GLL0'
-  h: 'HGT_P0_L100_GLL0'
-
 # 提取变量和统计变量
-ex_vars  : ['u','v','t','h','rainc','rainnc']
-st_vars  : ['u','v','t','h','24hrain']
+ex_vars  : ['u','v','t','h','w','q2','rainc','rainnc']
+
+# Units:
+# u, v [m/s]
+# t [K]
+# h [gpm]
+# w [cm/s]
+# q [g/kg]
+# 24hrain [mm]
+st_vars: ['u','v','t','h','w','q','24hrain']
 
 # 提取等压层和统计等压层
 ex_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
@@ -108,11 +122,32 @@ st_levels: [500.]
 
 # 预报时长
 fcst: [0,72] # hours
-# 预报时间步长: 不作用于出图脚本，只是为了方便生成动图和拼接图片的脚本
-time_incr: 12
 
 # 图片类型
 pic_prefix: 'png'
+# 图片质量
+plot_dpi: 300
+# 是否制作拼图
+make_comp: True
+# 是否制作动图 
+make_gif: True
+
+# 图片路径
+pic_dir: './pic'
+# 原始图片路径
+origin_dir: 'origin'
+# 拼图路径
+comp_dir: 'comp'
+# 动图路径
+gif_dir: 'gif'
+# 案例图路径
+case_dir: 'case'
+
+# 画图设置
+
+# 画图前是否清理原出图文件夹
+clean_plot: True
+
 
 # 画图区域设置
 plot_areas: ['Global', 'E_Asia', 'North_P', 'South_P', 'Tropics']
@@ -130,14 +165,16 @@ plot_types_name:
 clevel_step:
   u: 2
   v: 2
-  t: 3
+  t: 1
   h: 30
+  q: 0.1
 
 clevel_step_PMF:
   u: 1
   v: 1
-  t: 1
+  t: 0.3
   h: 10
+  q: 0.1
 
 # 变量名称
 variable_name:
@@ -169,25 +206,11 @@ python extractdata.py
 ```
 
 2. 画图
-手动添加 ./pic/目录
 修改./config/config.yml后，运行python plot_postvar.py即可，
 ```python
 python plot_postvar.py
 ```
 
-3. 制作用于比较的拼图
-手动添加 ./pic/目录
-修改./config/config.yml后，运行python make_comp.py即可，
-```python
-python make_comp.py
-```
-
-4. 制作动图
-手动添加 ./pic/目录
-修改./config/config.yml后，运行python make_gif.py即可，
-```python
-python make_gif.py
-```
 
 图形展示
 ----------

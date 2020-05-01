@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 15:11:40
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-01 14:58:24
+@LastEditTime: 2020-05-01 17:38:36
 '''
 
 
@@ -46,7 +46,7 @@ def _make_comp(pic_files, comp_file):
 
     d.save(os.path.join(comp_dir, comp_file))
 
-def make_comp_pic(var_time_indices, var_ndims):
+def make_comp_pic(var_time_indices, var_ndims, time_incr):
 
     print(u"开始拼接图片")
     for ivar, var in enumerate(st_vars):
@@ -71,7 +71,7 @@ def make_comp_pic(var_time_indices, var_ndims):
                     _make_comp(pic_files, comp_file)
 
 
-def make_gif_pic(var_time_indices, var_ndims):
+def make_gif_pic(var_time_indices, var_ndims, time_incr):
 
     print(u"开始合成gif")
     for ivar, var in enumerate(st_vars):

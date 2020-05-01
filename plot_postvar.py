@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-01 17:15:04
+@LastEditTime: 2020-05-01 17:40:31
 @Description  : process postvar
 '''
 import sys
@@ -370,8 +370,8 @@ if __name__ == "__main__":
 
     if make_comp:
         makenewdir(comp_dir)
-        make_comp_pic(var_time_indices, var_ndims)
+        make_comp_pic(var_time_indices, var_ndims, time_incr)
     
     if make_gif:
         makenewdir(gif_dir)
-        make_gif_pic(var_time_indices, var_ndims)
+        make_gif_pic(var_time_indices, var_ndims, time_incr)

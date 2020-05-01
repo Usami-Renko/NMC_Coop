@@ -34,22 +34,30 @@ st_levels: [500.]
 
 # 预报时长
 fcst: [0,72] # hours
-# 预报时间步长: 不作用于出图脚本，只是为了方便生成动图和拼接图片的脚本
-time_incr: 12
 
 # 图片类型
 pic_prefix: 'png'
+# 图片质量
 plot_dpi: 300
-make_comp: True 
+# 是否制作拼图
+make_comp: True
+# 是否制作动图 
 make_gif: True
 
+# 图片路径
 pic_dir: './pic'
+# 原始图片路径
 origin_dir: 'origin'
+# 拼图路径
 comp_dir: 'comp'
+# 动图路径
 gif_dir: 'gif'
+# 案例图路径
 case_dir: 'case'
 
 # 画图设置
+
+# 画图前是否清理原出图文件夹
 clean_plot: True
 
 # plot_areas: ['Global', 'E_Asia', 'North_P', 'South_P', 'Tropics']
@@ -63,6 +71,7 @@ plot_types_name:
   F:    'FNL'
   PMF:  'Prediction - FNL'
 
+# 填色色标间隔
 clevel_step:
   u: 2
   v: 2

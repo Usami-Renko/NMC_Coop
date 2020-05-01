@@ -14,8 +14,6 @@ Cmodule/__pycache__/
 
 **/test/**
 
-# specific file
-optimize.py
 
 # extensions
 *.log

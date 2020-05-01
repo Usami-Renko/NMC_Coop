@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-30 16:47:16
+@LastEditTime: 2020-05-01 14:47:11
 @Description  : process postvar
 '''
 import sys
@@ -17,12 +17,12 @@ import datetime as dt
 from gen_timelines import gen_timelines
 import os
 from multiprocessing import Pool
-from scipy.interpolate import griddata
 
 from plotmap import plot_data, find_clevels, plot_case
 from utils import DATAdecorator, config_list, hashlist, makenewdir
 from derived_vars import FNLWorkStation, GRAPESWorkStation
 from asciiio import read_obs
+from make_comp import make_comp_pic, make_gif_pic
 
 # read the config file
 cong = config_list(['config.yml', 'devconfig.yml'])
@@ -91,27 +91,21 @@ def get_GRAPES_data():
 
         for ivar, var in enumerate(st_vars):
 
-            var_table = ws.get_var(var)
-
-            time_indices_var = list(time_indices_align if var in align_vars else time_indices)
-            
-            # moist vars skip for initial filed
+            # determine the time_indices_var
+            time_indices_var = time_indices_align if var in align_vars else time_indices
+            # moist vars skip for initial field
             if var in moist_vars and 0 in time_indices_var:
-                time_indices_var.remove(0)
+                time_indices_var = np.delete(time_indices_var, time_indices_var[time_indices_var == 0])
 
-            if var not in var_time_indices.keys():
-                var_time_indices[var] = time_indices_var
+            var_time_indices[var] = time_indices_var
+            var_instance = ws.get_var(var, (time_indices_var, level_indices)).data
+            var_ndims[var] = var_instance.ndim
 
-            if var not in var_ndims.keys():
-                var_ndims[var] = len(var_table.shape)
-
-            for itime, time_index in enumerate(time_indices_var):
-                if var_ndims[var] == 4:
-                    for ilevel, level_index in enumerate(level_indices):
-                        tmp_datatable[idata, ivar, itime, ilevel, ...] = var_table[time_index, level_index, ...]
-                elif var_ndims[var] == 3:
-                    tmp_datatable[idata, ivar, itime, 0, ...] = var_table[time_index, ...]
-                    
+            if var_ndims[var] == 4:
+                tmp_datatable[idata, ivar, ...] = var_instance
+            elif var_ndims[var] == 3:
+                tmp_datatable[idata, ivar, :, 0, ...] = var_instance
+                
         ws.close()
         
     datatable = np.average(tmp_datatable, axis=0)
@@ -123,12 +117,9 @@ def get_GRAPES_data():
         data = data_list[init_index]
 
         ws = GRAPESWorkStation(data, grapes_varname)
-        var_table = ws.get_var('24hrain')  
-        
-        for ifcst, case_fcst_hour in enumerate(case_fcst_hours):
-            fcst_index = case_fcst_hour // time_incr
-            datatable_case[iinit, ifcst, ...] = var_table[fcst_index, ...]
-        
+        fcst_indices = np.array(case_fcst_hours, dtype='int') // time_incr
+        var_instance = ws.get_var('24hrain', (fcst_indices, level_indices))          
+        datatable_case[iinit, ...] = var_instance.data
         ws.close()
 
     # close the netCDF file handles and nc package for nasty issues with Nio
@@ -184,36 +175,9 @@ def get_FNL_data():
     t0 = time.time()
     
     sample = list(fnl_data_dic.values())[0]
-    fnl_lat, fnl_lon = sample.variables['lat_0'][:], sample.variables['lon_0'][:]
-    TLAT_fnl, TLON_fnl = np.meshgrid(fnl_lat, fnl_lon)
-    
-    # pad the data to make it cyclic
-    TLON_fnl = np.pad(TLON_fnl, ((0, 1), (0, 0)), 'constant', constant_values=360.0)
-    TLAT_fnl = np.pad(TLAT_fnl, ((0, 1), (0, 0)), 'constant')
-    TLAT_fnl[-1, :] = TLAT_fnl[0, :] 
-    
-    # make flattend points
-    LAT_fnl, LON_fnl   = TLAT_fnl.T.flatten(), TLON_fnl.T.flatten()
-    points = np.zeros((len(LAT_fnl), 2))
-    points[:, 0], points[:, 1] = LAT_fnl, LON_fnl
     
     fnl_levels = (sample.variables['lv_ISBL0'][:] / 100.).tolist()  # [Pa] --> [hPa]
-
-    # print(fnl_levels)
-    # print(levels)
-    '''
-    We perform FNL to GRAPES interpolation
-    All the grapes levels can be found in FNL dataset levels
-    No vertical interpolation needed
-
-    FNL levels: 
-    [  10.   20.   30.   50.   70.  100.  150.  200.  250.  300.  350.  400.
-      450.  500.  550.  600.  650.  700.  750.  800.  850.  900.  925.  950.
-      975. 1000.]
-    
-    GRAPES levels:
-    [1000.0, 925.0, 850.0, 700.0, 600.0, 500.0, 400.0, 300.0, 200.0, 100.0, 50.0, 10.0]
-    '''
+    level_indices_fnl = np.array([fnl_levels.index(st_level) for st_level in st_levels], dtype='int')
 
     tmp_datatable = np.zeros((len(timelines), len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
     
@@ -229,27 +193,15 @@ def get_FNL_data():
                 tmp_datatable[iinittime, :, ifcsttime, :, ...] = \
                     tmp_datatable[data_cache[fnl_datetime][0], :, data_cache[fnl_datetime][1], :, ...] 
             else:
-                ws = FNLWorkStation(fnl_data_dic[fnl_datetime], fnl_varname)
+                ws = FNLWorkStation(fnl_data_dic[fnl_datetime], fnl_varname, TLAT.T, TLON.T)
                 for ivar, var in enumerate(st_vars):
                     if var in noFNL_vars:
                         continue
-                    var_table = ws.get_var(var)
-                    for ilevel, level in enumerate(st_levels):
-                        level_index = fnl_levels.index(level)
-                        # (lat, lon)
-                        fnl_level_data = var_table[level_index, ...]
 
-                        # pad the data to make it cyclic
-                        fnl_level_data = np.pad(fnl_level_data, ((0, 0), (0, 1)), 'constant')
-                        fnl_level_data[:, -1] = fnl_level_data[:, 0]
-
-                        values = fnl_level_data.flatten()
-                        interp = griddata(points, values, (TLAT.T, TLON.T), method='linear')
-
-                        tmp_datatable[iinittime, ivar, ifcsttime, ilevel, ...] = interp
+                    tmp_datatable[iinittime, ivar, ifcsttime, ...] = ws.get_var(var, level_indices_fnl, interp=True).data
                 
-                data_cache[fnl_datetime] = (iinittime, ifcsttime)
                 ws.close()
+                data_cache[fnl_datetime] = (iinittime, ifcsttime)
     
     datatable = np.average(tmp_datatable, axis=0)
 
@@ -401,8 +353,8 @@ if __name__ == "__main__":
 
     if make_comp:
         makenewdir(comp_dir)
-        os.system('python make_comp.py')
+        make_comp_pic(var_time_indices, var_ndims)
     
     if make_gif:
         makenewdir(gif_dir)
-        os.system('python make_gif.py')
+        make_gif_pic(var_time_indices, var_ndims)

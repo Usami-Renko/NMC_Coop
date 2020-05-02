@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-27 11:07:21
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-30 11:47:54
+@LastEditTime: 2020-05-02 10:05:55
 '''
 
 import os
@@ -16,7 +16,7 @@ import pandas as pd
 
 def _read_file(filename):
     if sys.version_info[0] < 3:
-        with open(filename, 'r', encoding = 'utf-8') as fr:
+        with open(filename, 'r') as fr:
             lines = fr.readlines()
     elif sys.version_info[0] >= 3:
         try:

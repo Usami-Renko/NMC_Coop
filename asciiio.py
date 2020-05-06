@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-27 11:07:21
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-02 10:05:55
+@LastEditTime: 2020-05-06 17:09:19
 '''
 
 import os
@@ -36,6 +36,9 @@ def _probe_header(filename):
             return iline + 1 
 
 def read_obs(filename):
+    if not os.path.exists(filename):
+        raise IOError('{} OBS file not found'.format(filename))
+
     header = _probe_header(filename)
 
     dataframe = pd.read_table(filename, delim_whitespace=True, skiprows=header, skipfooter=0, 

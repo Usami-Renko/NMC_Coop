@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-04-30 16:53:13
+@LastEditTime: 2020-05-06 20:19:53
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -73,7 +73,7 @@ def _tick_lats(map, lat_labels, ax, xoffset=250000, yoffset=0, rl='r'):
             
         ax.text(x, y+yoffset, text, fontsize=11, ha='center', va='center')
 
-def _add_title(ax, title, subtitle):
+def _add_title(ax, title, subtitle, figsize):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.spines['left'].set_visible(False)
@@ -81,8 +81,15 @@ def _add_title(ax, title, subtitle):
 
     ax.set_xticks([])
     ax.set_yticks([])
-
-    ax.text(0.5, 0.50, title, fontsize=22, ha='center', va='center')
+    
+    if isinstance(title, list):
+        if figsize[0] < figsize[1]:
+            ax.text(0.5, 0.80, title[0], fontsize=20, ha='center', va='center')
+            ax.text(0.5, 0.40, title[1], fontsize=20, ha='center', va='center')
+        else:
+            ax.text(0.5, 0.60, title[0] + title[1], fontsize=18, ha='center', va='center')
+    else:
+        ax.text(0.5, 0.50, title, fontsize=22, ha='center', va='center')
     ax.text(0.5, 0.00, subtitle, fontsize=16, ha='center', va='center')
 
 def _clip_data(iarea, data, lon, lat):
@@ -158,7 +165,7 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     else:
         ax_title = fig.add_axes([0.1, 0.90, 0.82, 0.08])
     
-    _add_title(ax_title, title, subtitle)
+    _add_title(ax_title, title, subtitle, figsize)
 
     if iarea == 'Tropics':
         ax_cf = fig.add_axes([0.1, 0.16, 0.85, 0.65])
@@ -271,7 +278,7 @@ def plot_case(data_field, data_obs, lon, lat, title, subtitle, pic_file, newcolo
 
     ax_title = fig.add_axes([0.1, 0.90, 0.82, 0.08])
 
-    _add_title(ax_title, title, subtitle)
+    _add_title(ax_title, title, subtitle, figsize)
 
     ax_cf = fig.add_axes([0.1, 0.10, 0.85, 0.80])
 

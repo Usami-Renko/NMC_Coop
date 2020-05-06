@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 18:57:38
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-01 13:49:03
+@LastEditTime: 2020-05-06 20:18:21
 '''
 
 import numpy as np
@@ -268,5 +268,24 @@ class GRAPESWorkStation(_VarWorkStation):
         elif varname == 'w':
             w = self.get_var('w_m2s') * 100 # [m/s] --> [cm/s]
             return w
+        
+        elif varname == 'shf':
+            accum_hf1 = self.get_var('hf')
+            ndiff = 24 // self.time_incr
+            time_indices, level_indices = self.indices
+            new_indices = (time_indices+ndiff, level_indices)
+            accum_hf2 = self.get_var('hf', new_indices)
+            shf = accum_hf2 - accum_hf1
+            return shf / (3600 * 24) 
+        
+        elif varname == 'phf':
+            accum_qf1 = self.get_var('qf')
+            ndiff = 24 // self.time_incr
+            time_indices, level_indices = self.indices
+            new_indices = (time_indices+ndiff, level_indices)
+            accum_qf2 = self.get_var('qf', new_indices)
+            phf = (accum_qf2 - accum_qf1) * 2.5e6
+            return phf / (3600 * 24)
+
         else:
             return self._no_derived_var(varname)

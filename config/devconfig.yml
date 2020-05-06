@@ -23,9 +23,12 @@ grapes_varname:
   time: 'times'
   rainc: 'rainc'
   rainnc: 'rainnc'
+  t2m: 't2m'
+  hf: 'hfxa'
+  qf: 'qfxa'
 
 # 可画图变量
-plotable_vars: ['u','v','t','h','w','q','24hrain']
+plotable_vars: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
 
 # 画图归一化参数
 symlognorm_params:
@@ -34,21 +37,27 @@ symlognorm_params:
     linscale: 1.2
     vmin: -32
     vmax: 32
+  shf:
+    linthresh: 80
+    linscale: 1.4
+    vmin: -200
+    vmax: 800
 
 lognorm_params:
-  24hrain: 
+  24hrain:
 
 # 自定义clevels
 clevel_custom:
   24hrain: [1, 2, 4, 6, 8, 10, 12, 16, 20, 32, 64]
   w: [-32, -16, -8, -4, -2, -1, -0.5, -0.2, 0, 0.2, 0.5, 1, 2, 4, 6, 8, 16, 32]
+  shf: [-200, -100, -50, -25, 0, 25, 50, 100, 200, 400, 800]
 
 # 一些特殊变量
 # avoid ploting initial
-moist_vars : ['q', 'w']
+moist_vars : ['q', 'w', 't2m', 'shf', 'phf']
 
 # avoid ploting FNL
-noFNL_vars: ['24hrain', 'w']
+noFNL_vars: ['24hrain', 'w', 't2m', 'shf', 'phf']
 
 # align with 00z vars
 align_vars: ['24hrain']

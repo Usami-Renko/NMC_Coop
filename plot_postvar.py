@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-01 17:40:31
+@LastEditTime: 2020-05-06 20:00:38
 @Description  : process postvar
 '''
 import sys
@@ -53,8 +53,7 @@ def get_GRAPES_data():
     data_list = []
     for ifile in ncfiles:
         if not os.path.exists(exdata_dir+ifile):
-            print('Error: {} file not found under dir {}'.format(ifile, exdata_dir))
-            sys.exit()
+            raise IOError('{} file not found under dir {}'.format(ifile, exdata_dir))
         data_list.append(nc.Dataset(exdata_dir+ifile, 'r'))
 
     t1 = time.time()
@@ -162,6 +161,9 @@ def get_FNL_data():
         for time_index in time_indices_var:
             new = set(init_datetimes + dt.timedelta(hours=int(time_index*time_incr)))
             fnl_datetime_set = fnl_datetime_set.union(new)
+    
+    if len(fnl_datetime_set) == 0:
+        return None
 
     fnl_data_dic = dict()
     for fnl_datetime in fnl_datetime_set:
@@ -169,8 +171,7 @@ def get_FNL_data():
         fnl_timestr = fnl_datetime.strftime("%Y%m%d%H")
 
         if not os.path.exists(fnl_dir+fnl_filename):
-            print('Error: {} file not found under dir {}'.format(fnl_filename, fnl_dir))
-            sys.exit()
+            raise IOError('{} file not found under dir {}'.format(fnl_filename, fnl_dir))
         fnl_data_dic[fnl_timestr] = Nio.open_file(fnl_dir+fnl_filename, 'r')
 
     t1 = time.time()
@@ -347,7 +348,11 @@ if __name__ == "__main__":
 
                         # 3D or surface vars
                         if var_ndims[var] == 4:
-                            title    = '{} of {}hr {}hPa {}'.format(plot_types_name[plot_type], time_index*time_incr, int(level), varname)
+                            if len(varname) < 20:
+                                title = '{} of {}hr {}hPa {}'.format(plot_types_name[plot_type], time_index*time_incr, int(level), varname)
+                            else:
+                                title = ['{} of {}hr {}hPa'.format(plot_types_name[plot_type], time_index*time_incr, int(level)),
+                                         r'{}'.format(varname)]
                             subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
                             pic_file = '{}_{}_{}hr_{}hpa_{}.png'.format(plot_type, iarea, time_index*time_incr, int(level), var)
 
@@ -356,7 +361,11 @@ if __name__ == "__main__":
                             p.apply_async(plot_data, args=(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels))
                             plot_data(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels)
                         elif var_ndims[var] == 3:
-                            title    = '{} of {}hr {}'.format(plot_types_name[plot_type], time_index*time_incr, varname)
+                            if len(varname) < 20:
+                                title    = '{} of {}hr {}'.format(plot_types_name[plot_type], time_index*time_incr, varname)
+                            else:
+                                title    = ['{} of {}hr'.format(plot_types_name[plot_type], time_index*time_incr),
+                                            r'{}'.format(varname)]
                             subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
                             pic_file = '{}_{}_{}hr_{}.png'.format(plot_type, iarea, time_index*time_incr, var)
 

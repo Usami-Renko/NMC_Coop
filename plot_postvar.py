@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-09 22:16:23
+@LastEditTime: 2020-05-09 23:01:39
 @Description  : process postvar
 '''
 import sys
@@ -18,15 +18,23 @@ from gen_timelines import gen_timelines
 import os
 from multiprocessing import Pool
 
-from plotmap import plot_data, find_clevels, plot_case
 from utils import DATAdecorator, config_list, hashlist, makenewdir
 from derived_vars import FNLWorkStation, GRAPESWorkStation
 from asciiio import read_obs
+from plotmap import plot_data, find_clevels, plot_case
 from make_comp import make_comp_pic, make_gif_pic
 
 # read the config file
-cong = config_list(['config.yml', 'devconfig.yml'])
 
+CONFIGPATH = './config/' # default config path
+cong = config_list(CONFIGPATH, ['config.yml', 'devconfig.yml'])
+
+# config submodules
+import plotmap, make_comp
+plotmap.config_submodule(cong)
+make_comp.config_submodule(cong)
+
+# config script
 for key, value in cong.items():
     globals()[key] = value
 

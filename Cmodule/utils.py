@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-22 18:55:54
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-09 22:19:20
+@LastEditTime: 2020-05-09 22:53:22
 '''
 # -*- coding: utf-8 -*-
 
@@ -18,7 +18,6 @@ import pickle
 import hashlib
 from functools import wraps 
 
-CONFIGPATH='./config/'
 
 class DATAdecorator(object):
     def __init__(self, workdir, pickle_speedup, pickle_filename):
@@ -58,19 +57,18 @@ def makenewdir(mydir):
         os.system("mkdir {}".format(mydir))
         os.system("chmod -R o-w {}".format(mydir))
 
-
-def config(config_file):
-    cong_yamlPath = os.path.join(CONFIGPATH, config_file)
+def config(config_path, config_file):
+    cong_yamlPath = os.path.join(config_path, config_file)
     if sys.version_info[0] < 3:
         cong = yaml.load(open(cong_yamlPath))
     elif sys.version_info[0] >= 3:
         cong = yaml.load(open(cong_yamlPath), Loader=yaml.FullLoader)
     return cong
 
-def config_list(config_files):
+def config_list(config_path, config_files):
     cong = dict()
     for config_file in config_files:
-        new_cong = config(config_file)
+        new_cong = config(config_path, config_file)
         cong.update(new_cong)
     
     return cong

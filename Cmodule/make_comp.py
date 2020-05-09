@@ -6,26 +6,25 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 15:11:40
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-01 17:38:36
+@LastEditTime: 2020-05-09 22:58:52
 '''
 
 
-from utils import config_list
 from PIL import Image
 from copy import copy
 import os
 
 
-# read the config file
-cong = config_list(['config.yml', 'devconfig.yml'])
+def config_submodule(cong):
 
-for key, value in cong.items():
-    globals()[key] = value
+    global origin_dir, comp_dir, gif_dir
 
-origin_dir = os.path.join(pic_dir, origin_dir)
-comp_dir = os.path.join(pic_dir, comp_dir)
-gif_dir = os.path.join(pic_dir, gif_dir)
+    for key, value in cong.items():
+        globals()[key] = value
 
+    origin_dir = os.path.join(pic_dir, origin_dir)
+    comp_dir = os.path.join(pic_dir, comp_dir)
+    gif_dir = os.path.join(pic_dir, gif_dir)
 
 def _make_comp(pic_files, comp_file):
 

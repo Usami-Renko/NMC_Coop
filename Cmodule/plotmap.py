@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-09 12:18:05
+@LastEditTime: 2020-05-09 23:02:51
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -18,16 +18,15 @@ from matplotlib import colors
 from numpy import ma
 import os
 
-from utils import config_list
+def config_submodule(cong):
 
-# read the config file
-cong = config_list(['devconfig.yml', 'config.yml'])
+    global origin_dir, case_dir
 
-for key, value in cong.items():
-    globals()[key] = value
+    for key, value in cong.items():
+        globals()[key] = value
 
-origin_dir = os.path.join(pic_dir, origin_dir)
-case_dir = os.path.join(pic_dir, case_dir)
+    origin_dir = os.path.join(pic_dir, origin_dir)
+    case_dir = os.path.join(pic_dir, case_dir)
 
 def area_region(area):
     if area == 'South_P':

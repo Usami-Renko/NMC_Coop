@@ -99,8 +99,8 @@ variable_name:
   q: 'Specific Humidity [g/kg]'
   24hrain: '+24hr Precipitation [mm]'
   t2m: '2m Temperature [K]'
-  shf: '+24hr Mean Surface Sensible Heat Flux [$W \cdot m^{-2} \cdot s^{-1}$]'
-  phf: '+24hr Mean Surface Potential Heat Flux [$W \cdot m^{-2} \cdot s^{-1}$]'
+  shf: '24hr Mean Surface Sensible Heat Flux [$W \cdot m^{-2} \cdot s^{-1}$]'
+  phf: '24hr Mean Surface Potential Heat Flux [$W \cdot m^{-2} \cdot s^{-1}$]'
 
 # 个例画图
 plot_cases: True

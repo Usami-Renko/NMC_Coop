@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 18:57:38
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-06 20:18:21
+@LastEditTime: 2020-05-09 12:16:40
 '''
 
 import numpy as np
@@ -273,18 +273,18 @@ class GRAPESWorkStation(_VarWorkStation):
             accum_hf1 = self.get_var('hf')
             ndiff = 24 // self.time_incr
             time_indices, level_indices = self.indices
-            new_indices = (time_indices+ndiff, level_indices)
+            new_indices = (time_indices-ndiff, level_indices)
             accum_hf2 = self.get_var('hf', new_indices)
-            shf = accum_hf2 - accum_hf1
+            shf = accum_hf1 - accum_hf2
             return shf / (3600 * 24) 
         
         elif varname == 'phf':
             accum_qf1 = self.get_var('qf')
             ndiff = 24 // self.time_incr
             time_indices, level_indices = self.indices
-            new_indices = (time_indices+ndiff, level_indices)
+            new_indices = (time_indices-ndiff, level_indices)
             accum_qf2 = self.get_var('qf', new_indices)
-            phf = (accum_qf2 - accum_qf1) * 2.5e6
+            phf = (accum_qf1 - accum_qf2) * 2.5e6
             return phf / (3600 * 24)
 
         else:

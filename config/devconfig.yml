@@ -54,10 +54,13 @@ clevel_custom:
 
 # 一些特殊变量
 # avoid ploting initial
-moist_vars : ['q', 'w', 't2m', 'shf', 'phf']
+moist_vars : ['q', 'w', 't2m']
 
 # avoid ploting FNL
 noFNL_vars: ['24hrain', 'w', 't2m', 'shf', 'phf']
 
 # align with 00z vars
 align_vars: ['24hrain']
+
+# 24hmean var
+daymean_vars: ['shf', 'phf']

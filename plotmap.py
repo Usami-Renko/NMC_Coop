@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-06 20:19:53
+@LastEditTime: 2020-05-09 12:18:05
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -87,7 +87,7 @@ def _add_title(ax, title, subtitle, figsize):
             ax.text(0.5, 0.80, title[0], fontsize=20, ha='center', va='center')
             ax.text(0.5, 0.40, title[1], fontsize=20, ha='center', va='center')
         else:
-            ax.text(0.5, 0.60, title[0] + title[1], fontsize=18, ha='center', va='center')
+            ax.text(0.5, 0.60, title[0] + ' ' + title[1], fontsize=18, ha='center', va='center')
     else:
         ax.text(0.5, 0.50, title, fontsize=22, ha='center', va='center')
     ax.text(0.5, 0.00, subtitle, fontsize=16, ha='center', va='center')

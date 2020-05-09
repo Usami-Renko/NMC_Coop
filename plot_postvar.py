@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-06 20:00:38
+@LastEditTime: 2020-05-09 12:35:47
 @Description  : process postvar
 '''
 import sys
@@ -93,8 +93,10 @@ def get_GRAPES_data():
             # determine the time_indices_var
             time_indices_var = time_indices_align if var in align_vars else time_indices
             # moist vars skip for initial field
-            if var in moist_vars and 0 in time_indices_var:
-                time_indices_var = np.delete(time_indices_var, time_indices_var[time_indices_var == 0])
+            if var in moist_vars:
+                time_indices_var = time_indices_var[time_indices_var != 0]
+            if var in daymean_vars:
+                time_indices_var = time_indices_var[time_indices_var*time_incr > 24]
 
             var_time_indices[var] = time_indices_var
             var_instance = ws.get_var(var, (time_indices_var, level_indices)).data
@@ -345,13 +347,18 @@ if __name__ == "__main__":
                                     datatable_fnl[ivar, -1, ilevel, ...]
                             
                             clevels = find_clevels(iarea, clevel_data, lon, lat, dlevel, plot_type)
+                        
+                        if var in daymean_vars:
+                            timestr = '{}-{}'.format(time_index*time_incr-24, time_index*time_incr)
+                        else:
+                            timestr = '{}'.format(time_index*time_incr)
 
                         # 3D or surface vars
                         if var_ndims[var] == 4:
                             if len(varname) < 20:
-                                title = '{} of {}hr {}hPa {}'.format(plot_types_name[plot_type], time_index*time_incr, int(level), varname)
+                                title = '{} of {}hr {}hPa {}'.format(plot_types_name[plot_type], timestr, int(level), varname)
                             else:
-                                title = ['{} of {}hr {}hPa'.format(plot_types_name[plot_type], time_index*time_incr, int(level)),
+                                title = ['{} of {}hr {}hPa'.format(plot_types_name[plot_type], timestr, int(level)),
                                          r'{}'.format(varname)]
                             subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
                             pic_file = '{}_{}_{}hr_{}hpa_{}.png'.format(plot_type, iarea, time_index*time_incr, int(level), var)
@@ -362,9 +369,9 @@ if __name__ == "__main__":
                             plot_data(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels)
                         elif var_ndims[var] == 3:
                             if len(varname) < 20:
-                                title    = '{} of {}hr {}'.format(plot_types_name[plot_type], time_index*time_incr, varname)
+                                title    = '{} of {}hr {}'.format(plot_types_name[plot_type], timestr, varname)
                             else:
-                                title    = ['{} of {}hr'.format(plot_types_name[plot_type], time_index*time_incr),
+                                title    = ['{} of {}hr'.format(plot_types_name[plot_type], timestr),
                                             r'{}'.format(varname)]
                             subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
                             pic_file = '{}_{}_{}hr_{}.png'.format(plot_type, iarea, time_index*time_incr, var)

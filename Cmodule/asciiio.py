@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-27 11:07:21
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-10 19:48:17
+@LastEditTime: 2020-05-10 19:56:44
 '''
 
 import os
@@ -32,7 +32,6 @@ def _read_file(filename):
 
 def _write_file(filename, lines):
     with open(filename, 'w') as fw:
-        print(filename)
         fw.writelines(lines)
 
 def _probe_header(filename):
@@ -78,6 +77,7 @@ def generate_generalctl(timelines, datadir):
         ctl_lines = _transfer_generalctl(template_ctl_lines, initdatetime)
         ctl_filename = 'post.ctl_' + initdatetime.strftime("%Y%m%d%H")
         ctl_path = os.path.join(datadir, ctl_filename)
+        print(u'生成CTL文件:{}'.format(ctl_path))
         _write_file(ctl_path, ctl_lines)
 
 if __name__ == "__main__":

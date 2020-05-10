@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*- 
-"""
-Extract data from Grads data
-2018.03.23
-@author:wanghao
-"""
+'''
+@Description: Extract data from Grads data
+@Author: wanghao
+@Date: 2020-04-20 09:59:11
+@LastEditors: Hejun Xie
+@LastEditTime: 2020-05-10 19:52:35
+'''
+
 import sys
 #sys.path.append('/g3/wanghao/Python/Cmodule/CTLReader/CTLReader_Py')
 #sys.path.append('/g3/wanghao/Python/Cmodule/CTLExtract')
@@ -17,18 +20,24 @@ from gen_timelines import gen_timelines
 import os
 import datetime
 import time
-from utils import config
+
+from utils import config_list
+from asciiio import generate_generalctl
 
 # Main Program
 if __name__ == '__main__':
     # read the config file
     
+    CONFIGPATH = './config/' # default config path
     cong = config_list(CONFIGPATH, ['config.yml', 'devconfig.yml'])
     for key, value in cong.items():
         locals()[key] = value
     
     # 参数设置
     timelines   = gen_timelines(start_ddate, end_ddate, fcst_step)
+
+    # 制作ctl描述文件
+    generate_generalctl(timelines, ctlfile_dir)
     
     if not os.path.exists(exdata_dir):
         os.makedirs(exdata_dir)

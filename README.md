@@ -3,7 +3,7 @@
  * @Author: Hejun Xie
  * @Date: 2020-04-23 20:31:50
  * @LastEditors: wanghao
- * @LastEditTime: 2020-05-11 14:04:46
+ * @LastEditTime: 2020-05-11 16:26:05
  -->
 # GRAPES预报场与FNL分析场诊断画图脚本V1.3
 
@@ -11,9 +11,9 @@
 Developers and Contributors
 ----------
 
-####王皓 - 中国气象局数值预报中心
-
-####谢和俊 - 浙江大学地球科学学院
+#### 王皓 - 中国气象局数值预报中心
+ 
+#### 谢和俊 - 浙江大学地球科学学院
 
 ## 1、数据提取模块
 

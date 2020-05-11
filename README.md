@@ -2,17 +2,25 @@
  * @Description: README
  * @Author: Hejun Xie
  * @Date: 2020-04-23 20:31:50
- * @LastEditors: Hejun Xie
- * @LastEditTime: 2020-05-01 17:37:38
+ * @LastEditors: wanghao
+ * @LastEditTime: 2020-05-11 14:04:46
  -->
 # GRAPES预报场与FNL分析场诊断画图脚本V1.3
+
+----------
+Developers and Contributors
+----------
+
+####王皓 - 中国气象局数值预报中心
+
+####谢和俊 - 浙江大学地球科学学院
 
 ## 1、数据提取模块
 
 extractdata.py
 
-从 GRAPES postvar 数据中诊断画图提取所需的变量, 并存储为nc格式的数据。
-放置在提取数据目录下。
+从 GRAPES postvar 数据中根据通配的ctl文件，提取诊断绘图提取所需的变量, 并存储为nc格式的数据。
+放置在提取数据目录下。注意用户需给定初始是时刻的通配ctl,程序会解析初始时刻的ctl并自动在数据文件夹下生成对应时次的通配ctl。如果不存在初始时刻的ctl, 程序会抛出异常并中断。
 
 ## 2. 绘图模块
 
@@ -51,7 +59,7 @@ data.py
 
 ## 7. 合成图模块
 
-data.py
+make_comp.py
 
 主要负责合成拼图和动图
 
@@ -150,7 +158,9 @@ clean_plot: True
 
 
 # 画图区域设置
-plot_areas: ['Global', 'E_Asia', 'North_P', 'South_P', 'Tropics']
+  "u v t h w q": ['Global', 'E_Asia', 'North_P', 'South_P']
+  "24hrain shf phf" : ['Global', 'E_Asia']
+  "t2m" : ['Global']
 
 # 画图类型设置 
 plot_types: ['P', 'F', 'PMF']
@@ -198,6 +208,7 @@ newcolorscheme: False
 
 使用方式
 ----------
+用户需在config.yml中给定初始和结束时刻的时间信息，并给定模式数据所在的路径。一般只需要修改这两块就可以。
 
 1. 提取postvar数据
 修改./config/config.yml后，运行python extractdata.py即可，
@@ -232,12 +243,3 @@ python plot_postvar.py
 
 - observation vs prediction precipitation (new color scheme) 
 ![avatar](./pic_eg/case_2016010112_12hr_24hrain_newscheme.png)
-
-
-----------
-Developers and Contributors
-----------
-
-王皓 - 中国气象局数值预报中心
-
-谢和俊 - 浙江大学地球科学学院

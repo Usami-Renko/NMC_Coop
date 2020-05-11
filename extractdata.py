@@ -48,7 +48,7 @@ if __name__ == '__main__':
         ctlfilename = 	'{}/post.ctl_{}'.format(ctlfile_dir,ddate)
     
         ex_ctl  = '{}/postvar{}.ctl'.format(exdata_dir,ddate)
-        ex_data = '{}/postavr{}.dat'.format(exdata_dir,ddate)
+        ex_data = '{}/postvar{}.dat'.format(exdata_dir,ddate)
 
         ex_nc   = '{}/postvar{}.nc'.format(exdata_dir,ddate)
         

@@ -386,7 +386,7 @@ if __name__ == "__main__":
 
                             print(u'\t\t\t'+pic_file)
 
-                            p.apply_async(plot_data, args=(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels))
+                            # p.apply_async(plot_data, args=(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels))
                             plot_data(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels)
                         elif var_ndims[var] == 3:
                             if len(varname) < 20:

@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-09 23:01:39
+@LastEditTime: 2020-05-11 10:28:54
 @Description  : process postvar
 '''
 import sys
@@ -306,6 +306,8 @@ if __name__ == "__main__":
 
     # exit()
 
+    var_plot_areas = dict()
+
     # begin to plot
     for plot_type in plot_types:
         print(u'开始作图: {}'.format(plot_types_name[plot_type]))
@@ -316,9 +318,20 @@ if __name__ == "__main__":
                 continue
             varname = variable_name[var]
 
-            time_indices_var = var_time_indices[var] 
+            time_indices_var = var_time_indices[var]
 
-            for iarea in plot_areas:
+            # get plot_areas_var
+            for key in plot_areas.keys():
+                if var in key.split():
+                    plot_areas_var = plot_areas[key]
+            if 'plot_areas_var' not in locals().keys():
+                raise KeyError('plot_area not defined for var:{}'.format(var))
+            var_plot_areas[var] = plot_areas_var
+
+            var_dir = os.path.join(origin_dir, var)
+            makenewdir(var_dir)
+
+            for iarea in plot_areas_var:
                 print(u'\t\t区域: {}'.format(iarea))
                 for itime,time_index in enumerate(time_indices_var):
                     
@@ -394,8 +407,8 @@ if __name__ == "__main__":
 
     if make_comp:
         makenewdir(comp_dir)
-        make_comp_pic(var_time_indices, var_ndims, time_incr)
+        make_comp_pic(var_time_indices, var_ndims, var_plot_areas, time_incr)
     
     if make_gif:
         makenewdir(gif_dir)
-        make_gif_pic(var_time_indices, var_ndims, time_incr)
+        make_gif_pic(var_time_indices, var_ndims, var_plot_areas, time_incr)

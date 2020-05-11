@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-09 23:02:51
+@LastEditTime: 2020-05-11 10:17:20
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -257,7 +257,7 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
         CB.ax.set_xticklabels(ticklabels)
     CB.set_label(varname, fontsize=14)
 
-    plt.savefig('{}/{}'.format(origin_dir, pic_file), bbox_inches='tight', dpi=plot_dpi)
+    plt.savefig('{}/{}/{}'.format(origin_dir, var, pic_file), bbox_inches='tight', dpi=plot_dpi)
     plt.close()
 
 

@@ -18,14 +18,6 @@ fnl_dir: './fnl_data/'
 ex_vars  : ['u','v','t','h','w','q2','rainc','rainnc', 'hfxa', 'qfxa', 't2m']
 
 # Units:
-# u, v [m/s]
-# t [K]
-# h [gpm]
-# w [cm/s]
-# q [g/kg]
-# 24hrain [mm]
-# t2m [K]
-# st_vars: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
 st_vars: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
 
 # 提取等压层和统计等压层
@@ -62,7 +54,11 @@ case_dir: 'case'
 clean_plot: True
 
 # plot_areas: ['Global', 'E_Asia', 'North_P', 'South_P', 'Tropics']
-plot_areas: ['Global']
+plot_areas:
+  "u v t h w q": ['Global', 'E_Asia', 'North_P', 'South_P']
+  "24hrain shf phf" : ['Global', 'E_Asia']
+  "t2m" : ['Global']
+
 
 plot_types: ['P', 'F', 'PMF']
 # plot_types: ['F']
@@ -100,7 +96,7 @@ variable_name:
   24hrain: '+24hr Precipitation [mm]'
   t2m: '2m Temperature [K]'
   shf: '24hr Mean Surface Sensible Heat Flux [$W \cdot m^{-2} \cdot s^{-1}$]'
-  phf: '24hr Mean Surface Potential Heat Flux [$W \cdot m^{-2} \cdot s^{-1}$]'
+  phf: '24hr Mean Surface Latent Heat Flux [$W \cdot m^{-2} \cdot s^{-1}$]'
 
 # 个例画图
 plot_cases: True

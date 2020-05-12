@@ -17,7 +17,7 @@ fnl_dir: './fnl_data/'
 # 提取变量和统计变量
 ex_vars  : ['u','v','t','h','w','q2','rainc','rainnc', 'hfxa', 'qfxa', 't2m']
 
-# Units:
+# 画图变量:
 st_vars: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
 
 # 提取等压层和统计等压层
@@ -53,12 +53,17 @@ case_dir: 'case'
 # 画图前是否清理原出图文件夹
 clean_plot: True
 
-# plot_areas: ['Global', 'E_Asia', 'North_P', 'South_P', 'Tropics']
+# 画图区域
+# 可供选择的区域 ['Global', 'E_Asia', 'North_P', 'South_P', 'Tropics']
 plot_areas:
   "u v t h w q": ['Global', 'E_Asia', 'North_P', 'South_P']
   "24hrain shf phf" : ['Global', 'E_Asia']
   "t2m" : ['Global']
 
+# plot_areas:
+#   "u v t h w q": ['Global']
+#   "24hrain shf phf" : ['Global']
+#   "t2m" : ['Global']
 
 plot_types: ['P', 'F', 'PMF']
 # plot_types: ['F']
@@ -99,7 +104,7 @@ variable_name:
   phf: '24hr Mean Surface Latent Heat Flux [$W \cdot m^{-2} \cdot s^{-1}$]'
 
 # 个例画图
-plot_cases: True
+plot_cases: False
 # 观测文件路径
 obs_dir: './nmc_obs/'
 # 个例起报时间

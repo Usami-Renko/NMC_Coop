@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-12 09:00:43
+@LastEditTime: 2020-05-12 10:00:53
 @Description  : process postvar
 '''
 import sys
@@ -104,7 +104,7 @@ def get_GRAPES_data():
             if var in moist_vars:
                 time_indices_var = time_indices_var[time_indices_var != 0]
             if var in daymean_vars:
-                time_indices_var = time_indices_var[time_indices_var*time_incr > 24]
+                time_indices_var = time_indices_var[time_indices_var*time_incr >= 24]
 
             var_time_indices[var] = time_indices_var
             var_instance = ws.get_var(var, (time_indices_var, level_indices)).data
@@ -364,10 +364,12 @@ if __name__ == "__main__":
                                 clevel_data = datatable_fnl[ivar, itime, ilevel, ...]
                             elif plot_type in ['PMF']:
                                 # the biggest forecast range have large clevels
-                                clevel_data = datatable_grapes[ivar, -1, ilevel, ...] - \
-                                    datatable_fnl[ivar, -1, ilevel, ...]
+                                clevel_data = datatable_grapes[ivar, len(time_indices_var)-1, ilevel, ...] - \
+                                    datatable_fnl[ivar, len(time_indices_var)-1, ilevel, ...]
                             
                             clevels = find_clevels(iarea, clevel_data, lon, lat, dlevel, plot_type)
+                        
+                        # print(clevels)
                         
                         if var in daymean_vars:
                             timestr = '{}-{}'.format(time_index*time_incr-24, time_index*time_incr)

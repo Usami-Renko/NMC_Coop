@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-12 10:00:53
+@LastEditTime: 2020-05-12 12:57:59
 @Description  : process postvar
 '''
 import sys
@@ -50,6 +50,30 @@ GRAPES_DATA_PKLNAME = './pkl/GRAPES_{}.pkl'.format(GRAPES_HASH)
 FNL_DATA_PKLNAME = './pkl/FNL_{}.pkl'.format(GRAPES_HASH)
 
 
+def get_time_indices(var, time_indices, time_incr, times):
+
+    time_indices_var = time_indices.copy()
+
+    times_dt = [dt.datetime.strptime(str(time), '%Y%m%d%H%M') for time in times]
+    fcst_hours = [int((time_dt - times_dt[0]).total_seconds() // 3600) for time_dt in times_dt]
+
+    if var in align_vars:
+        if dt.datetime.strptime(timelines[0], '%Y%m%d%H').hour != 0:
+            offset_index = (24 - dt.datetime.strptime(timelines[0], '%Y%m%d%H').hour) // time_incr
+            time_indices_var = time_indices + offset_index
+    if var in moist_vars:
+        time_indices_var = time_indices[time_indices != 0]
+    if var in daymean_vars:
+        time_indices_var = time_indices[time_indices*time_incr >= 24]
+    
+    # remove overflow indices
+    if var in align_vars:
+        time_indices_var = time_indices_var[(time_indices_var*time_incr + 24) <= fcst_hours[-1]]
+    else:
+        time_indices_var = time_indices_var[(time_indices_var*time_incr) <= fcst_hours[-1]]
+    
+    return time_indices_var
+
 # pickle the data for ploting
 @DATAdecorator('./', True, GRAPES_DATA_PKLNAME)
 def get_GRAPES_data():
@@ -70,18 +94,10 @@ def get_GRAPES_data():
     lat, lon  = data_list[0].variables['latitude'][:], data_list[0].variables['longitude'][:]
     TLAT, TLON  = np.meshgrid(lat, lon)
     levels    = data_list[0].variables['levels'][:].tolist()
+    times     = data_list[0].variables['times'][:]
     time_incr = int(float(data_list[0].variables['times'].incr))
     
-    # get indices for time and levels
     time_indices = np.array([int(i/time_incr) for i in fcst], dtype='int')
-
-    # get time_indices_align, make alignment with 00UTC
-    if dt.datetime.strptime(timelines[0], '%Y%m%d%H').hour == 0: 
-        time_indices_align = time_indices
-    else:
-        offset_index = (24 - dt.datetime.strptime(timelines[0], '%Y%m%d%H').hour) // time_incr
-        time_indices_align = time_indices + offset_index
-    
     level_indices = np.array([levels.index(st_level) for st_level in st_levels], dtype='int')
 
     # 2.0 对指定高度和指定的预报时效做平均
@@ -98,14 +114,8 @@ def get_GRAPES_data():
 
         for ivar, var in enumerate(st_vars):
 
-            # determine the time_indices_var
-            time_indices_var = time_indices_align if var in align_vars else time_indices
-            # moist vars skip for initial field
-            if var in moist_vars:
-                time_indices_var = time_indices_var[time_indices_var != 0]
-            if var in daymean_vars:
-                time_indices_var = time_indices_var[time_indices_var*time_incr >= 24]
-
+            time_indices_var = get_time_indices(var, time_indices, time_incr, times)
+            
             var_time_indices[var] = time_indices_var
             var_instance = ws.get_var(var, (time_indices_var, level_indices)).data
             var_ndims[var] = var_instance.ndim

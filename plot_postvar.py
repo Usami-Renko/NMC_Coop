@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-11 10:28:54
+@LastEditTime: 2020-05-12 09:00:43
 @Description  : process postvar
 '''
 import sys
@@ -111,9 +111,9 @@ def get_GRAPES_data():
             var_ndims[var] = var_instance.ndim
 
             if var_ndims[var] == 4:
-                tmp_datatable[idata, ivar, ...] = var_instance
+                tmp_datatable[idata, ivar, :len(time_indices_var), ...] = var_instance
             elif var_ndims[var] == 3:
-                tmp_datatable[idata, ivar, :, 0, ...] = var_instance
+                tmp_datatable[idata, ivar, :len(time_indices_var), 0, ...] = var_instance
                 
         ws.close()
         

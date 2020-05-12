@@ -69,9 +69,9 @@ plot_types: ['P', 'F', 'PMF']
 # plot_types: ['F']
 
 plot_types_name:
-  P:    'Prediction'
+  P:    'GRAPES'
   F:    'FNL'
-  PMF:  'Prediction - FNL'
+  PMF:  'GRAPES - FNL'
 
 # 填色色标间隔
 clevel_step:

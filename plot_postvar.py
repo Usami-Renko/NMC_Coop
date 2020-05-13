@@ -3,8 +3,8 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: Hejun Xie
-@LastEditTime: 2020-05-12 12:57:59
+@LastEditors: wanghao
+@LastEditTime: 2020-05-13 14:01:55
 @Description  : process postvar
 '''
 import sys
@@ -190,9 +190,9 @@ def get_FNL_data():
         fnl_filename = fnl_datetime.strftime("fnl_%Y%m%d_%H_00.grib2")
         fnl_timestr = fnl_datetime.strftime("%Y%m%d%H")
 
-        if not os.path.exists(fnl_dir+fnl_filename):
-            raise IOError('{} file not found under dir {}'.format(fnl_filename, fnl_dir))
-        fnl_data_dic[fnl_timestr] = Nio.open_file(fnl_dir+fnl_filename, 'r')
+        if not os.path.exists(fnl_dir+os.sep+fnl_datetime.strftime("%Y")+os.sep+fnl_filename):
+            raise IOError('{} file not found under dir {}'.format(fnl_filename, fnl_datetime.strftime("%Y")))
+        fnl_data_dic[fnl_timestr] = Nio.open_file(fnl_dir+os.sep+fnl_datetime.strftime("%Y")+os.sep+fnl_filename, 'r')
 
     t1 = time.time()
     print(u'读取FNL数据结束, 用时{} seconds.'.format(str(t1-t0)[:7]))

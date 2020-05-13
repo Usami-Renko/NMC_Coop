@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: wanghao
-@LastEditTime: 2020-05-13 14:11:01
+@LastEditTime: 2020-05-13 17:21:06
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -111,7 +111,7 @@ def _find_clevels_rec(data, dlevel, plot_type):
     if dlevel < 1.0:
         data *= 10
         dlevel *= 10
-        clevels = _find_clevels_rec(data, dlevel, plot_type) / 10
+        clevels = _find_clevels_rec(data, dlevel, plot_type) / 10.
         return clevels
     
     # remove float here

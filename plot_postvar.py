@@ -3,8 +3,8 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: wanghao
-@LastEditTime: 2020-05-13 14:01:55
+@LastEditors: Hejun Xie
+@LastEditTime: 2020-05-13 16:56:37
 @Description  : process postvar
 '''
 import sys
@@ -104,7 +104,7 @@ def get_GRAPES_data():
     print(u'2.0 对指定预报面高度列表和指定的预报时效列表做平均')
     t0 = time.time()
 
-    tmp_datatable = np.zeros((len(timelines), len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
+    tmp_datatable = np.zeros((len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
     var_ndims = dict()
     var_time_indices = dict()
 
@@ -121,13 +121,13 @@ def get_GRAPES_data():
             var_ndims[var] = var_instance.ndim
 
             if var_ndims[var] == 4:
-                tmp_datatable[idata, ivar, :len(time_indices_var), ...] = var_instance
+                tmp_datatable[ivar, :len(time_indices_var), ...] += var_instance
             elif var_ndims[var] == 3:
-                tmp_datatable[idata, ivar, :len(time_indices_var), 0, ...] = var_instance
+                tmp_datatable[ivar, :len(time_indices_var), 0, ...] += var_instance
                 
         ws.close()
         
-    datatable = np.average(tmp_datatable, axis=0)
+    datatable = tmp_datatable / len(timelines)
 
     datatable_case = np.zeros((len(case_ini_times), len(case_fcst_hours), len(lat), len(lon)), dtype='float32')
 
@@ -206,10 +206,9 @@ def get_FNL_data():
     fnl_levels = (sample.variables['lv_ISBL0'][:] / 100.).tolist()  # [Pa] --> [hPa]
     level_indices_fnl = np.array([fnl_levels.index(st_level) for st_level in st_levels], dtype='int')
 
-    tmp_datatable = np.zeros((len(timelines), len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
+    tmp_datatable = np.zeros((len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
     
     # we use a data cache to avoid repeated interpolation for the same dataset
-    data_cache = dict()
 
     # time_indices always have the largest dimension among var_time_indices
 
@@ -225,23 +224,14 @@ def get_FNL_data():
                 fnl_datetime = (dt.datetime.strptime(inittime_str, '%Y%m%d%H') + \
                     dt.timedelta(hours=int(time_indices_var[ifcsttime]*time_incr))).strftime('%Y%m%d%H')
 
-                data_id = fnl_datetime + var
+                ws = FNLWorkStation(fnl_data_dic[fnl_datetime], fnl_varname, TLAT.T, TLON.T)
+                if ndim == 4:
+                    tmp_datatable[ivar, ifcsttime, ...] += ws.get_var(var, level_indices_fnl, interp=True).data                
+                elif ndim == 3:
+                    tmp_datatable[ivar, ifcsttime, 0, ...] += ws.get_var(var, level_indices_fnl, interp=True).data
+                ws.close()
 
-                if data_id in data_cache:
-                    tmp_datatable[iinittime, ivar, ifcsttime, ...] = \
-                    tmp_datatable[data_cache[data_id][0], data_cache[data_id][2], data_cache[data_id][1], ...]
-                else:
-                    ws = FNLWorkStation(fnl_data_dic[fnl_datetime], fnl_varname, TLAT.T, TLON.T)
-                    if ndim == 4:
-                        tmp_datatable[iinittime, ivar, ifcsttime, ...] = ws.get_var(var, level_indices_fnl, interp=True).data                
-                    elif ndim == 3:
-                        tmp_datatable[iinittime, ivar, ifcsttime, 0, ...] = ws.get_var(var, level_indices_fnl, interp=True).data
-                    ws.close()
-                
-                    data_cache[data_id] = (iinittime, ifcsttime, ivar)
-
-
-    datatable = np.average(tmp_datatable, axis=0)
+    datatable = tmp_datatable / len(timelines)
 
     # close the file handle    
     for fnl_data in fnl_data_dic.values():

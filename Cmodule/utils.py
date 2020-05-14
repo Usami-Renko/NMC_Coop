@@ -5,8 +5,8 @@
 @Description: some utilities for that package
 @Author: Hejun Xie
 @Date: 2020-04-22 18:55:54
-@LastEditors: Hejun Xie
-@LastEditTime: 2020-05-09 22:53:22
+@LastEditors: wanghao
+@LastEditTime: 2020-05-14 11:27:17
 '''
 # -*- coding: utf-8 -*-
 
@@ -62,7 +62,10 @@ def config(config_path, config_file):
     if sys.version_info[0] < 3:
         cong = yaml.load(open(cong_yamlPath))
     elif sys.version_info[0] >= 3:
-        cong = yaml.load(open(cong_yamlPath), Loader=yaml.FullLoader)
+        if platform == 'PC':
+            cong = yaml.load(open(cong_yamlPath), Loader=yaml.FullLoader)
+        else：
+            cong = yaml.load(open(cong_yamlPath))
     return cong
 
 def config_list(config_path, config_files):

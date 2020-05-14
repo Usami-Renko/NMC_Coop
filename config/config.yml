@@ -37,6 +37,9 @@ make_comp: True
 # 是否制作动图 
 make_gif: True
 
+# 平台
+platform: 'PC'    # 'Pi'
+
 # 图片路径
 pic_dir: './pic'
 # 原始图片路径

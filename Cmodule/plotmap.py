@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: wanghao
-@LastEditTime: 2020-05-13 17:21:06
+@LastEditTime: 2020-05-14 08:54:24
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -251,12 +251,13 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     else:
         ticks = None
     
-    # for Pi 
-    #if var == '24hrain':
-    #    colors_24hrain = ['#000080','#0034FF','#30FFC7','#8AFF6D','#D1FF26','#FBF100','#FFC800','#FFAB00','#FF8900','#FF6400','#FF3000','#BB0000','#800000']
-    #    CF = map.contourf(x, y, post_data.T, levels=clevels, colors=colors_24hrain, origin=origin, extend="both")
-    #else:
-    #    CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend="both", norm=norm)
+    # for Pi
+    if platform == 'Pi':
+        if var == '24hrain':
+            colors_24hrain = ['#000080','#0034FF','#30FFC7','#8AFF6D','#D1FF26','#FBF100','#FFC800','#FFAB00','#FF8900','#FF6400','#FF3000','#BB0000','#800000']
+            CF = map.contourf(x, y, post_data.T, levels=clevels, colors=colors_24hrain, origin=origin, extend="both")
+    if platform == 'PC':
+            CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend="both", norm=norm)
 
     CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend="both", norm=norm)
     CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal', ticks=ticks)

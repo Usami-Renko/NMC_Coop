@@ -3,8 +3,8 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: Hejun Xie
-@LastEditTime: 2020-05-13 16:56:37
+@LastEditors: wanghao
+@LastEditTime: 2020-05-14 14:41:12
 @Description  : process postvar
 '''
 import sys
@@ -79,7 +79,7 @@ def get_time_indices(var, time_indices, time_incr, times):
 def get_GRAPES_data():
 
     # 1.0 读取postvar数据
-    print(u'1.0 开始读取postvar数据')
+    print('1.0 开始读取postvar数据')
     import netCDF4 as nc
     t0 = time.time()
     data_list = []
@@ -89,7 +89,7 @@ def get_GRAPES_data():
         data_list.append(nc.Dataset(exdata_dir+ifile, 'r'))
 
     t1 = time.time()
-    print(u'postvar数据读取结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
+    print('postvar数据读取结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
     lat, lon  = data_list[0].variables['latitude'][:], data_list[0].variables['longitude'][:]
     TLAT, TLON  = np.meshgrid(lat, lon)
@@ -101,7 +101,7 @@ def get_GRAPES_data():
     level_indices = np.array([levels.index(st_level) for st_level in st_levels], dtype='int')
 
     # 2.0 对指定高度和指定的预报时效做平均
-    print(u'2.0 对指定预报面高度列表和指定的预报时效列表做平均')
+    print('2.0 对指定预报面高度列表和指定的预报时效列表做平均')
     t0 = time.time()
 
     tmp_datatable = np.zeros((len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
@@ -148,7 +148,7 @@ def get_GRAPES_data():
     del nc
 
     t1 = time.time()
-    print(u'对指定预报面高度列表和指定的预报时效列表做平均结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
+    print('对指定预报面高度列表和指定的预报时效列表做平均结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
     global_package = dict()
     global_names = ['time_indices', 'time_incr', 
@@ -164,7 +164,7 @@ def get_GRAPES_data():
 def get_FNL_data():
 
     # 3.0 读取FNL数据
-    print(u'3.0 开始读取FNL数据')
+    print('3.0 开始读取FNL数据')
     t0 = time.time()
 
     import Nio
@@ -191,14 +191,14 @@ def get_FNL_data():
         fnl_timestr = fnl_datetime.strftime("%Y%m%d%H")
 
         if not os.path.exists(fnl_dir+os.sep+fnl_datetime.strftime("%Y")+os.sep+fnl_filename):
-            raise IOError('{} file not found under dir {}'.format(fnl_filename, fnl_datetime.strftime("%Y")))
+            raise IOError('{} file not found under dir {}'.format(fnl_filename, fnl_dir+os.sep+fnl_datetime.strftime("%Y"))+os.sep)
         fnl_data_dic[fnl_timestr] = Nio.open_file(fnl_dir+os.sep+fnl_datetime.strftime("%Y")+os.sep+fnl_filename, 'r')
 
     t1 = time.time()
-    print(u'读取FNL数据结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
+    print('读取FNL数据结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
     # 4.0 对FNL数据进行插值
-    print(u'4.0 对FNL数据进行插值')
+    print('4.0 对FNL数据进行插值')
     t0 = time.time()
     
     sample = list(fnl_data_dic.values())[0]
@@ -240,7 +240,7 @@ def get_FNL_data():
     del Nio
 
     t1 = time.time()
-    print(u'对FNL数据进行插值, 用时{} seconds.'.format(str(t1-t0)[:7]))
+    print('对FNL数据进行插值, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
     return datatable
 
@@ -249,7 +249,7 @@ def get_FNL_data():
 def get_OBS_data():
 
     # 3.0 读取FNL数据
-    print(u'5.0 开始读取OBS数据')
+    print('5.0 开始读取OBS数据')
     t0 = time.time()
     
     datatable = dict()
@@ -265,7 +265,7 @@ def get_OBS_data():
             datatable[case_ini_time][case_fcst_hour] = read_obs(obs_filename)
 
     t1 = time.time()
-    print(u'读取OBS数据结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
+    print('读取OBS数据结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
     return datatable
 
@@ -292,7 +292,7 @@ if __name__ == "__main__":
     
     if plot_cases:
         makenewdir(case_dir)
-        print(u'开始作图: 案例')
+        print('开始作图: 案例')
         for iinit, case_ini_time in enumerate(case_ini_times):
             for ifcst, case_fcst_hour in enumerate(case_fcst_hours):
                 dataframe_obs = datatable_obs[case_ini_time][case_fcst_hour]
@@ -301,7 +301,7 @@ if __name__ == "__main__":
                 subtitle = 'Init: {} UTC'.format(case_ini_time)
                 pic_file = 'case_{}_{}hr_24hrain.png'.format(case_ini_time, case_fcst_hour)
 
-                print(u'\t{}'.format(pic_file))
+                print('\t{}'.format(pic_file))
                 plot_case(dataframe_grapes, dataframe_obs, lon, lat, title, subtitle, pic_file, newcolorscheme)
 
     # exit()
@@ -310,9 +310,9 @@ if __name__ == "__main__":
 
     # begin to plot
     for plot_type in plot_types:
-        print(u'开始作图: {}'.format(plot_types_name[plot_type]))
+        print('开始作图: {}'.format(plot_types_name[plot_type]))
         for ivar, var in enumerate(st_vars):
-            print(u'\t变量: {}'.format(var))
+            print('\t变量: {}'.format(var))
             # No FNL data for '24hrain'
             if var in noFNL_vars and plot_type in ['F', 'PMF']:
                 continue
@@ -332,23 +332,23 @@ if __name__ == "__main__":
             makenewdir(var_dir)
 
             for iarea in plot_areas_var:
-                print(u'\t\t区域: {}'.format(iarea))
+                print('\t\t区域: {}'.format(iarea))
                 for itime,time_index in enumerate(time_indices_var):
                     
                     if var not in clevel_custom.keys():
-                        if plot_type in ['P', 'F']:    
+                        if plot_type in ['G', 'F']:    
                             dlevel = clevel_step[var]
-                        elif plot_type == 'PMF':
+                        elif plot_type == 'GMF':
                             dlevel = clevel_step_PMF[var]
 
                     p = Pool(len(st_levels))
                     for ilevel,level in enumerate(st_levels):
 
-                        if plot_type == 'P':
+                        if plot_type == 'G':
                             data = datatable_grapes[ivar, itime, ilevel, ...]
                         elif plot_type == 'F':
                             data = datatable_fnl[ivar, itime, ilevel, ...]
-                        elif plot_type == 'PMF':
+                        elif plot_type == 'GMF':
                             data = datatable_grapes[ivar, itime, ilevel, ...] - \
                                 datatable_fnl[ivar, itime, ilevel, ...]
 
@@ -360,9 +360,9 @@ if __name__ == "__main__":
                         else:
                             if var in noFNL_vars:
                                 clevel_data = datatable_grapes[ivar, itime, ilevel, ...]
-                            elif plot_type in ['P', 'F']:
+                            elif plot_type in ['G', 'F']:
                                 clevel_data = datatable_fnl[ivar, itime, ilevel, ...]
-                            elif plot_type in ['PMF']:
+                            elif plot_type in ['GMF']:
                                 # the biggest forecast range have large clevels
                                 clevel_data = datatable_grapes[ivar, len(time_indices_var)-1, ilevel, ...] - \
                                     datatable_fnl[ivar, len(time_indices_var)-1, ilevel, ...]
@@ -386,7 +386,7 @@ if __name__ == "__main__":
                             subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
                             pic_file = '{}_{}_{}hr_{}hpa_{}.png'.format(plot_type, iarea, time_index*time_incr, int(level), var)
 
-                            print(u'\t\t\t'+pic_file)
+                            print('\t\t\t'+pic_file)
 
                             # p.apply_async(plot_data, args=(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels))
                             plot_data(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels)
@@ -399,7 +399,7 @@ if __name__ == "__main__":
                             subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
                             pic_file = '{}_{}_{}hr_{}.png'.format(plot_type, iarea, time_index*time_incr, var)
 
-                            print(u'\t\t\t'+pic_file)
+                            print('\t\t\t'+pic_file)
 
                             plot_data(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels)
                             break

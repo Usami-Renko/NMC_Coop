@@ -14,44 +14,19 @@ exdata_dir: './ex_data/'
 # FNL数据路径
 fnl_dir: './fnl_data/'
 
-# 提取变量和统计变量
-ex_vars  : ['u','v','t','h','w','q2','rainc','rainnc', 'hfxa', 'qfxa', 't2m']
-
-# 画图变量:
+# 统计绘图变量和层次:
+# 可供选择的变量和层次: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
+#                     [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
 st_vars: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
-
-# 提取等压层和统计等压层
-ex_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
-
-st_levels: [500.]
+st_levels: [1000., 850., 500.]
 
 # 预报时长
 fcst: [0, 24, 72] # hours
 
-# 图片类型
-pic_prefix: 'png'
-# 图片质量
-plot_dpi: 300
-# 是否制作拼图
-make_comp: True
-# 是否制作动图 
-make_gif: True
-
-# 平台
-platform: 'PC'    # 'Pi'
-
-# 图片路径
-pic_dir: './pic'
-# 原始图片路径
-origin_dir: 'origin'
-# 拼图路径
-comp_dir: 'comp'
-# 动图路径
-gif_dir: 'gif'
-# 案例图路径
-case_dir: 'case'
-
 # 画图设置
+# 图片路径和类型
+pic_dir: './pic'
+pic_prefix: 'png'
 
 # 画图前是否清理原出图文件夹
 clean_plot: True
@@ -63,51 +38,15 @@ plot_areas:
   "24hrain shf phf" : ['Global', 'E_Asia']
   "t2m" : ['Global']
 
-# plot_areas:
-#   "u v t h w q": ['Global']
-#   "24hrain shf phf" : ['Global']
-#   "t2m" : ['Global']
-
-plot_types: ['P', 'F', 'PMF']
-# plot_types: ['F']
+plot_types: ['G', 'F', 'GMF']
 
 plot_types_name:
-  P:    'GRAPES'
+  G:    'GRAPES'
   F:    'FNL'
-  PMF:  'GRAPES - FNL'
-
-# 填色色标间隔
-clevel_step:
-  u: 2
-  v: 2
-  t: 1
-  h: 30
-  q: 0.1
-  t2m: 1
-  shf: 10
-  phf: 10
-
-clevel_step_PMF:
-  u: 1
-  v: 1
-  t: 0.3
-  h: 10
-  q: 0.1
-
-variable_name:
-  t:  'Temperature [K]'
-  u:  'U Wind [m/s]'
-  v:  'V wind [m/s]'
-  h:  'Geopotential Height [gpm]'
-  w:  'Vertical Velocity [cm/s]'
-  q: 'Specific Humidity [g/kg]'
-  24hrain: '+24hr Precipitation [mm]'
-  t2m: '2m Temperature [K]'
-  shf: '24hr Mean Surface Sensible Heat Flux [$W \cdot m^{-2} \cdot s^{-1}$]'
-  phf: '24hr Mean Surface Latent Heat Flux [$W \cdot m^{-2} \cdot s^{-1}$]'
+  GMF:  'GRAPES - FNL'
 
 # 个例画图
-plot_cases: False
+plot_cases: True
 # 观测文件路径
 obs_dir: './nmc_obs/'
 # 个例起报时间
@@ -115,4 +54,4 @@ case_ini_times: ['2016010112']
 # 个例预报时间
 case_fcst_hours: [12,36,60]
 # 是否使用新配色方案
-newcolorscheme: True
+newcolorscheme: False

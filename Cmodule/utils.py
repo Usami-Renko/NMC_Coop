@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-22 18:55:54
 @LastEditors: wanghao
-@LastEditTime: 2020-05-14 11:35:14
+@LastEditTime: 2020-05-14 14:29:24
 '''
 # -*- coding: utf-8 -*-
 
@@ -62,9 +62,9 @@ def config(config_path, config_file):
     if sys.version_info[0] < 3:
         cong = yaml.load(open(cong_yamlPath))
     elif sys.version_info[0] >= 3:
-        if platform == 'PC':
+        try:
             cong = yaml.load(open(cong_yamlPath), Loader=yaml.FullLoader)
-        if platform == 'Pi':
+        except:
             cong = yaml.load(open(cong_yamlPath))
     return cong
 

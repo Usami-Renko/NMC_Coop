@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: wanghao
-@LastEditTime: 2020-05-14 14:41:12
+@LastEditTime: 2020-05-14 15:53:20
 @Description  : process postvar
 '''
 import sys
@@ -314,7 +314,7 @@ if __name__ == "__main__":
         for ivar, var in enumerate(st_vars):
             print('\t变量: {}'.format(var))
             # No FNL data for '24hrain'
-            if var in noFNL_vars and plot_type in ['F', 'PMF']:
+            if var in noFNL_vars and plot_type in ['F', 'GMF']:
                 continue
             varname = variable_name[var]
 

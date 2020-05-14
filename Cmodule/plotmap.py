@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-14 09:10:26
+@LastEditTime: 2020-05-14 09:12:37
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -258,8 +258,8 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
             CF = map.contourf(x, y, post_data.T, levels=clevels, colors=colors_24hrain, origin=origin, extend="both")
         if platform == 'PC':
             CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend="both", norm=norm)
-
-    CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend="both", norm=norm)
+    else:
+        CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend="both", norm=norm)
     CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal', ticks=ticks)
     if 'ticklabels' in locals().keys():
         CB.ax.set_xticklabels(ticklabels)

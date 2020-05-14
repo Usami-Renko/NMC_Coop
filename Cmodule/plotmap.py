@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-14 09:15:18
+@LastEditTime: 2020-05-14 20:16:19
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -123,7 +123,7 @@ def _find_clevels_rec(data, dlevel, plot_type):
         data_max = data_max // 10 * 10
         data_min = data_min // 10 * 10
 
-    if plot_type == 'PMF':
+    if plot_type == 'GMF':
         if abs(data_max) > abs(data_min):
             data_min = - data_max
         else:
@@ -227,7 +227,7 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
 
     # some settings 
     
-    if plot_type == 'PMF':
+    if plot_type == 'GMF':
         cmap = 'RdBu_r'
     else:
         cmap = 'jet'

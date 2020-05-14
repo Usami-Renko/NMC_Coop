@@ -17,11 +17,11 @@ fnl_dir: './fnl_data/'
 # 统计绘图变量和层次:
 # 可供选择的变量和层次: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
 #                     [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
-st_vars: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
-st_levels: [1000., 850., 500.]
+st_vars: ['24hrain']
+st_levels: [500.]
 
 # 预报时长
-fcst: [0, 24, 72] # hours
+fcst: [24] # hours
 
 # 画图设置
 # 图片路径和类型
@@ -33,9 +33,14 @@ clean_plot: True
 
 # 画图区域
 # 可供选择的区域 ['Global', 'E_Asia', 'North_P', 'South_P', 'Tropics']
+# plot_areas:
+#   "u v t h w q": ['Global', 'E_Asia', 'North_P', 'South_P']
+#   "24hrain shf phf" : ['Global', 'E_Asia']
+#   "t2m" : ['Global']
+
 plot_areas:
-  "u v t h w q": ['Global', 'E_Asia', 'North_P', 'South_P']
-  "24hrain shf phf" : ['Global', 'E_Asia']
+  "u v t h w q": ['Global']
+  "24hrain shf phf" : ['Global']
   "t2m" : ['Global']
 
 plot_types: ['G', 'F', 'GMF']
@@ -46,7 +51,7 @@ plot_types_name:
   GMF:  'GRAPES - FNL'
 
 # 个例画图
-plot_cases: True
+plot_cases: False
 # 观测文件路径
 obs_dir: './nmc_obs/'
 # 个例起报时间

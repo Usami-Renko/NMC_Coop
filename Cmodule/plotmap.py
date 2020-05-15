@@ -5,12 +5,13 @@
 @Description: plot the countoured map of a given variable
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
-@LastEditors: Hejun Xie
-@LastEditTime: 2020-05-14 20:16:19
+@LastEditors: wanghao
+@LastEditTime: 2020-05-15 14:42:59
 '''
 
 from mpl_toolkits.basemap import Basemap
 import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import copy as cp

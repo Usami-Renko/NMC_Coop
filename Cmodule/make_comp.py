@@ -5,8 +5,8 @@
 @Description: make compsite pics for comparison
 @Author: Hejun Xie
 @Date: 2020-04-26 15:11:40
-@LastEditors: Hejun Xie
-@LastEditTime: 2020-05-11 10:38:37
+@LastEditors: wanghao
+@LastEditTime: 2020-05-16 19:18:04
 '''
 
 
@@ -48,7 +48,7 @@ def _make_comp(pic_files, comp_file):
 
 def make_comp_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):
 
-    print(u"开始拼接图片")
+    print("开始拼接图片")
     for ivar, var in enumerate(st_vars):
         # 24hrain has no FNL data and in align_vars
 
@@ -77,7 +77,7 @@ def make_comp_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):
 
 def make_gif_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):
 
-    print(u"开始合成gif")
+    print("开始合成gif")
     for ivar, var in enumerate(st_vars):
 
         time_indices_var = var_time_indices[var]

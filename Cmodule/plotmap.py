@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: wanghao
-@LastEditTime: 2020-05-15 14:42:59
+@LastEditTime: 2020-05-16 20:47:59
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -257,6 +257,8 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
         if var == '24hrain':
             colors_24hrain = ['#000080','#0034FF','#30FFC7','#8AFF6D','#D1FF26','#FBF100','#FFC800','#FFAB00','#FF8900','#FF6400','#FF3000','#BB0000','#800000']
             CF = map.contourf(x, y, post_data.T, levels=clevels, colors=colors_24hrain, origin=origin, extend="both")
+        else:
+            CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend="both", norm=norm)
     else:
         CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend="both", norm=norm)
     CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal', ticks=ticks)

@@ -3,7 +3,7 @@
 @Author: wanghao
 @Date: 2019-01-22 15:31:50
 @LastEditors: wanghao
-@LastEditTime: 2020-04-21 21:57:38
+@LastEditTime: 2020-05-16 20:45:07
 @Description: 转换数据在一个文件中的数据
 '''
 import sys
@@ -17,7 +17,7 @@ class transf2nc(object):
     def __init__(self,ctlname,nc_filename,var=-1):
         
         data = CTLReader(ctlname)
-        times_tmp = [itime.strftime("%Y%m%d%H%M") for itime in data.variables['time']]
+        times_tmp = [itime.strftime("%Y%m%d%H") for itime in data.variables['time']]
 
         # 提取维度信息
         nt = data.dimensions['time']

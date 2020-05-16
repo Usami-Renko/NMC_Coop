@@ -3,8 +3,8 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: Hejun Xie
-@LastEditTime: 2020-05-14 20:25:40
+@LastEditors: wanghao
+@LastEditTime: 2020-05-16 21:24:48
 @Description  : process postvar
 '''
 import sys
@@ -54,7 +54,7 @@ def get_time_indices(var, time_indices, time_incr, times):
 
     time_indices_var = time_indices.copy()
 
-    times_dt = [dt.datetime.strptime(str(time), '%Y%m%d%H%M') for time in times]
+    times_dt = [dt.datetime.strptime(str(time), '%Y%m%d%H') for time in times]
     fcst_hours = [int((time_dt - times_dt[0]).total_seconds() // 3600) for time_dt in times_dt]
 
     if var in align_vars:

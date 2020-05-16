@@ -18,7 +18,7 @@ st_vars: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
 st_levels: [1000., 850., 500.]
 
 # 预报时长
-fcst: [24] # hours
+fcst: [24,72,120] # hours
 
 # 画图设置
 # 图片路径和类型

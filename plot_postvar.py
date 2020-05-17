@@ -3,8 +3,8 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: wanghao
-@LastEditTime: 2020-05-16 21:24:48
+@LastEditors: Hejun Xie
+@LastEditTime: 2020-05-17 22:31:55
 @Description  : process postvar
 '''
 import sys
@@ -18,7 +18,7 @@ from gen_timelines import gen_timelines
 import os
 from multiprocessing import Pool
 
-from utils import DATAdecorator, config_list, hashlist, makenewdir
+from utils import DATAdecorator, config_list, hashlist, makenewdir, DumpDataSet
 from derived_vars import FNLWorkStation, GRAPESWorkStation
 from asciiio import read_obs
 from plotmap import plot_data, find_clevels, plot_case
@@ -53,7 +53,6 @@ FNL_DATA_PKLNAME = './pkl/FNL_{}.pkl'.format(GRAPES_HASH)
 def get_time_indices(var, time_indices, time_incr, times):
 
     time_indices_var = time_indices.copy()
-
     times_dt = [dt.datetime.strptime(str(time), '%Y%m%d%H') for time in times]
     fcst_hours = [int((time_dt - times_dt[0]).total_seconds() // 3600) for time_dt in times_dt]
 
@@ -212,6 +211,13 @@ def get_FNL_data():
 
     # time_indices always have the largest dimension among var_time_indices
 
+    def get_FNL_worker(var, fnl_datetime):
+        ws = FNLWorkStation(fnl_data_dic[fnl_datetime], fnl_varname, TLAT.T, TLON.T)
+        FNL_data = ws.get_var(var, level_indices_fnl, interp=True).data
+        ws.close()
+        return FNL_data
+
+    dds = DumpDataSet(dump_dir, get_FNL_worker)
     for ivar, var in enumerate(st_vars):
         if var in noFNL_vars:
             continue
@@ -224,13 +230,15 @@ def get_FNL_data():
                 fnl_datetime = (dt.datetime.strptime(inittime_str, '%Y%m%d%H') + \
                     dt.timedelta(hours=int(time_indices_var[ifcsttime]*time_incr))).strftime('%Y%m%d%H')
 
-                ws = FNLWorkStation(fnl_data_dic[fnl_datetime], fnl_varname, TLAT.T, TLON.T)
-                if ndim == 4:
-                    tmp_datatable[ivar, ifcsttime, ...] += ws.get_var(var, level_indices_fnl, interp=True).data                
-                elif ndim == 3:
-                    tmp_datatable[ivar, ifcsttime, 0, ...] += ws.get_var(var, level_indices_fnl, interp=True).data
-                ws.close()
+                FNL_data = dds.get_data(var, fnl_datetime)
 
+                if ndim == 4:
+                    tmp_datatable[ivar, ifcsttime, ...] += FNL_data               
+                elif ndim == 3:
+                    tmp_datatable[ivar, ifcsttime, 0, ...] += FNL_data
+
+    dds.close()
+    
     datatable = tmp_datatable / len(timelines)
 
     # close the file handle    

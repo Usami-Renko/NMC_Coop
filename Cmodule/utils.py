@@ -5,8 +5,8 @@
 @Description: some utilities for that package
 @Author: Hejun Xie
 @Date: 2020-04-22 18:55:54
-@LastEditors: wanghao
-@LastEditTime: 2020-05-14 14:29:24
+@LastEditors: Hejun Xie
+@LastEditTime: 2020-05-17 22:29:29
 '''
 # -*- coding: utf-8 -*-
 
@@ -49,6 +49,44 @@ class DATAdecorator(object):
     def pickle_load(self):
         print('Load data at {}'.format(self.pickle_filename))
         with open(self.pickle_filename, "rb") as f:
+            DATA = pickle.load(f)
+        return DATA
+
+class DumpDataSet(object):
+    def __init__(self, dump_dir, worker):
+        self.dump_dir = dump_dir
+        self.worker = worker
+        
+        self.register = list()
+        makenewdir(dump_dir)
+    
+    def get_data(self, *args, **kwargs):
+        '''
+        args is the datalabel
+        '''
+
+        datahash = hashlist(args)
+
+        if datahash in self.register:
+            return self.pickle_load(datahash)
+        else:
+            DATA = self.worker(*args, **kwargs)
+            self.pickle_dump(DATA, datahash)
+            return DATA
+        
+    def close(self):
+        os.system("rm {}/*.pkl".format(self.dump_dir))
+        del self.register
+
+    def pickle_dump(self, DATA, datahash):
+        self.register.append(datahash)
+        datafile = "{}/{}.pkl".format(self.dump_dir, datahash)
+        with open(datafile, "wb") as f:
+            pickle.dump(DATA, f)
+        
+    def pickle_load(self, datahash):
+        datafile = "{}/{}.pkl".format(self.dump_dir, datahash)
+        with open(datafile, "rb") as f:
             DATA = pickle.load(f)
         return DATA
 

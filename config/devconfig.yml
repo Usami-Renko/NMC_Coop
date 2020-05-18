@@ -11,7 +11,7 @@ dump_dir: './temp/'
 remove_dump: False
 
 # 运行模式 interp / plot
-run_mode: 'interp'
+run_mode: 'plot'
 nc_sample: './ex_data/postvar2016010112.nc'
 
 # 提取变量和层次

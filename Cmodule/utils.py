@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-22 18:55:54
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-18 17:53:32
+@LastEditTime: 2020-05-18 21:42:08
 '''
 # -*- coding: utf-8 -*-
 
@@ -35,7 +35,8 @@ class DATAdecorator(object):
                 os.chdir(self.workdir)
                 DATA = worker(*args, **kwargs)
                 os.chdir(cdir)
-                self.pickle_dump(DATA)
+                if DATA is not None:
+                    self.pickle_dump(DATA)
             else:
                 DATA = self.pickle_load()           
             return DATA

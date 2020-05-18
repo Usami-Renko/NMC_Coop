@@ -8,7 +8,10 @@ fnl_dir: './fnl_data/'
 
 # FNL加速硬盘缓冲区
 dump_dir: './temp/'
-remove_dump: True
+remove_dump: False
+
+# 运行模式 interp / plot
+run_mode: 'plot'
 
 # 提取变量和层次
 ex_vars  : ['u','v','t','h','w','q2','rainc','rainnc', 'hfxa', 'qfxa', 't2m']
@@ -55,6 +58,18 @@ variable_name:
 
 # 可画图变量
 plotable_vars: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
+
+var_ndims:
+  u: 4
+  v: 4
+  t: 4
+  h: 4
+  w: 4
+  q: 4
+  24hrain: 3
+  t2m: 3
+  shf: 3
+  phf: 3
 
 # 画图归一化参数
 symlognorm_params:

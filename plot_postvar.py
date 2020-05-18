@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-18 11:48:46
+@LastEditTime: 2020-05-18 18:00:51
 @Description  : process postvar
 '''
 import sys
@@ -99,37 +99,40 @@ def get_GRAPES_data():
     time_indices = np.array([int(i/time_incr) for i in fcst], dtype='int')
     level_indices = np.array([levels.index(st_level) for st_level in st_levels], dtype='int')
 
+    var_time_indices = dict()
+    for ivar, var in enumerate(st_vars):
+        var_time_indices[var] = get_time_indices(var, time_indices, time_incr, times)
+    
+    if run_mode == 'interp':
+        global_package = dict()
+        global_names = ['time_indices', 'time_incr', 
+                    'levels', 'TLON', 'TLAT', 'lon', 'lat', 
+                    'var_time_indices']
+        for global_name in global_names:
+            global_package[global_name] = locals()[global_name]
+        
+        return global_package, None, None        
+
+
     # 2.0 对指定高度和指定的预报时效做平均
     print('2.0 对指定预报面高度列表和指定的预报时效列表做平均')
     t0 = time.time()
 
     tmp_datatable = np.zeros((len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
-    var_ndims = dict()
-    var_time_indices = dict()
-
     for idata, data in enumerate(data_list):
-        
         ws = GRAPESWorkStation(data, grapes_varname)
-
         for ivar, var in enumerate(st_vars):
-
-            time_indices_var = get_time_indices(var, time_indices, time_incr, times)
-            
-            var_time_indices[var] = time_indices_var
+            time_indices_var = var_time_indices[var]
             var_instance = ws.get_var(var, (time_indices_var, level_indices)).data
-            var_ndims[var] = var_instance.ndim
-
             if var_ndims[var] == 4:
                 tmp_datatable[ivar, :len(time_indices_var), ...] += var_instance
             elif var_ndims[var] == 3:
                 tmp_datatable[ivar, :len(time_indices_var), 0, ...] += var_instance
-                
         ws.close()
-        
     datatable = tmp_datatable / len(timelines)
 
+    # get case data
     datatable_case = np.zeros((len(case_ini_times), len(case_fcst_hours), len(lat), len(lon)), dtype='float32')
-
     for iinit, case_ini_time in enumerate(case_ini_times):
         init_index = timelines.index(case_ini_time)
         data = data_list[init_index]
@@ -152,14 +155,14 @@ def get_GRAPES_data():
     global_package = dict()
     global_names = ['time_indices', 'time_incr', 
                     'levels', 'TLON', 'TLAT', 'lon', 'lat', 
-                    'var_ndims', 'var_time_indices']
+                    'var_time_indices']
     for global_name in global_names:
         global_package[global_name] = locals()[global_name]
 
     return global_package, datatable, datatable_case
 
 # pickle the data for ploting
-@DATAdecorator('./', True, FNL_DATA_PKLNAME)
+@DATAdecorator('./', False, FNL_DATA_PKLNAME)
 def get_FNL_data():
 
     # 3.0 读取FNL数据
@@ -203,7 +206,15 @@ def get_FNL_data():
     sample = list(fnl_data_dic.values())[0]
     
     fnl_levels = (sample.variables['lv_ISBL0'][:] / 100.).tolist()  # [Pa] --> [hPa]
-    level_indices_fnl = np.array([fnl_levels.index(st_level) for st_level in st_levels], dtype='int')
+
+    # if run in interp-mode, then we interp all the levels in ex_levels 
+    level_indices_fnl_interp = np.array([fnl_levels.index(ex_level) for ex_level in ex_levels], dtype='int')
+    level_indices_fnl_plot = np.array([fnl_levels.index(st_level) for st_level in st_levels], dtype='int')
+
+    select_table = np.zeros((len(ex_levels)), dtype='bool')
+    for iindex, level_index_fnl_interp in enumerate(level_indices_fnl_interp):
+        if level_index_fnl_interp in level_indices_fnl_plot:
+            select_table[iindex] = True
 
     tmp_datatable = np.zeros((len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
     
@@ -211,14 +222,20 @@ def get_FNL_data():
 
     # time_indices always have the largest dimension among var_time_indices
 
-    def get_FNL_worker(var, fnl_datetime, level_indices_fnl):
+    def get_FNL_worker(var, fnl_datetime):
+        if run_mode == 'plot':
+            msg = "FNL interpolated data {}_{}.pkl not found, please report this to developers of this script, ploting abort...".format(
+                var, fnl_datetime)
+            raise IOError(msg)
+
         ws = FNLWorkStation(fnl_data_dic[fnl_datetime], fnl_varname, TLAT.T, TLON.T)
-        FNL_data = ws.get_var(var, level_indices_fnl, interp=True).data
+        FNL_data = ws.get_var(var, level_indices_fnl_interp, interp=True).data
         ws.close()
         return FNL_data
 
     dds = DumpDataSet(dump_dir, get_FNL_worker)
     for ivar, var in enumerate(st_vars):
+        print('\t变量:{}'.format(var))
         if var in noFNL_vars:
             continue
                 
@@ -226,14 +243,15 @@ def get_FNL_data():
         ndim = var_ndims[var]
 
         for iinittime, inittime_str in enumerate(timelines):
+            print('\t\t起报时间:{}'.format(inittime_str))
             for ifcsttime, time_index in enumerate(time_indices_var):
                 fnl_datetime = (dt.datetime.strptime(inittime_str, '%Y%m%d%H') + \
                     dt.timedelta(hours=int(time_indices_var[ifcsttime]*time_incr))).strftime('%Y%m%d%H')
 
-                FNL_data = dds.get_data(var, fnl_datetime, level_indices_fnl)
+                FNL_data = dds.get_data(var, fnl_datetime)
 
                 if ndim == 4:
-                    tmp_datatable[ivar, ifcsttime, ...] += FNL_data               
+                    tmp_datatable[ivar, ifcsttime, ...] += FNL_data[select_table]               
                 elif ndim == 3:
                     tmp_datatable[ivar, ifcsttime, 0, ...] += FNL_data
 
@@ -290,6 +308,9 @@ if __name__ == "__main__":
     for global_name in global_package.keys():
         globals()[global_name] = global_package[global_name]
     datatable_fnl = get_FNL_data()
+    if run_mode == 'interp':
+        print('Successfully interpolated FNL data from {} to {}'.format(start_ddate, end_ddate))
+        exit()
     datatable_obs = get_OBS_data()
 
     # exit()

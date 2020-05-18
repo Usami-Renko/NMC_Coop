@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-22 18:55:54
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-18 11:23:05
+@LastEditTime: 2020-05-18 17:53:32
 '''
 # -*- coding: utf-8 -*-
 
@@ -63,36 +63,41 @@ class DumpDataSet(object):
         self.get_register()
     
     def get_register(self):
-        pkls = glob.glob('{}/*.pkl'.format(self.dump_dir))
+        pkls = glob.glob('{}/*/*/*.pkl'.format(self.dump_dir))
         for pkl in pkls:
             self.register.append(pkl.split('/')[-1].split('.')[0])
+    
+    def get_label(self, *args):
+        label = args[0] + '_' + args[1]
+        datadir = "/{}/{}/".format(args[1][0:4], args[1][0:8])
+        makenewdir("{}/{}".format(self.dump_dir, args[1][0:4]))
+        makenewdir("{}/{}".format(self.dump_dir, datadir))
+        return label, datadir
 
     def get_data(self, *args, **kwargs):
         '''
         args is the datalabel
         '''
-
-        datahash = hashlist(args)
-
-        if datahash in self.register:
-            return self.pickle_load(datahash)
+        datalabel, datadir = self.get_label(*args)
+        if datalabel in self.register:
+            return self.pickle_load(datalabel, datadir)
         else:
             DATA = self.worker(*args, **kwargs)
-            self.pickle_dump(DATA, datahash)
+            self.pickle_dump(DATA, datalabel, datadir)
             return DATA
         
     def close(self):
-        os.system("rm {}/*.pkl".format(self.dump_dir))
+        os.system("rm {}/*/*/*.pkl".format(self.dump_dir))
         del self.register
 
-    def pickle_dump(self, DATA, datahash):
-        self.register.append(datahash)
-        datafile = "{}/{}.pkl".format(self.dump_dir, datahash)
+    def pickle_dump(self, DATA, datalabel, datadir):
+        self.register.append(datalabel)
+        datafile = "{}/{}/{}.pkl".format(self.dump_dir, datadir, datalabel)
         with open(datafile, "wb") as f:
             pickle.dump(DATA, f)
         
-    def pickle_load(self, datahash):
-        datafile = "{}/{}.pkl".format(self.dump_dir, datahash)
+    def pickle_load(self, datalabel, datadir):
+        datafile = "{}/{}/{}.pkl".format(self.dump_dir, datadir, datalabel)
         with open(datafile, "rb") as f:
             DATA = pickle.load(f)
         return DATA

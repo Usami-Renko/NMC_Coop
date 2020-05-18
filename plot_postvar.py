@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-18 18:00:51
+@LastEditTime: 2020-05-18 20:49:19
 @Description  : process postvar
 '''
 import sys
@@ -37,6 +37,11 @@ make_comp.config_submodule(cong)
 # config script
 for key, value in cong.items():
     globals()[key] = value
+
+# mode settings
+if run_mode == 'interp':
+    st_vars = plotable_vars
+    fcst_step = 6
 
 origin_dir = os.path.join(pic_dir, origin_dir)
 comp_dir = os.path.join(pic_dir, comp_dir)
@@ -82,19 +87,26 @@ def get_GRAPES_data():
     import netCDF4 as nc
     t0 = time.time()
     data_list = []
-    for ifile in ncfiles:
-        if not os.path.exists(exdata_dir+ifile):
+
+    if run_mode == 'plot':
+        for ifile in ncfiles:
+            if not os.path.exists(exdata_dir+ifile):
+                raise IOError('{} file not found under dir {}'.format(ifile, exdata_dir))
+            data_list.append(nc.Dataset(exdata_dir+ifile, 'r'))
+        sample = data_list[0]
+    elif run_mode == 'interp':
+        if not os.path.exists(nc_sample):
             raise IOError('{} file not found under dir {}'.format(ifile, exdata_dir))
-        data_list.append(nc.Dataset(exdata_dir+ifile, 'r'))
+        sample = nc.Dataset(nc_sample, 'r')
 
     t1 = time.time()
     print('postvar数据读取结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
-    lat, lon  = data_list[0].variables['latitude'][:], data_list[0].variables['longitude'][:]
+    lat, lon  = sample.variables['latitude'][:], sample.variables['longitude'][:]
     TLAT, TLON  = np.meshgrid(lat, lon)
-    levels    = data_list[0].variables['levels'][:].tolist()
-    times     = data_list[0].variables['times'][:]
-    time_incr = int(float(data_list[0].variables['times'].incr))
+    levels    = sample.variables['levels'][:].tolist()
+    times     = sample.variables['times'][:]
+    time_incr = int(float(sample.variables['times'].incr))
     
     time_indices = np.array([int(i/time_incr) for i in fcst], dtype='int')
     level_indices = np.array([levels.index(st_level) for st_level in st_levels], dtype='int')
@@ -217,11 +229,8 @@ def get_FNL_data():
             select_table[iindex] = True
 
     tmp_datatable = np.zeros((len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
-    
-    # we use a data cache to avoid repeated interpolation for the same dataset
 
     # time_indices always have the largest dimension among var_time_indices
-
     def get_FNL_worker(var, fnl_datetime):
         if run_mode == 'plot':
             msg = "FNL interpolated data {}_{}.pkl not found, please report this to developers of this script, ploting abort...".format(

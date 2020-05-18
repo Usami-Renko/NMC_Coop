@@ -8,6 +8,7 @@ fnl_dir: './fnl_data/'
 
 # FNL加速硬盘缓冲区
 dump_dir: './temp/'
+remove_dump: True
 
 # 提取变量和层次
 ex_vars  : ['u','v','t','h','w','q2','rainc','rainnc', 'hfxa', 'qfxa', 't2m']

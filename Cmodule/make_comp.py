@@ -5,8 +5,8 @@
 @Description: make compsite pics for comparison
 @Author: Hejun Xie
 @Date: 2020-04-26 15:11:40
-@LastEditors: wanghao
-@LastEditTime: 2020-05-16 19:18:04
+@LastEditors: Hejun Xie
+@LastEditTime: 2020-05-18 10:52:15
 '''
 
 
@@ -14,6 +14,7 @@ from PIL import Image
 from copy import copy
 import os
 from utils import makenewdir
+import numpy as np
 
 
 def config_submodule(cong):
@@ -69,8 +70,13 @@ def make_comp_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):
                             for plot_type in plot_types]
                         comp_file = 'comp_{}_{}hr_{}hpa_{}.png'.format(iarea, time_index*time_incr, int(level), var)
                     elif ndim == 3:
-                        pic_files = ['{}_{}_{}hr_{}.png'.format(plot_type, iarea, time_index*time_incr, var) for plot_type in plot_types]
+                        pic_files = ['{}/{}/{}_{}_{}hr_{}.png'.format(origin_dir, var, plot_type, iarea, time_index*time_incr, var) for plot_type in plot_types]
                         comp_file = 'comp_{}_{}hr_{}.png'.format(iarea, time_index*time_incr, var)
+                    
+                    if not np.array([os.path.exists(pic_file) for pic_file in pic_files]).all():
+                        print("[warning]: failed to make comp {} due to missing components".format(comp_file))
+                        continue
+
                     d = _make_comp(pic_files, comp_file)
                     d.save(os.path.join(comp_dir, var, comp_file))
 
@@ -102,6 +108,10 @@ def make_gif_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):
                 pic_files = ['{}/{}/{}_{}_{}hr_{}hpa_{}.png'.format(source_dir, var, gif_type, iarea, time_index*time_incr,int(level), var) \
                     for level in st_levels]
                 gif_file = '{}/{}/{}_{}_{}hr_{}_pres.gif'.format(gif_dir, var, gif_type, iarea, time_index*time_incr, var)
-            
+
+                if not np.array([os.path.exists(pic_file) for pic_file in pic_files]).all():
+                    print("[warning]: failed to make gif {} due to missing components".format(gif_file))
+                    break
+
                 imgs = [Image.open(ipic) for ipic in pic_files]
                 imgs[0].save(gif_file, save_all=True, append_images=imgs, duration=2)

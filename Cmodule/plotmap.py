@@ -5,8 +5,8 @@
 @Description: plot the countoured map of a given variable
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
-@LastEditors: wanghao
-@LastEditTime: 2020-05-16 20:47:59
+@LastEditors: Hejun Xie
+@LastEditTime: 2020-05-18 11:08:14
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -140,6 +140,10 @@ def find_clevels(iarea, data, lon, lat, dlevel, plot_type):
     data_visible = _clip_data(iarea, data, lon, lat)
     data_visible_copy = cp.copy(data_visible)
     clevels = _find_clevels_rec(data_visible_copy, dlevel, plot_type)
+    if len(clevels) > 20:
+        step = len(clevels) // 20
+        clevels = clevels[::step]
+    
     return clevels
 
 def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels):
@@ -237,7 +241,8 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
         post_data = ma.masked_where(post_data <= 0.01, post_data)
     
     if len(clevels) < 3:
-        raise ValueError('clevels too short for {}'.format(clevels))
+        print("[warning]: clevels too short for this var at this level, abort...".format())
+        return
 
     if var in lognorm_params.keys():
         norm = colors.LogNorm(**lognorm_params[var] if lognorm_params[var] is not None else {})

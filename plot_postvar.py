@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-17 22:31:55
+@LastEditTime: 2020-05-18 11:48:46
 @Description  : process postvar
 '''
 import sys
@@ -211,7 +211,7 @@ def get_FNL_data():
 
     # time_indices always have the largest dimension among var_time_indices
 
-    def get_FNL_worker(var, fnl_datetime):
+    def get_FNL_worker(var, fnl_datetime, level_indices_fnl):
         ws = FNLWorkStation(fnl_data_dic[fnl_datetime], fnl_varname, TLAT.T, TLON.T)
         FNL_data = ws.get_var(var, level_indices_fnl, interp=True).data
         ws.close()
@@ -230,14 +230,15 @@ def get_FNL_data():
                 fnl_datetime = (dt.datetime.strptime(inittime_str, '%Y%m%d%H') + \
                     dt.timedelta(hours=int(time_indices_var[ifcsttime]*time_incr))).strftime('%Y%m%d%H')
 
-                FNL_data = dds.get_data(var, fnl_datetime)
+                FNL_data = dds.get_data(var, fnl_datetime, level_indices_fnl)
 
                 if ndim == 4:
                     tmp_datatable[ivar, ifcsttime, ...] += FNL_data               
                 elif ndim == 3:
                     tmp_datatable[ivar, ifcsttime, 0, ...] += FNL_data
 
-    dds.close()
+    if remove_dump:
+        dds.close()
     
     datatable = tmp_datatable / len(timelines)
 

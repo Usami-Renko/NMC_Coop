@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-22 18:55:54
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-17 22:29:29
+@LastEditTime: 2020-05-18 11:23:05
 '''
 # -*- coding: utf-8 -*-
 
@@ -16,6 +16,7 @@ import sys
 import yaml
 import pickle
 import hashlib
+import glob
 from functools import wraps 
 
 
@@ -59,7 +60,13 @@ class DumpDataSet(object):
         
         self.register = list()
         makenewdir(dump_dir)
+        self.get_register()
     
+    def get_register(self):
+        pkls = glob.glob('{}/*.pkl'.format(self.dump_dir))
+        for pkl in pkls:
+            self.register.append(pkl.split('/')[-1].split('.')[0])
+
     def get_data(self, *args, **kwargs):
         '''
         args is the datalabel

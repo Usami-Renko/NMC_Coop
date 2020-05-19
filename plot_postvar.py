@@ -3,8 +3,8 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: Hejun Xie
-@LastEditTime: 2020-05-19 17:39:37
+@LastEditors: wanghao
+@LastEditTime: 2020-05-19 20:27:09
 @Description  : process postvar
 '''
 import sys
@@ -425,11 +425,11 @@ if __name__ == "__main__":
                         # 3D or surface vars
                         if var_ndims[var] == 4:
                             if len(varname) < 20:
-                                title = '{} of {}hr {}hPa {}'.format(plot_types_name[plot_type], timestr, int(level), varname)
+                                title = '{} {}hPa {}'.format(plot_types_name[plot_type], int(level), varname)  # timestr
                             else:
-                                title = ['{} of {}hr {}hPa'.format(plot_types_name[plot_type], timestr, int(level)),
+                                title = ['{} {}hPa'.format(plot_types_name[plot_type], int(level)),
                                          r'{}'.format(varname)]
-                            subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
+                            subtitle = 'Init(UTC): {}+{}h - {}+{}h'.format(start_ddate,timestr,end_ddate,timestr)
                             pic_file = '{}_{}_{}hr_{}hpa_{}.png'.format(plot_type, iarea, time_index*time_incr, int(level), var)
 
                             print('\t\t\t'+pic_file)

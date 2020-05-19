@@ -11,7 +11,7 @@ dump_dir: './temp/'
 remove_dump: False
 
 # 运行模式 interp / plot / debug
-run_mode: 'interp'
+run_mode: 'plot'
 nc_sample: './ex_data/postvar2016010112.nc'
 
 # 提取变量和层次
@@ -52,7 +52,7 @@ variable_name:
   h:  'Geopotential Height [gpm]'
   w:  'Vertical Velocity [cm/s]'
   q: 'Specific Humidity [g/kg]'
-  24hrain: '+24hr Precipitation [mm]'
+  24hrain: '24hr Precipitation [mm]'
   t2m: '2m Temperature [K]'
   shf: '24hr Mean Surface Sensible Heat Flux [$W \cdot m^{-2} \cdot s^{-1}$]'
   phf: '24hr Mean Surface Latent Heat Flux [$W \cdot m^{-2} \cdot s^{-1}$]'
@@ -124,6 +124,9 @@ align_vars: ['24hrain']
 
 # 24hmean var
 daymean_vars: ['shf', 'phf']
+
+# 24hacc var
+dayacc_vars: ['24hrain']
 
 # 图片质量
 plot_dpi: 300

@@ -3,8 +3,8 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: wanghao
-@LastEditTime: 2020-05-19 20:27:09
+@LastEditors: Hejun Xie
+@LastEditTime: 2020-05-19 22:22:06
 @Description  : process postvar
 '''
 import sys
@@ -39,9 +39,19 @@ for key, value in cong.items():
     globals()[key] = value
 
 # mode settings
+GRAPES_PKL = True
+FNL_PKL = True
+OBS_PKL = True
+
 if run_mode == 'interp':
     st_vars = plotable_vars
     fcst_step = 6
+    FNL_PKL = False
+
+if run_mode == 'debug':
+    FNL_PKL = False
+    GRAPES_PKL = False
+    OBS_PKL = False
 
 origin_dir = os.path.join(pic_dir, origin_dir)
 comp_dir = os.path.join(pic_dir, comp_dir)
@@ -79,7 +89,7 @@ def get_time_indices(var, time_indices, time_incr, times):
     return time_indices_var
 
 # pickle the data for ploting
-@DATAdecorator('./', True, GRAPES_DATA_PKLNAME)
+@DATAdecorator('./', GRAPES_PKL, GRAPES_DATA_PKLNAME)
 def get_GRAPES_data():
 
     # 1.0 读取postvar数据
@@ -174,7 +184,7 @@ def get_GRAPES_data():
     return global_package, datatable, datatable_case
 
 # pickle the data for ploting
-@DATAdecorator('./', False, FNL_DATA_PKLNAME)
+@DATAdecorator('./', FNL_PKL, FNL_DATA_PKLNAME)
 def get_FNL_data():
 
     # 3.0 读取FNL数据
@@ -288,7 +298,7 @@ def get_FNL_data():
     return datatable
 
 
-@DATAdecorator('./', True, OBS_DATA_PKLNAME)
+@DATAdecorator('./', OBS_PKL, OBS_DATA_PKLNAME)
 def get_OBS_data():
 
     # 3.0 读取FNL数据
@@ -418,9 +428,16 @@ if __name__ == "__main__":
                         # print(clevels)
                         
                         if var in daymean_vars:
-                            timestr = '{}-{}'.format(time_index*time_incr-24, time_index*time_incr)
+                            timestr = '({}-{})'.format(time_index*time_incr-24, time_index*time_incr)
+                        elif var in dayacc_vars:
+                            timestr = '({}-{})'.format(time_index*time_incr, time_index*time_incr+24)
                         else:
                             timestr = '{}'.format(time_index*time_incr)
+                        
+                        
+                        if plot_type == 'F':
+                            fnl_start_ddate = (dt.datetime.strptime(start_ddate, '%Y%m%d%H') + dt.timedelta(hours=int(time_index*time_incr))).strftime("%Y%m%d%H")
+                            fnl_end_ddate = (dt.datetime.strptime(end_ddate, '%Y%m%d%H') + dt.timedelta(hours=int(time_index*time_incr))).strftime("%Y%m%d%H")
 
                         # 3D or surface vars
                         if var_ndims[var] == 4:
@@ -429,7 +446,10 @@ if __name__ == "__main__":
                             else:
                                 title = ['{} {}hPa'.format(plot_types_name[plot_type], int(level)),
                                          r'{}'.format(varname)]
-                            subtitle = 'Init(UTC): {}+{}h - {}+{}h'.format(start_ddate,timestr,end_ddate,timestr)
+                            if plot_type == 'F':
+                                subtitle = 'Init(UTC): {} - {}'.format(fnl_start_ddate, fnl_end_ddate)
+                            else:
+                                subtitle = 'Init(UTC): {}+{}h - {}+{}h'.format(start_ddate,timestr,end_ddate,timestr)
                             pic_file = '{}_{}_{}hr_{}hpa_{}.png'.format(plot_type, iarea, time_index*time_incr, int(level), var)
 
                             print('\t\t\t'+pic_file)
@@ -438,11 +458,14 @@ if __name__ == "__main__":
                             plot_data(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels)
                         elif var_ndims[var] == 3:
                             if len(varname) < 20:
-                                title    = '{} of {}hr {}'.format(plot_types_name[plot_type], timestr, varname)
+                                title    = '{} {}'.format(plot_types_name[plot_type], varname)
                             else:
-                                title    = ['{} of {}hr'.format(plot_types_name[plot_type], timestr),
+                                title    = ['{}'.format(plot_types_name[plot_type]),
                                             r'{}'.format(varname)]
-                            subtitle = 'Init: {} UTC - {} UTC'.format(start_ddate, end_ddate)
+                            if plot_type == 'F':
+                                subtitle = 'Init(UTC): {} - {}'.format(fnl_start_ddate, fnl_end_ddate)
+                            else:
+                                subtitle = 'Init(UTC): {}+{}h - {}+{}h'.format(start_ddate, timestr, end_ddate, timestr)
                             pic_file = '{}_{}_{}hr_{}.png'.format(plot_type, iarea, time_index*time_incr, var)
 
                             print('\t\t\t'+pic_file)

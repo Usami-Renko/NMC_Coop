@@ -10,8 +10,8 @@ fnl_dir: './fnl_data/'
 dump_dir: './temp/'
 remove_dump: False
 
-# 运行模式 interp / plot
-run_mode: 'plot'
+# 运行模式 interp / plot / debug
+run_mode: 'interp'
 nc_sample: './ex_data/postvar2016010112.nc'
 
 # 提取变量和层次
@@ -20,12 +20,12 @@ ex_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
 
 # FNL数据变量名
 fnl_varname:
-  u: 'UGRD_P0_L100_GLL0' # [m/s]
-  v: 'VGRD_P0_L100_GLL0' # [m/s]
-  t: 'TMP_P0_L100_GLL0' # [K]
-  h: 'HGT_P0_L100_GLL0' # [gpm]
-  rh: 'RH_P0_L100_GLL0' # [%]
-  p_pa: 'lv_ISBL0' # [Pa]
+  u: 'u' # [m/s]
+  v: 'v' # [m/s]
+  t: 't' # [K]
+  h: 'gh' # [gpm]
+  rh: 'r' # [%]
+  p: 'isobaricInhPa' # [hPa]
 
 # GRAPES数据变量名
 grapes_varname:

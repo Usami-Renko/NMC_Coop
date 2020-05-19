@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 18:57:38
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-18 11:46:48
+@LastEditTime: 2020-05-19 17:40:58
 '''
 
 import numpy as np
@@ -97,7 +97,7 @@ class FNLWorkStation(_VarWorkStation):
     [1000.0, 925.0, 850.0, 700.0, 600.0, 500.0, 400.0, 300.0, 200.0, 100.0, 50.0, 10.0]
     '''
 
-    def __init__(self, filehandle, dic_varname, interp_LAT, interp_LON):
+    def __init__(self, filehandle, dic_varname, interp_LAT, interp_LON, sample_field):
         '''
         Additional inputs:
             interp_LAT, interp_LON:
@@ -110,13 +110,15 @@ class FNLWorkStation(_VarWorkStation):
         self.points = None
 
         self.interp_LAT, self.interp_LON = interp_LAT, interp_LON
+
+        self.sample_field = sample_field
         
         self._prepare_points()
 
     def _prepare_points(self):
         # pad the data to make it cyclic
 
-        lat, lon = self.filehandle.variables['lat_0'][:], self.filehandle.variables['lon_0'][:]
+        lat, lon = self.sample_field.coords['latitude'].values, self.sample_field.coords['longitude'].values
         TLAT, TLON = np.meshgrid(lat, lon)
 
         # pad the meshgrid to make it cyclic
@@ -180,7 +182,7 @@ class FNLWorkStation(_VarWorkStation):
 
     def _get_raw_var(self, varname):
         level_indices = self.indices
-        return FNLSlicedData(self.dic_varname[varname], self.filehandle, level_indices)
+        return FNLSlicedData(self.dic_varname[varname], self.filehandle, level_indices, self.sample_field)
 
     def _get_derived_var(self, varname):
         '''
@@ -208,8 +210,6 @@ class FNLWorkStation(_VarWorkStation):
             rh = self.get_var('rh')
             E = Es * rh / 100.
             return E  
-        elif varname == 'p':
-            return self.get_var('p_pa') / 100 # [Pa] --> [hPa]
         else:
             return self._no_derived_var(varname)
 

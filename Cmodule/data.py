@@ -3,7 +3,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-30 17:18:42
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-01 13:47:23
+@LastEditTime: 2020-05-19 17:42:10
 '''
 
 import numpy as np
@@ -11,6 +11,7 @@ from collections import OrderedDict
 import copy
 import os
 import warnings
+from nwpc_data.grib.eccodes import load_field_from_file
 
 
 class _DataClass(object):
@@ -401,18 +402,19 @@ class FNLSlicedData(_DataClass):
     '''
     A class to handle sliced FNL data with coordinates and attributes
     '''
-    def __init__(self, varname='', filehandle='', level_indices=''):
+    def __init__(self, varname='', filehandle='', level_indices='', sample_field=''):
         '''
         If this __init__() is called by self.copy(),
         just do no initialization  
         '''
         if filehandle != '' and varname != '':
-            self.create(varname, filehandle, level_indices)
+            self.create(varname, filehandle, level_indices, sample_field)
     
-    def create(self, varname, filehandle, level_indices):
+    def create(self, varname, filehandle, level_indices, sample_field):
         super(FNLSlicedData, self).__init__(varname)
 
         self.filehandle = filehandle
+        self.sample_field = sample_field
         self.level_indices = level_indices
         self.surface = False
 
@@ -421,16 +423,21 @@ class FNLSlicedData(_DataClass):
         self.raw_indices = None
 
         self.dimensions = None
+        self.xarray = None
+
+        # print(self.varname)
 
         self._assign_raw_coordinates()
-        if self.varname in self.raw_dims and varname != 'lv_ISBL0':
+        if self.varname in self.raw_dims and self.varname != 'isobaricInhPa':
             self.data = self.raw_coordinates[varname]
             self.ndim = 1
-        else: 
+        else:
+            if self.varname != 'isobaricInhPa':
+                self._get_xarray()
             self._assign_raw_indices()
             self._slice_coordinates()
             self._slice_data()
-    
+
     def copy(self):
         cp=FNLSlicedData()
         for attr in self.__dict__.keys():
@@ -440,29 +447,43 @@ class FNLSlicedData(_DataClass):
                 setattr(cp,attr,getattr(self,attr))                
         return cp
     
+    def close(self):
+        super(FNLSlicedData, self).close()
+        del self.xarray
+    
     def _assign_raw_coordinates(self):
-        self.raw_dims = ['lv_ISBL0', 'lat_0', 'lon_0']
+        self.raw_dims = ['isobaricInhPa', 'latitude', 'longitude']
         self.raw_coordinates = OrderedDict()
         for raw_dim in self.raw_dims:
-            self.raw_coordinates[raw_dim] = self.filehandle.variables[raw_dim][:]
+            self.raw_coordinates[raw_dim] = self.sample_field.coords[raw_dim].values
 
-        # print(self.raw_coordinates)    
+        # print(self.raw_coordinates)
+
+    def _get_xarray(self):
+        self.xarray = load_field_from_file(
+            file_path = self.filehandle,
+            parameter = self.varname,
+            level_type = "isobaricInhPa",
+            level = None,
+        )
     
     def _assign_raw_indices(self):
+
+        if self.varname == 'isobaricInhPa':
+            self.dimensions = ['isobaricInhPa']
+        else:
+            self.dimensions = self.xarray.dims
         
-        self.dimensions = self.filehandle.variables[self.varname].dimensions
         self.ndim = len(self.dimensions)
 
-        if 'lv_ISBL0' not in self.dimensions:
+        if 'isobaricInhPa' not in self.dimensions:
             self.surface = True
         
         self.raw_indices = OrderedDict()
         
         for dimension in self.dimensions:
-            if dimension == 'lv_ISBL0':
+            if dimension == 'isobaricInhPa':
                 self.raw_indices[dimension] = self.level_indices
-            elif dimension == 'times':
-                self.raw_indices[dimension] = self.time_indices
             else:
                 self.raw_indices[dimension] = range(len(self.raw_coordinates[dimension]))    
 
@@ -490,13 +511,10 @@ class FNLSlicedData(_DataClass):
         
         # Currently it is not written generally enough
         if not self.surface:
-            for ilevel, level_index in enumerate(self.level_indices):
-                if self.ndim != 1:
-                    self.data[ilevel, ...] = \
-                        self.filehandle.variables[self.varname][level_index, ...]
-                else:
-                    self.data[ilevel] = \
-                        self.filehandle.variables[self.varname][level_index]
+            if self.varname == 'isobaricInhPa':
+                self.data = self.coordinates['isobaricInhPa']
+            else:
+                for ilevel, level_index in enumerate(self.level_indices):
+                    self.data[ilevel, ...] = self.xarray[level_index, ...]
         else:
-            self.data[...] = \
-                self.filehandle.variables[self.varname][...]
+            self.data[...] = self.xarray[...]

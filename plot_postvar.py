@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-19 11:52:13
+@LastEditTime: 2020-05-19 17:39:37
 @Description  : process postvar
 '''
 import sys
@@ -88,16 +88,16 @@ def get_GRAPES_data():
     t0 = time.time()
     data_list = []
 
-    if run_mode == 'plot':
+    if run_mode == 'interp':
+        if not os.path.exists(nc_sample):
+            raise IOError('{} file not found under dir {}'.format(ifile, exdata_dir))
+        sample = nc.Dataset(nc_sample, 'r')
+    else:
         for ifile in ncfiles:
             if not os.path.exists(exdata_dir+ifile):
                 raise IOError('{} file not found under dir {}'.format(ifile, exdata_dir))
             data_list.append(nc.Dataset(exdata_dir+ifile, 'r'))
         sample = data_list[0]
-    elif run_mode == 'interp':
-        if not os.path.exists(nc_sample):
-            raise IOError('{} file not found under dir {}'.format(ifile, exdata_dir))
-        sample = nc.Dataset(nc_sample, 'r')
 
     t1 = time.time()
     print('postvar数据读取结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
@@ -174,14 +174,14 @@ def get_GRAPES_data():
     return global_package, datatable, datatable_case
 
 # pickle the data for ploting
-@DATAdecorator('./', True, FNL_DATA_PKLNAME)
+@DATAdecorator('./', False, FNL_DATA_PKLNAME)
 def get_FNL_data():
 
     # 3.0 读取FNL数据
     print('3.0 开始读取FNL数据')
     t0 = time.time()
 
-    import Nio
+    from nwpc_data.grib.eccodes import load_field_from_file
     
     init_datetimes = np.array([dt.datetime.strptime(itime, "%Y%m%d%H") for itime in timelines])
 
@@ -206,7 +206,7 @@ def get_FNL_data():
 
         if not os.path.exists(fnl_dir+os.sep+fnl_datetime.strftime("%Y")+os.sep+fnl_filename):
             raise IOError('{} file not found under dir {}'.format(fnl_filename, fnl_dir+os.sep+fnl_datetime.strftime("%Y"))+os.sep)
-        fnl_data_dic[fnl_timestr] = Nio.open_file(fnl_dir+os.sep+fnl_datetime.strftime("%Y")+os.sep+fnl_filename, 'r')
+        fnl_data_dic[fnl_timestr] = fnl_dir+os.sep+fnl_datetime.strftime("%Y")+os.sep+fnl_filename
 
     t1 = time.time()
     print('读取FNL数据结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
@@ -215,9 +215,15 @@ def get_FNL_data():
     print('4.0 对FNL数据进行插值')
     t0 = time.time()
     
-    sample = list(fnl_data_dic.values())[0]
+    sample_file = list(fnl_data_dic.values())[0]
+    sample_field = load_field_from_file(
+        file_path = sample_file,
+        parameter = "t",
+        level_type = "isobaricInhPa",
+        level = None,
+    )
     
-    fnl_levels = (sample.variables['lv_ISBL0'][:] / 100.).tolist()  # [Pa] --> [hPa]
+    fnl_levels = sample_field.coords['isobaricInhPa'].values.tolist()
 
     # if run in interp-mode, then we interp all the levels in ex_levels 
     level_indices_fnl_interp = np.array([fnl_levels.index(ex_level) for ex_level in ex_levels], dtype='int')
@@ -237,14 +243,14 @@ def get_FNL_data():
                 var, fnl_datetime)
             raise IOError(msg)
 
-        ws = FNLWorkStation(fnl_data_dic[fnl_datetime], fnl_varname, TLAT.T, TLON.T)
+        ws = FNLWorkStation(fnl_data_dic[fnl_datetime], fnl_varname, TLAT.T, TLON.T, sample_field)
         FNL_data = ws.get_var(var, level_indices_fnl_interp, interp=True).data
         ws.close()
         return FNL_data
 
     dds = DumpDataSet(dump_dir, get_FNL_worker)
     for ivar, var in enumerate(st_vars):
-        if run_mode == 'interp':
+        if run_mode != 'plot':
             print('\t变量:{}'.format(var)) 
         if var in noFNL_vars:
             continue
@@ -253,7 +259,7 @@ def get_FNL_data():
         ndim = var_ndims[var]
 
         for iinittime, inittime_str in enumerate(timelines):
-            if run_mode == 'interp':
+            if run_mode != 'plot':
                 print('\t\t起报时间:{}'.format(inittime_str)) 
             for ifcsttime, time_index in enumerate(time_indices_var):
                 fnl_datetime = (dt.datetime.strptime(inittime_str, '%Y%m%d%H') + \
@@ -272,10 +278,9 @@ def get_FNL_data():
     datatable = tmp_datatable / len(timelines)
 
     # close the file handle    
-    for fnl_data in fnl_data_dic.values():
-        fnl_data.close()
+    del fnl_data_dic
     del tmp_datatable
-    del Nio
+    del load_field_from_file
 
     t1 = time.time()
     print('对FNL数据进行插值, 用时{} seconds.'.format(str(t1-t0)[:7]))

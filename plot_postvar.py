@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-18 20:49:19
+@LastEditTime: 2020-05-19 11:52:13
 @Description  : process postvar
 '''
 import sys
@@ -174,7 +174,7 @@ def get_GRAPES_data():
     return global_package, datatable, datatable_case
 
 # pickle the data for ploting
-@DATAdecorator('./', False, FNL_DATA_PKLNAME)
+@DATAdecorator('./', True, FNL_DATA_PKLNAME)
 def get_FNL_data():
 
     # 3.0 读取FNL数据
@@ -244,7 +244,8 @@ def get_FNL_data():
 
     dds = DumpDataSet(dump_dir, get_FNL_worker)
     for ivar, var in enumerate(st_vars):
-        print('\t变量:{}'.format(var))
+        if run_mode == 'interp':
+            print('\t变量:{}'.format(var)) 
         if var in noFNL_vars:
             continue
                 
@@ -252,7 +253,8 @@ def get_FNL_data():
         ndim = var_ndims[var]
 
         for iinittime, inittime_str in enumerate(timelines):
-            print('\t\t起报时间:{}'.format(inittime_str))
+            if run_mode == 'interp':
+                print('\t\t起报时间:{}'.format(inittime_str)) 
             for ifcsttime, time_index in enumerate(time_indices_var):
                 fnl_datetime = (dt.datetime.strptime(inittime_str, '%Y%m%d%H') + \
                     dt.timedelta(hours=int(time_indices_var[ifcsttime]*time_incr))).strftime('%Y%m%d%H')

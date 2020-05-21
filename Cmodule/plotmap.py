@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-18 11:08:14
+@LastEditTime: 2020-05-20 22:31:07
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -272,7 +272,7 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     CB.set_label(varname, fontsize=14)
 
     plt.savefig('{}/{}/{}'.format(origin_dir, var, pic_file), bbox_inches='tight', dpi=plot_dpi)
-    plt.close()
+    plt.close(fig)
 
 
 def plot_case(data_field, data_obs, lon, lat, title, subtitle, pic_file, newcolorscheme):
@@ -375,7 +375,7 @@ def plot_case(data_field, data_obs, lon, lat, title, subtitle, pic_file, newcolo
     ax_cf.legend(frameon=True, loc='lower left', title='Observation')
 
     plt.savefig('{}/{}'.format(case_dir, pic_file), bbox_inches='tight', dpi=plot_dpi)
-    plt.close()
+    plt.close(fig)
 
 # unit test
 if __name__ == "__main__":

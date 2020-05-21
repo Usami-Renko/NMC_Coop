@@ -1,6 +1,6 @@
 # 时间信息
-start_ddate: '2016010112'  # yyyymndd
-end_ddate  : '2016010512'  # yyyymndd
+start_ddate: '2019080112'  # yyyymndd
+end_ddate  : '2019080512'  # yyyymndd
 
 # 起报时间间隔
 fcst_step: 24 # hours
@@ -15,7 +15,7 @@ exdata_dir: './ex_data/'
 # 可供选择的变量和层次: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
 #                     [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
 # st_vars: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
-st_vars: ['q', '24hrain']
+st_vars:  ['u','q','24hrain']
 # st_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.]
 st_levels: [500.,100.]
 

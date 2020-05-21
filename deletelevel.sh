@@ -5,16 +5,21 @@
  # @Author: Hejun Xie
  # @Date: 2020-05-21 11:24:29
  # @LastEditors: Hejun Xie
- # @LastEditTime: 2020-05-21 12:00:47
+ # @LastEditTime: 2020-05-21 12:09:09
 ### 
 
-path=./fnl_data/2019/
-outpath=./temp/fnl_data_tmp/2019/
+year=2019
+
+path=./fnl_data/
+outpath=./temp/fnl_data_tmp/
 
 files=$(ls $path)
 # echo $files
 
+mkdir $outpath
+mkdir $outpath/$year
+
 for file in $files
 do
-	cdo delete,name=gh,t,level=1500,4000 $path/$file $outpath/$file
+	cdo delete,name=gh,t,level=1500,4000 $path/$year/$file $outpath/$year/$file
 done

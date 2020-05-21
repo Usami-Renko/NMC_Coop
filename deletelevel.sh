@@ -5,7 +5,7 @@
  # @Author: Hejun Xie
  # @Date: 2020-05-21 11:24:29
  # @LastEditors: Hejun Xie
- # @LastEditTime: 2020-05-21 12:09:09
+ # @LastEditTime: 2020-05-21 12:11:47
 ### 
 
 year=2019
@@ -13,11 +13,12 @@ year=2019
 path=./fnl_data/
 outpath=./temp/fnl_data_tmp/
 
-files=$(ls $path)
+files=$(ls $path/$year)
 # echo $files
 
 mkdir $outpath
 mkdir $outpath/$year
+
 
 for file in $files
 do

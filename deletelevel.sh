@@ -5,11 +5,11 @@
  # @Author: Hejun Xie
  # @Date: 2020-05-21 11:24:29
  # @LastEditors: Hejun Xie
- # @LastEditTime: 2020-05-21 11:49:40
+ # @LastEditTime: 2020-05-21 12:00:47
 ### 
 
 path=./fnl_data/2019/
-outpath=./temp/2019/
+outpath=./temp/fnl_data_tmp/2019/
 
 files=$(ls $path)
 # echo $files

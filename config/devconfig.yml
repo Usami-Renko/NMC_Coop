@@ -4,10 +4,10 @@
 platform: 'PC'    # 'Pi'
 
 # FNL数据路径
-fnl_dir: './temp/'
+fnl_dir: './temp/fnl_data_tmp/'
 
 # FNL加速硬盘缓冲区
-dump_dir: './temp/'
+dump_dir: './temp/pkl/'
 remove_dump: False
 
 # 运行模式 interp / plot / debug

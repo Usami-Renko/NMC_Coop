@@ -5,14 +5,16 @@
  # @Author: Hejun Xie
  # @Date: 2020-05-21 11:24:29
  # @LastEditors: Hejun Xie
- # @LastEditTime: 2020-05-21 11:35:57
+ # @LastEditTime: 2020-05-21 11:49:40
 ### 
 
 path=./fnl_data/2019/
+outpath=./temp/2019/
+
 files=$(ls $path)
 # echo $files
 
 for file in $files
 do
-	cdo delete,name=gh,t,level=1500,4000 $path/$file $path/$file.tmp
+	cdo delete,name=gh,t,level=1500,4000 $path/$file $outpath/$file
 done

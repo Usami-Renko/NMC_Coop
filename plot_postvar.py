@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-21 11:37:33
+@LastEditTime: 2020-05-21 11:53:06
 @Description  : process postvar
 '''
 import sys
@@ -211,7 +211,7 @@ def get_FNL_data():
 
     fnl_data_dic = dict()
     for fnl_datetime in fnl_datetime_set:
-        fnl_filename = fnl_datetime.strftime("fnl_%Y%m%d_%H_00.grib2.tmp")
+        fnl_filename = fnl_datetime.strftime("fnl_%Y%m%d_%H_00.grib2")
         fnl_timestr = fnl_datetime.strftime("%Y%m%d%H")
 
         if not os.path.exists(fnl_dir+os.sep+fnl_datetime.strftime("%Y")+os.sep+fnl_filename):

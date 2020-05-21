@@ -4,7 +4,7 @@
 platform: 'PC'    # 'Pi'
 
 # FNL数据路径
-fnl_dir: './fnl_data/'
+fnl_dir: './temp/'
 
 # FNL加速硬盘缓冲区
 dump_dir: './temp/'

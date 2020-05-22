@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-20 22:31:07
+@LastEditTime: 2020-05-22 18:15:07
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -37,8 +37,8 @@ def area_region(area):
         rlat, qlat =  60.,  90.
         rlon, qlon =   0., 360.
     if area == 'E_Asia':
-        rlat, qlat =  10.,  70.
-        rlon, qlon =  60., 150.
+        rlat, qlat =  10.,  60.
+        rlon, qlon =  70., 140.
     if area == 'Tropics':
         rlat, qlat = -20.,  20.
         rlon, qlon =   0., 360.
@@ -73,7 +73,7 @@ def _tick_lats(map, lat_labels, ax, xoffset=250000, yoffset=0, rl='r'):
             
         ax.text(x, y+yoffset, text, fontsize=11, ha='center', va='center')
 
-def _add_title(ax, title, subtitle, figsize):
+def _add_title(ax, title, subtitle, statistics, figsize):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.spines['left'].set_visible(False)
@@ -83,14 +83,19 @@ def _add_title(ax, title, subtitle, figsize):
     ax.set_yticks([])
     
     if isinstance(title, list):
-        if figsize[0] < figsize[1]:
+        if figsize[0] < figsize[1] * 1.4:
             ax.text(0.5, 0.80, title[0], fontsize=20, ha='center', va='center')
-            ax.text(0.5, 0.40, title[1], fontsize=20, ha='center', va='center')
+            ax.text(0.5, 0.40, title[1], fontsize=16, ha='center', va='center')
         else:
             ax.text(0.5, 0.60, title[0] + ' ' + title[1], fontsize=18, ha='center', va='center')
     else:
         ax.text(0.5, 0.50, title, fontsize=22, ha='center', va='center')
-    ax.text(0.5, 0.00, subtitle, fontsize=16, ha='center', va='center')
+    ax.text(0.5, 0.00, subtitle, fontsize=14, ha='center', va='center')
+
+    ax.text(0.08, 0.60, "MIN: {:>.2f}".format(statistics[0]), fontsize=8, ha='right', va='center')
+    ax.text(0.08, 0.30, "MAX: {:>.2f}".format(statistics[1]), fontsize=8, ha='right', va='center')
+    ax.text(0.08, 0.00, "MEAN: {:>.2f}".format(statistics[2]), fontsize=8, ha='right', va='center')
+
 
 def _clip_data(iarea, data, lon, lat):
 
@@ -120,9 +125,13 @@ def _find_clevels_rec(data, dlevel, plot_type):
     
     data_max, data_min = int(data.max()), int(data.min())
 
-    if dlevel >= 10:
-        data_max = data_max // 10 * 10
-        data_min = data_min // 10 * 10
+    if plot_type in ['G', 'F']:
+        data_max = data_max // dlevel * dlevel
+        data_min = data_min // dlevel * dlevel
+    
+    if plot_type in ['GMF']:
+        data_max = data_max // dlevel * dlevel + dlevel / 2
+        data_min = data_min // dlevel * dlevel - dlevel / 2
 
     if plot_type == 'GMF':
         if abs(data_max) > abs(data_min):
@@ -146,7 +155,12 @@ def find_clevels(iarea, data, lon, lat, dlevel, plot_type):
     
     return clevels
 
-def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels):
+def find_statistics(iarea, data, lon, lat):
+    data_visible = _clip_data(iarea, data, lon, lat)
+    Min, Max, Mean = data_visible.min(), data_visible.max(), data_visible.mean()
+    return Min, Max, Mean
+
+def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels, statistics):
     
     plt.rcParams['font.family'] = 'serif'
 
@@ -160,7 +174,7 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     elif iarea == 'Tropics':
         figsize = (20,4.0)
     elif iarea == 'E_Asia':
-        figsize = (10,7.7)
+        figsize = (10,8.2)
 
     fig = plt.figure(figsize=figsize)
     
@@ -169,7 +183,7 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     else:
         ax_title = fig.add_axes([0.1, 0.90, 0.82, 0.08])
     
-    _add_title(ax_title, title, subtitle, figsize)
+    _add_title(ax_title, title, subtitle, statistics, figsize)
 
     if iarea == 'Tropics':
         ax_cf = fig.add_axes([0.1, 0.16, 0.85, 0.65])
@@ -195,6 +209,7 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
         map = Basemap(projection='cyl',llcrnrlat=slat,urcrnrlat=elat, llcrnrlon=slon, urcrnrlon=elon, resolution='l', ax=ax_cf)
         map.drawparallels(np.arange(slat, elat+1, 20), linewidth=1, dashes=[4, 3], labels=[1, 0, 0, 0])
         map.drawmeridians(np.arange(slon, elon+1, 20), linewidth=1, dashes=[4, 3], labels=[0, 0, 0, 1])
+        map.drawcountries()
     elif iarea == 'North_P':
         map = Basemap(projection='npstere', boundinglat=slat, lon_0=0, resolution='l', ax=ax_cf)
         map.drawparallels(np.arange(slat, 90, 10), linewidth=1, dashes=[4, 3])
@@ -229,6 +244,7 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     x, y = map(TLON.T, TLAT.T)
 
     origin = 'lower'
+    extend = 'both'
 
     # some settings 
     
@@ -240,6 +256,10 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     if var in ['24hrain']:
         post_data = ma.masked_where(post_data <= 0.01, post_data)
     
+    if var in ['q'] and plot_type in ['G', 'F']:
+        post_data = ma.masked_where(post_data <= 0.00, post_data)
+        extend = 'max'
+
     if len(clevels) < 3:
         print("[warning]: clevels too short for this var at this level, abort...".format())
         return
@@ -261,11 +281,11 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     if platform == 'Pi':
         if var == '24hrain':
             colors_24hrain = ['#000080','#0034FF','#30FFC7','#8AFF6D','#D1FF26','#FBF100','#FFC800','#FFAB00','#FF8900','#FF6400','#FF3000','#BB0000','#800000']
-            CF = map.contourf(x, y, post_data.T, levels=clevels, colors=colors_24hrain, origin=origin, extend="both")
+            CF = map.contourf(x, y, post_data.T, levels=clevels, colors=colors_24hrain, origin=origin, extend=extend)
         else:
-            CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend="both", norm=norm)
+            CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend=extend, norm=norm)
     else:
-        CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend="both", norm=norm)
+        CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend=extend, norm=norm)
     CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal', ticks=ticks)
     if 'ticklabels' in locals().keys():
         CB.ax.set_xticklabels(ticklabels)

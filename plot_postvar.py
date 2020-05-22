@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-21 11:53:06
+@LastEditTime: 2020-05-22 17:26:17
 @Description  : process postvar
 '''
 import sys
@@ -21,7 +21,7 @@ from multiprocessing import Pool
 from utils import DATAdecorator, config_list, hashlist, makenewdir, DumpDataSet
 from derived_vars import FNLWorkStation, GRAPESWorkStation
 from asciiio import read_obs
-from plotmap import plot_data, find_clevels, plot_case
+from plotmap import plot_data, find_clevels, find_statistics, plot_case
 from make_comp import make_comp_pic, make_gif_pic
 
 # read the config file
@@ -408,8 +408,8 @@ if __name__ == "__main__":
                             data = datatable_grapes[ivar, itime, ilevel, ...] - \
                                 datatable_fnl[ivar, itime, ilevel, ...]
 
-                        # print(data.min())
-                        # print(data.max())
+                        statistcs = find_statistics(iarea, data, lon, lat)
+                        # print(statistcs)
 
                         if var in clevel_custom.keys(): 
                             clevels = np.array(clevel_custom[var])
@@ -428,11 +428,11 @@ if __name__ == "__main__":
                         # print(clevels)
                         
                         if var in daymean_vars:
-                            timestr = '({}-{})'.format(time_index*time_incr-24, time_index*time_incr)
+                            timestr = '({:0>3}-{:0>3})'.format(time_index*time_incr-24, time_index*time_incr)
                         elif var in dayacc_vars:
-                            timestr = '({}-{})'.format(time_index*time_incr, time_index*time_incr+24)
+                            timestr = '({:0>3}-{:0>3})'.format(time_index*time_incr, time_index*time_incr+24)
                         else:
-                            timestr = '{}'.format(time_index*time_incr)
+                            timestr = '{:0>3}'.format(time_index*time_incr)
                         
                         
                         if plot_type == 'F':
@@ -449,13 +449,13 @@ if __name__ == "__main__":
                             if plot_type == 'F':
                                 subtitle = 'Init(UTC): {} - {}'.format(fnl_start_ddate, fnl_end_ddate)
                             else:
-                                subtitle = 'Init(UTC): {}+{}h - {}+{}h'.format(start_ddate,timestr,end_ddate,timestr)
+                                subtitle = 'Init(UTC): {}+{}H - {}+{}H'.format(start_ddate,timestr,end_ddate,timestr)
                             pic_file = '{}_{}_{}hr_{}hpa_{}.png'.format(plot_type, iarea, time_index*time_incr, int(level), var)
 
                             print('\t\t\t'+pic_file)
 
                             # p.apply_async(plot_data, args=(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels))
-                            plot_data(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels)
+                            plot_data(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels, statistcs)
                         elif var_ndims[var] == 3:
                             if len(varname) < 20:
                                 title    = '{} {}'.format(plot_types_name[plot_type], varname)
@@ -465,12 +465,12 @@ if __name__ == "__main__":
                             if plot_type == 'F':
                                 subtitle = 'Init(UTC): {} - {}'.format(fnl_start_ddate, fnl_end_ddate)
                             else:
-                                subtitle = 'Init(UTC): {}+{}h - {}+{}h'.format(start_ddate, timestr, end_ddate, timestr)
+                                subtitle = 'Init(UTC): {}+{}H - {}+{}H'.format(start_ddate, timestr, end_ddate, timestr)
                             pic_file = '{}_{}_{}hr_{}.png'.format(plot_type, iarea, time_index*time_incr, var)
 
                             print('\t\t\t'+pic_file)
 
-                            plot_data(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels)
+                            plot_data(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels, statistcs)
                             break
 
                     p.close()

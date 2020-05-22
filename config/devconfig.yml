@@ -11,7 +11,7 @@ dump_dir: './temp/pkl/'
 remove_dump: False
 
 # 运行模式 interp / plot / debug
-run_mode: 'interp'
+run_mode: 'plot'
 nc_sample: './ex_data/postvar2016010112.nc'
 
 # 提取变量和层次
@@ -83,7 +83,7 @@ symlognorm_params:
     linthresh: 80
     linscale: 1.4
     vmin: -200
-    vmax: 800
+    vmax: 400
 
 lognorm_params:
   24hrain:
@@ -93,7 +93,7 @@ clevel_step:
   u: 2
   v: 2
   t: 1
-  h: 30
+  h: 40
   q: 0.1
   t2m: 1
   shf: 10
@@ -102,7 +102,7 @@ clevel_step:
 clevel_step_PMF:
   u: 1
   v: 1
-  t: 0.3
+  t: 0.5
   h: 10
   q: 0.1
 
@@ -110,7 +110,8 @@ clevel_step_PMF:
 clevel_custom:
   24hrain: [0.1, 1, 2, 4, 6, 8, 10, 12, 16, 20, 32, 64]
   w: [-32, -16, -8, -4, -2, -1, -0.5, -0.2, 0, 0.2, 0.5, 1, 2, 4, 6, 8, 16, 32]
-  shf: [-200, -100, -50, -25, 0, 25, 50, 100, 200, 400, 800]
+  shf: [-200, -100, -50, -25, 0, 25, 50, 100, 200, 400]
+  phf: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450]
 
 # 一些特殊变量
 # avoid ploting initial

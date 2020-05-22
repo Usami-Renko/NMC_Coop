@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-22 18:15:07
+@LastEditTime: 2020-05-22 19:22:14
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -274,6 +274,15 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     if var in clevel_custom.keys():
         ticks = clevels
         ticklabels = [str(clevel) for clevel in clevels]
+    elif plot_type == 'GMF':
+        if len(clevels) > 12:
+            positive = clevels[clevels>0][::2]
+        else:
+            positive = clevels[clevels>0]
+        negative = -np.flip(positive)
+        ticks = list(negative) 
+        ticks.extend(list(positive))
+        ticklabels = [str(tick) for tick in ticks]
     else:
         ticks = None
     

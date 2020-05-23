@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-22 19:22:14
+@LastEditTime: 2020-05-23 21:09:00
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -271,21 +271,9 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     else:
         norm = None
 
-    if var in clevel_custom.keys():
-        ticks = clevels
-        ticklabels = [str(clevel) for clevel in clevels]
-    elif plot_type == 'GMF':
-        if len(clevels) > 12:
-            positive = clevels[clevels>0][::2]
-        else:
-            positive = clevels[clevels>0]
-        negative = -np.flip(positive)
-        ticks = list(negative) 
-        ticks.extend(list(positive))
-        ticklabels = [str(tick) for tick in ticks]
-    else:
-        ticks = None
-    
+    ticks = clevels
+    ticklabels = [str(clevel) for clevel in clevels]
+
     # for Pi
     if platform == 'Pi':
         if var == '24hrain':
@@ -296,8 +284,11 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     else:
         CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend=extend, norm=norm)
     CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal', ticks=ticks)
-    if 'ticklabels' in locals().keys():
-        CB.ax.set_xticklabels(ticklabels)
+    CB.ax.set_xticklabels(ticklabels)
+    for tick in CB.ax.xaxis.get_major_ticks():
+            tick.label.set_fontsize(10)
+            tick.label.set_rotation(45)
+
     CB.set_label(varname, fontsize=14)
 
     plt.savefig('{}/{}/{}'.format(origin_dir, var, pic_file), bbox_inches='tight', dpi=plot_dpi)

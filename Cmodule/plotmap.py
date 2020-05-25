@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-25 12:25:00
+@LastEditTime: 2020-05-25 12:31:27
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -95,7 +95,7 @@ def _add_title(ax, title, subtitle, statistics, figsize):
     ax.text(0.08, 0.90, "MIN: {:>.2f}".format(statistics[0]), fontsize=8, ha='right', va='center')
     ax.text(0.08, 0.60, "MAX: {:>.2f}".format(statistics[1]), fontsize=8, ha='right', va='center')
     ax.text(0.08, 0.30, "MEAN: {:>.2f}".format(statistics[2]), fontsize=8, ha='right', va='center')
-    ax.text(0.08, 0.00, "{}".format(plot_expr), fontsize=8, ha='right', va='center')
+    ax.text(0.08, 0.00, "{}".format(plot_expr), fontsize=10, weight='bold', ha='right', va='center')
 
 def _clip_data(iarea, data, lon, lat):
 

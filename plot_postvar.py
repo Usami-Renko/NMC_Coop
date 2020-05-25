@@ -3,14 +3,13 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: Hejun Xie
-@LastEditTime: 2020-05-22 17:26:17
+@LastEditors: wanghao
+@LastEditTime: 2020-05-25 08:37:00
 @Description  : process postvar
 '''
 import sys
-# sys.path.append('/g3/wanghao/Python/Cmodule/gen_info')
-# sys.path.append('/home/shiyu1997/NMC/Cmodule/')
 sys.path.append('./Cmodule')
+sys.path.append('/g3/wanghao/Python/Cmodule/GRAPES_VS_FNL')
 import numpy as np
 import time
 import datetime as dt

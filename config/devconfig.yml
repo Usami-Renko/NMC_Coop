@@ -2,17 +2,21 @@
 
 # 平台
 platform: 'PC'    # 'Pi'
+# platforn: 'Pi'
 
 # FNL数据路径
 fnl_dir: './temp/fnl_data_tmp/'
+# fnl_dir: '/g1/COMMONDATA/obs/EXPR/NWPC/glob/fnl/'
 
 # FNL加速硬盘缓冲区
 dump_dir: './temp/pkl/'
+# dump_dir: '/g3/das_xp/DATA/fnl/fnl_pkl/'
 remove_dump: False
 
 # 运行模式 interp / plot / debug
 run_mode: 'plot'
 nc_sample: './ex_data/postvar2016010112.nc'
+# nc_sample: '/g3/wanghao/share/GRAPES_VS_FNL/ex_data/postvar2016010112.nc'
 
 # 提取变量和层次
 ex_vars  : ['u','v','t','h','w','q2','rainc','rainnc', 'hfxa', 'qfxa', 't2m']

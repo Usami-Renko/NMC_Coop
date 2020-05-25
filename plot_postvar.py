@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-25 11:42:21
+@LastEditTime: 2020-05-25 19:37:11
 @Description  : process postvar
 '''
 import sys
@@ -17,7 +17,7 @@ from gen_timelines import gen_timelines
 import os
 from multiprocessing import Pool
 
-from utils import DATAdecorator, config_list, hashlist, makenewdir, DumpDataSet
+from utils import DATADumpManager, config_list, hashlist, makenewdir, DumpDataSet
 from derived_vars import FNLWorkStation, GRAPESWorkStation
 from asciiio import read_obs
 from plotmap import plot_data, find_clevels, find_statistics, plot_case
@@ -36,35 +36,6 @@ make_comp.config_submodule(cong)
 # config script
 for key, value in cong.items():
     globals()[key] = value
-
-exdata_dir = os.path.join(exdata_root_dir, plot_expr)
-
-# mode settings
-GRAPES_PKL = True
-FNL_PKL = True
-OBS_PKL = True
-
-if run_mode == 'interp':
-    st_vars = plotable_vars
-    fcst_step = 6
-    FNL_PKL = False
-
-if run_mode == 'debug':
-    FNL_PKL = False
-    GRAPES_PKL = False
-    OBS_PKL = False
-
-origin_dir = os.path.join(pic_dir, origin_dir)
-comp_dir = os.path.join(pic_dir, comp_dir)
-gif_dir = os.path.join(pic_dir, gif_dir)
-case_dir = os.path.join(pic_dir, case_dir)
-
-OBS_HASH = hashlist([case_ini_times, case_fcst_hours])
-GRAPES_HASH = hashlist([st_vars, st_levels, fcst, start_ddate, end_ddate, fcst_step, OBS_HASH])
-OBS_DATA_PKLNAME = './pkl/OBS_{}.pkl'.format(OBS_HASH)
-GRAPES_DATA_PKLNAME = './pkl/GRAPES_{}.pkl'.format(GRAPES_HASH)
-FNL_DATA_PKLNAME = './pkl/FNL_{}.pkl'.format(GRAPES_HASH)
-
 
 def get_time_indices(var, time_indices, time_incr, times):
 
@@ -89,8 +60,6 @@ def get_time_indices(var, time_indices, time_incr, times):
     
     return time_indices_var
 
-# pickle the data for ploting
-@DATAdecorator('./', GRAPES_PKL, GRAPES_DATA_PKLNAME)
 def get_GRAPES_data():
 
     # 1.0 读取postvar数据
@@ -184,8 +153,6 @@ def get_GRAPES_data():
 
     return global_package, datatable, datatable_case
 
-# pickle the data for ploting
-@DATAdecorator('./', FNL_PKL, FNL_DATA_PKLNAME)
 def get_FNL_data():
 
     # 3.0 读取FNL数据
@@ -299,7 +266,6 @@ def get_FNL_data():
     return datatable
 
 
-@DATAdecorator('./', OBS_PKL, OBS_DATA_PKLNAME)
 def get_OBS_data():
 
     # 3.0 读取FNL数据
@@ -330,15 +296,48 @@ if __name__ == "__main__":
     timelines   = gen_timelines(start_ddate, end_ddate, fcst_step)
     ncfiles     = ['postvar{}.nc'.format(itime) for itime in timelines]
 
+    exdata_dir = os.path.join(exdata_root_dir, plot_expr)
+
+    # mode settings
+    GRAPES_PKL = True
+    FNL_PKL = True
+    OBS_PKL = True
+
+    if run_mode == 'interp':
+        st_vars = plotable_vars
+        fcst_step = 6
+        FNL_PKL = False
+
+    if run_mode == 'debug':
+        FNL_PKL = False
+        GRAPES_PKL = False
+        OBS_PKL = False
+
+    origin_dir = os.path.join(pic_dir, origin_dir)
+    comp_dir = os.path.join(pic_dir, comp_dir)
+    gif_dir = os.path.join(pic_dir, gif_dir)
+    case_dir = os.path.join(pic_dir, case_dir)
+
+    OBS_HASH = hashlist([case_ini_times, case_fcst_hours])
+    GRAPES_HASH = hashlist([st_vars, st_levels, fcst, start_ddate, end_ddate, fcst_step, OBS_HASH])
+    OBS_DATA_PKLNAME = './pkl/OBS_{}.pkl'.format(OBS_HASH)
+    GRAPES_DATA_PKLNAME = './pkl/GRAPES_{}.pkl'.format(GRAPES_HASH)
+    FNL_DATA_PKLNAME = './pkl/FNL_{}.pkl'.format(GRAPES_HASH)
+
+    ddm_grapes = DATADumpManager('./', GRAPES_PKL, GRAPES_DATA_PKLNAME, get_GRAPES_data)
+    ddm_fnl = DATADumpManager('./', FNL_PKL, FNL_DATA_PKLNAME, get_FNL_data)
+    ddm_obs = DATADumpManager('./', OBS_PKL, OBS_DATA_PKLNAME, get_OBS_data)
+    
+
     # datatable dimension: (nvars, nfcsrtimes, nlevels, nlat, nlon)
-    global_package, datatable_grapes, datatable_case_grapes = get_GRAPES_data()
+    global_package, datatable_grapes, datatable_case_grapes = ddm_grapes.get_data()
     for global_name in global_package.keys():
         globals()[global_name] = global_package[global_name]
-    datatable_fnl = get_FNL_data()
+    datatable_fnl = ddm_fnl.get_data()
     if run_mode == 'interp':
         print('Successfully interpolated FNL data from {} to {}'.format(start_ddate, end_ddate))
         exit()
-    datatable_obs = get_OBS_data()
+    datatable_obs = ddm_obs.get_data()
 
     # exit()
 

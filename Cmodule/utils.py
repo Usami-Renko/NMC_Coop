@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-22 18:55:54
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-18 21:42:08
+@LastEditTime: 2020-05-25 19:30:08
 '''
 # -*- coding: utf-8 -*-
 
@@ -20,28 +20,26 @@ import glob
 from functools import wraps 
 
 
-class DATAdecorator(object):
-    def __init__(self, workdir, pickle_speedup, pickle_filename):
+class DATADumpManager(object):
+    def __init__(self, workdir, pickle_speedup, pickle_filename, worker):
         self.workdir = workdir
         self.pickle_speedup = pickle_speedup
         self.pickle_filename = pickle_filename
+        self.worker = worker
     
-    def __call__(self, worker):
-        @wraps(worker)
-        def wrapped_worker(*args, **kwargs):
-            if not self.pickle_speedup \
-                or not os.path.exists(self.pickle_filename):
-                cdir = os.getcwd()
-                os.chdir(self.workdir)
-                DATA = worker(*args, **kwargs)
-                os.chdir(cdir)
-                if DATA is not None:
-                    self.pickle_dump(DATA)
-            else:
-                DATA = self.pickle_load()           
-            return DATA
-        return wrapped_worker
-            
+    def get_data(self, *args, **kwargs):        
+        if not self.pickle_speedup \
+            or not os.path.exists(self.pickle_filename):
+            cdir = os.getcwd()
+            os.chdir(self.workdir)
+            DATA = self.worker(*args, **kwargs)
+            os.chdir(cdir)
+            if DATA is not None:
+                self.pickle_dump(DATA)
+        else:
+            DATA = self.pickle_load()           
+        return DATA
+
     def pickle_dump(self, DATA):
         print('Dump data at {}'.format(self.pickle_filename))
         makenewdir(os.path.dirname(self.pickle_filename))

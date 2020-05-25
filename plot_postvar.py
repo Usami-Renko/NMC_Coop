@@ -3,8 +3,8 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: wanghao
-@LastEditTime: 2020-05-25 08:37:00
+@LastEditors: Hejun Xie
+@LastEditTime: 2020-05-25 11:42:21
 @Description  : process postvar
 '''
 import sys
@@ -36,6 +36,8 @@ make_comp.config_submodule(cong)
 # config script
 for key, value in cong.items():
     globals()[key] = value
+
+exdata_dir = os.path.join(exdata_root_dir, plot_expr)
 
 # mode settings
 GRAPES_PKL = True
@@ -103,9 +105,9 @@ def get_GRAPES_data():
         sample = nc.Dataset(nc_sample, 'r')
     else:
         for ifile in ncfiles:
-            if not os.path.exists(exdata_dir+ifile):
+            if not os.path.exists(os.path.join(exdata_dir, ifile)):
                 raise IOError('{} file not found under dir {}'.format(ifile, exdata_dir))
-            data_list.append(nc.Dataset(exdata_dir+ifile, 'r'))
+            data_list.append(nc.Dataset(os.path.join(exdata_dir, ifile), 'r'))
         sample = data_list[0]
 
     t1 = time.time()

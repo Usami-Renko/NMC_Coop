@@ -8,11 +8,14 @@ fcst_step: 24 # hours
 # GRAPES试验名称和数据路径 
 # ctlfile_dir: './87_fcst_ctl/'
 exprs:
-  - 'CTRL' : './87_fcst_ctl/'
-  - 'ASSI' : './87_fcst_ctl/'
+  'CTRL' : './87_fcst_ctl/'
+  'ASSI' : './87_fcst_ctl/'
 
 # GRAPES数据转换路径
 exdata_root_dir: './ex_data/'
+
+# 需要画图的试验名称
+plot_expr: 'CTRL' 
 
 # 统计绘图变量和层次:
 # 可供选择的变量和层次: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']

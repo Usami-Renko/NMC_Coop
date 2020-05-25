@@ -15,7 +15,7 @@ remove_dump: False
 
 # 运行模式 interp / plot / debug
 run_mode: 'plot'
-nc_sample: './ex_data/postvar2016010112.nc'
+nc_sample: './ex_data/CTRL/postvar2016010112.nc'
 # nc_sample: '/g3/wanghao/share/GRAPES_VS_FNL/ex_data/postvar2016010112.nc'
 
 # 提取变量和层次

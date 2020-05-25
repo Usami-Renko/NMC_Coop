@@ -3,8 +3,8 @@
 @Description: Extract data from Grads data
 @Author: wanghao
 @Date: 2020-04-20 09:59:11
-@LastEditors: wanghao
-@LastEditTime: 2020-05-25 10:56:52
+@LastEditors: Hejun Xie
+@LastEditTime: 2020-05-25 11:29:49
 '''
 
 import sys
@@ -41,7 +41,7 @@ if __name__ == '__main__':
         generate_generalctl(timelines, ctlfile_dir)
 
         # 创建数据提取路径
-        exdata_dir = exdata_dir + list(iexpr.keys())[0]
+        exdata_dir = exdata_root_dir + list(iexpr.keys())[0]
         if not os.path.exists(exdata_dir):
             os.makedirs(exdata_dir)
         

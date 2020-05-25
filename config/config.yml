@@ -12,7 +12,7 @@ exprs:
   - 'ASSI' : './87_fcst_ctl/'
 
 # GRAPES数据转换路径
-exdata_dir: './ex_data/'
+exdata_root_dir: './ex_data/'
 
 # 统计绘图变量和层次:
 # 可供选择的变量和层次: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']

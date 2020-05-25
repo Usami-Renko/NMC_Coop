@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-25 20:30:11
+@LastEditTime: 2020-05-25 21:24:35
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -74,7 +74,7 @@ def _tick_lats(map, lat_labels, ax, xoffset=250000, yoffset=0, rl='r'):
             
         ax.text(x, y+yoffset, text, fontsize=11, ha='center', va='center')
 
-def _add_title(ax, title, subtitle, statistics, figsize):
+def _add_title(ax, title, subtitle, statistics, figsize, plot_type):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.spines['left'].set_visible(False)
@@ -93,10 +93,16 @@ def _add_title(ax, title, subtitle, statistics, figsize):
         ax.text(0.5, 0.50, title, fontsize=22, ha='center', va='center')
     ax.text(0.5, 0.00, subtitle, fontsize=14, ha='center', va='center')
 
-    ax.text(0.08, 0.90, "MIN: {:>.2f}".format(statistics[0]), fontsize=8, ha='right', va='center')
-    ax.text(0.08, 0.60, "MAX: {:>.2f}".format(statistics[1]), fontsize=8, ha='right', va='center')
-    ax.text(0.08, 0.30, "MEAN: {:>.2f}".format(statistics[2]), fontsize=8, ha='right', va='center')
-    ax.text(0.08, 0.00, "{}".format(plot_expr), fontsize=10, weight='bold', ha='right', va='center')
+    if plot_type in ['GMF', 'G']:
+        ax.text(0.08, 0.90, "MIN: {:>.2f}".format(statistics[0]), fontsize=8, ha='right', va='center')
+        ax.text(0.08, 0.60, "MAX: {:>.2f}".format(statistics[1]), fontsize=8, ha='right', va='center')
+        ax.text(0.08, 0.30, "MEAN: {:>.2f}".format(statistics[2]), fontsize=8, ha='right', va='center')
+        ax.text(0.08, 0.00, "{}".format(plot_expr), fontsize=10, weight='bold', ha='right', va='center')
+    elif plot_type == 'F':
+        ax.text(0.08, 0.60, "MIN: {:>.2f}".format(statistics[0]), fontsize=8, ha='right', va='center')
+        ax.text(0.08, 0.30, "MAX: {:>.2f}".format(statistics[1]), fontsize=8, ha='right', va='center')
+        ax.text(0.08, 0.00, "MEAN: {:>.2f}".format(statistics[2]), fontsize=8, ha='right', va='center')
+
 
 def _clip_data(iarea, data, lon, lat):
 
@@ -184,7 +190,7 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     else:
         ax_title = fig.add_axes([0.1, 0.90, 0.82, 0.08])
     
-    _add_title(ax_title, title, subtitle, statistics, figsize)
+    _add_title(ax_title, title, subtitle, statistics, figsize, plot_type)
 
     if iarea == 'Tropics':
         ax_cf = fig.add_axes([0.1, 0.16, 0.85, 0.65])

@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-25 20:46:04
+@LastEditTime: 2020-05-25 21:22:19
 @Description  : process postvar
 '''
 import sys
@@ -15,6 +15,7 @@ import time
 import datetime as dt
 from gen_timelines import gen_timelines
 import os
+import glob
 from multiprocessing import Pool
 
 from utils import DATADumpManager, config_list, hashlist, makenewdir, DumpDataSet
@@ -286,7 +287,9 @@ def get_OBS_data():
 
     return datatable
 
-def plot(pic_dir, datatable_grapes, datatable_case_grapes, expr_name):
+def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero, expr_name, iexpr):
+
+    global fnl_pics
 
     origin_dir = os.path.join(pic_dir, origin)
     comp_dir = os.path.join(pic_dir, comp)
@@ -324,6 +327,20 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, expr_name):
 
     # begin to plot
     for plot_type in plot_types:
+        
+        if iexpr != 0 and plot_type == 'F':
+            print("Copy fnl files from first experiment")
+            for fnl_pic in fnl_pics:
+                fnl_pic_segments = fnl_pic.split('/')
+                fnl_pic_segments[-4] = expr_name
+                new_fnl_pic = '/'.join(fnl_pic_segments)
+
+                command = "cp {} {}".format(fnl_pic, new_fnl_pic)
+                print(command)
+                os.system(command)
+            continue
+
+
         print('开始作图: {}'.format(plot_types_name[plot_type]))
         for ivar, var in enumerate(st_vars):
             print('\t变量: {}'.format(var))
@@ -373,7 +390,7 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, expr_name):
                             clevels = np.array(clevel_custom[var])
                         else:
                             if var in noFNL_vars:
-                                clevel_data = datatable_grapes[ivar, itime, ilevel, ...]
+                                clevel_data = datatable_grapes_zero[ivar, itime, ilevel, ...]
                             elif plot_type in ['G', 'F']:
                                 clevel_data = datatable_fnl[ivar, itime, ilevel, ...]
                             elif plot_type in ['GMF']:
@@ -433,6 +450,9 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, expr_name):
 
                     p.close()
                     p.join()
+    
+    if iexpr == 0:
+        fnl_pics = glob.glob("{}/*/F_*.png".format(origin_dir))
 
     if make_comp:
         makenewdir(comp_dir)
@@ -482,7 +502,8 @@ if __name__ == "__main__":
         GRAPES_DATA_PKLNAME = './pkl/GRAPES_{}.pkl'.format(GRAPES_HASH)
         ddm_grapes = DATADumpManager('./', GRAPES_PKL, GRAPES_DATA_PKLNAME, get_GRAPES_data)
         global_package, datatable_grapes, datatable_case_grapes = ddm_grapes.get_data(exdata_dir)
-    
+        if iexpr == 0:
+            datatable_grapes_zero = datatable_grapes
     # clean the memory
     del datatable_grapes, datatable_case_grapes
     for global_name in global_package.keys():
@@ -516,7 +537,7 @@ if __name__ == "__main__":
         # plot
         pic_dir = os.path.join(pic_root_dir, expr_name)
         makenewdir(pic_dir)
-        plot(pic_dir, datatable_grapes, datatable_case_grapes, expr_name)
+        plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero, expr_name, iexpr)
 
         # clean the memory
         del global_package, datatable_grapes, datatable_case_grapes

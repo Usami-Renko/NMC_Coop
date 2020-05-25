@@ -5,8 +5,11 @@ end_ddate  : '2016010512'  # yyyymndd
 # 起报时间间隔
 fcst_step: 24 # hours
 
-# GRAPES数据路径 
-ctlfile_dir: './87_fcst_ctl/'
+# GRAPES试验名称和数据路径 
+# ctlfile_dir: './87_fcst_ctl/'
+exprs:
+  - 'CTRL' : './87_fcst_ctl/'
+  - 'ASSI' : './87_fcst_ctl/'
 
 # GRAPES数据转换路径
 exdata_dir: './ex_data/'

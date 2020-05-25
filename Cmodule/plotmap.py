@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-25 12:31:27
+@LastEditTime: 2020-05-25 20:30:11
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -19,15 +19,16 @@ from matplotlib import colors
 from numpy import ma
 import os
 
-def config_submodule(cong):
+def config_submodule(cong, pic_dir, expr_name):
 
-    global origin_dir, case_dir
+    global origin_dir, case_dir, plot_expr
 
     for key, value in cong.items():
         globals()[key] = value
 
-    origin_dir = os.path.join(pic_dir, origin_dir)
-    case_dir = os.path.join(pic_dir, case_dir)
+    origin_dir = os.path.join(pic_dir, origin)
+    case_dir = os.path.join(pic_dir, case)
+    plot_expr = expr_name
 
 def area_region(area):
     if area == 'South_P':

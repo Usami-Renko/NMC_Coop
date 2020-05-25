@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-25 19:37:11
+@LastEditTime: 2020-05-25 20:28:33
 @Description  : process postvar
 '''
 import sys
@@ -27,11 +27,6 @@ from make_comp import make_comp_pic, make_gif_pic
 
 CONFIGPATH = './config/' # default config path
 cong = config_list(CONFIGPATH, ['config.yml', 'devconfig.yml'])
-
-# config submodules
-import plotmap, make_comp
-plotmap.config_submodule(cong)
-make_comp.config_submodule(cong)
 
 # config script
 for key, value in cong.items():
@@ -60,13 +55,15 @@ def get_time_indices(var, time_indices, time_incr, times):
     
     return time_indices_var
 
-def get_GRAPES_data():
+def get_GRAPES_data(exdata_dir):
 
     # 1.0 读取postvar数据
     print('1.0 开始读取postvar数据')
     import netCDF4 as nc
     t0 = time.time()
     data_list = []
+
+    ncfiles = ['postvar{}.nc'.format(itime) for itime in timelines]
 
     if run_mode == 'interp':
         if not os.path.exists(nc_sample):
@@ -289,57 +286,18 @@ def get_OBS_data():
 
     return datatable
 
-# Main Program
-if __name__ == "__main__":
-    
-    # 参数设置
-    timelines   = gen_timelines(start_ddate, end_ddate, fcst_step)
-    ncfiles     = ['postvar{}.nc'.format(itime) for itime in timelines]
+def plot(pic_dir, datatable_grapes, datatable_case_grapes, expr_name):
 
-    exdata_dir = os.path.join(exdata_root_dir, plot_expr)
+    origin_dir = os.path.join(pic_dir, origin)
+    comp_dir = os.path.join(pic_dir, comp)
+    gif_dir = os.path.join(pic_dir, gif)
+    case_dir = os.path.join(pic_dir, case)
 
-    # mode settings
-    GRAPES_PKL = True
-    FNL_PKL = True
-    OBS_PKL = True
+    # config submodules
+    import plotmap, make_comp
+    plotmap.config_submodule(cong, pic_dir, expr_name)
+    make_comp.config_submodule(cong, pic_dir)
 
-    if run_mode == 'interp':
-        st_vars = plotable_vars
-        fcst_step = 6
-        FNL_PKL = False
-
-    if run_mode == 'debug':
-        FNL_PKL = False
-        GRAPES_PKL = False
-        OBS_PKL = False
-
-    origin_dir = os.path.join(pic_dir, origin_dir)
-    comp_dir = os.path.join(pic_dir, comp_dir)
-    gif_dir = os.path.join(pic_dir, gif_dir)
-    case_dir = os.path.join(pic_dir, case_dir)
-
-    OBS_HASH = hashlist([case_ini_times, case_fcst_hours])
-    GRAPES_HASH = hashlist([st_vars, st_levels, fcst, start_ddate, end_ddate, fcst_step, OBS_HASH])
-    OBS_DATA_PKLNAME = './pkl/OBS_{}.pkl'.format(OBS_HASH)
-    GRAPES_DATA_PKLNAME = './pkl/GRAPES_{}.pkl'.format(GRAPES_HASH)
-    FNL_DATA_PKLNAME = './pkl/FNL_{}.pkl'.format(GRAPES_HASH)
-
-    ddm_grapes = DATADumpManager('./', GRAPES_PKL, GRAPES_DATA_PKLNAME, get_GRAPES_data)
-    ddm_fnl = DATADumpManager('./', FNL_PKL, FNL_DATA_PKLNAME, get_FNL_data)
-    ddm_obs = DATADumpManager('./', OBS_PKL, OBS_DATA_PKLNAME, get_OBS_data)
-    
-
-    # datatable dimension: (nvars, nfcsrtimes, nlevels, nlat, nlon)
-    global_package, datatable_grapes, datatable_case_grapes = ddm_grapes.get_data()
-    for global_name in global_package.keys():
-        globals()[global_name] = global_package[global_name]
-    datatable_fnl = ddm_fnl.get_data()
-    if run_mode == 'interp':
-        print('Successfully interpolated FNL data from {} to {}'.format(start_ddate, end_ddate))
-        exit()
-    datatable_obs = ddm_obs.get_data()
-
-    # exit()
 
     makenewdir(pic_dir)
     if clean_plot:
@@ -483,3 +441,64 @@ if __name__ == "__main__":
     if make_gif:
         makenewdir(gif_dir)
         make_gif_pic(var_time_indices, var_ndims, var_plot_areas, time_incr)
+
+
+# Main Program
+if __name__ == "__main__":
+    
+    # 参数设置
+    timelines   = gen_timelines(start_ddate, end_ddate, fcst_step)
+
+    # mode settings
+    GRAPES_PKL = True
+    FNL_PKL = True
+    OBS_PKL = True
+
+    if run_mode == 'interp':
+        st_vars = plotable_vars
+        fcst_step = 6
+        FNL_PKL = False
+
+    if run_mode == 'debug':
+        FNL_PKL = False
+        GRAPES_PKL = False
+        OBS_PKL = False
+
+    OBS_HASH = hashlist([case_ini_times, case_fcst_hours])
+    FNL_HASH = hashlist([st_vars, st_levels, fcst, start_ddate, end_ddate, fcst_step])
+    OBS_DATA_PKLNAME = './pkl/OBS_{}.pkl'.format(OBS_HASH)
+    FNL_DATA_PKLNAME = './pkl/FNL_{}.pkl'.format(FNL_HASH)
+
+    ddm_fnl = DATADumpManager('./', FNL_PKL, FNL_DATA_PKLNAME, get_FNL_data)
+    ddm_obs = DATADumpManager('./', OBS_PKL, OBS_DATA_PKLNAME, get_OBS_data)
+    
+    # datatable dimension: (nvars, nfcsrtimes, nlevels, nlat, nlon)
+    # get grapes experiment data
+    datatable_grapes_ls, datatable_case_grapes_ls = [], []
+    for iexpr, expr_name in enumerate(exprs.keys()):
+        exdata_dir = os.path.join(exdata_root_dir, expr_name)
+        GRAPES_HASH = hashlist([exdata_dir, st_vars, st_levels, fcst, start_ddate, end_ddate, fcst_step, OBS_HASH])
+        GRAPES_DATA_PKLNAME = './pkl/GRAPES_{}.pkl'.format(GRAPES_HASH)
+        ddm_grapes = DATADumpManager('./', GRAPES_PKL, GRAPES_DATA_PKLNAME, get_GRAPES_data)
+        global_package, datatable_grapes, datatable_case_grapes = ddm_grapes.get_data(exdata_dir)
+        datatable_grapes_ls.append(datatable_grapes)
+        datatable_case_grapes_ls.append(datatable_case_grapes)
+    
+    for global_name in global_package.keys():
+        globals()[global_name] = global_package[global_name]
+    
+    datatable_fnl = ddm_fnl.get_data()
+    if run_mode == 'interp':
+        print('Successfully interpolated FNL data from {} to {}'.format(start_ddate, end_ddate))
+        exit()
+    
+    datatable_obs = ddm_obs.get_data()
+
+    # exit()
+
+    # start ploting
+    for iexpr, expr_name in enumerate(exprs.keys()):
+        pic_dir = os.path.join(pic_root_dir, expr_name)
+        makenewdir(pic_dir)
+        plot(pic_dir, datatable_grapes_ls[iexpr], datatable_case_grapes_ls[iexpr], expr_name)
+    

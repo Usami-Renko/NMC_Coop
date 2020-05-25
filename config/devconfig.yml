@@ -141,10 +141,10 @@ make_comp: True
 make_gif: False
 
 # 原始图片路径
-origin_dir: 'origin'
+origin: 'origin'
 # 拼图路径
-comp_dir: 'comp'
+comp: 'comp'
 # 动图路径
-gif_dir: 'gif'
+gif: 'gif'
 # 案例图路径
-case_dir: 'case'
+case: 'case'

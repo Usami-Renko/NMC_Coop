@@ -14,9 +14,6 @@ exprs:
 # GRAPES数据转换路径
 exdata_root_dir: './ex_data/'
 
-# 需要画图的试验名称
-plot_expr: 'CTRL' 
-
 # 统计绘图变量和层次:
 # 可供选择的变量和层次: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
 #                     [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
@@ -30,7 +27,7 @@ fcst: [72] # hours
 
 # 画图设置
 # 图片路径和类型
-pic_dir: './pic'
+pic_root_dir: './pic'
 pic_prefix: 'png'
 
 # 画图前是否清理原出图文件夹

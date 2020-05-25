@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 15:11:40
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-18 10:52:15
+@LastEditTime: 2020-05-25 20:27:04
 '''
 
 
@@ -17,16 +17,16 @@ from utils import makenewdir
 import numpy as np
 
 
-def config_submodule(cong):
+def config_submodule(cong, pic_dir):
 
     global origin_dir, comp_dir, gif_dir
 
     for key, value in cong.items():
         globals()[key] = value
 
-    origin_dir = os.path.join(pic_dir, origin_dir)
-    comp_dir = os.path.join(pic_dir, comp_dir)
-    gif_dir = os.path.join(pic_dir, gif_dir)
+    origin_dir = os.path.join(pic_dir, origin)
+    comp_dir = os.path.join(pic_dir, comp)
+    gif_dir = os.path.join(pic_dir, gif)
 
 def _make_comp(pic_files, comp_file):
 

@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-25 20:28:33
+@LastEditTime: 2020-05-25 20:46:04
 @Description  : process postvar
 '''
 import sys
@@ -473,32 +473,50 @@ if __name__ == "__main__":
     ddm_obs = DATADumpManager('./', OBS_PKL, OBS_DATA_PKLNAME, get_OBS_data)
     
     # datatable dimension: (nvars, nfcsrtimes, nlevels, nlat, nlon)
-    # get grapes experiment data
-    datatable_grapes_ls, datatable_case_grapes_ls = [], []
+    # [A]. get grapes experiment data
+    # dump the data
     for iexpr, expr_name in enumerate(exprs.keys()):
+        print("计算试验{}".format(expr_name))
         exdata_dir = os.path.join(exdata_root_dir, expr_name)
         GRAPES_HASH = hashlist([exdata_dir, st_vars, st_levels, fcst, start_ddate, end_ddate, fcst_step, OBS_HASH])
         GRAPES_DATA_PKLNAME = './pkl/GRAPES_{}.pkl'.format(GRAPES_HASH)
         ddm_grapes = DATADumpManager('./', GRAPES_PKL, GRAPES_DATA_PKLNAME, get_GRAPES_data)
         global_package, datatable_grapes, datatable_case_grapes = ddm_grapes.get_data(exdata_dir)
-        datatable_grapes_ls.append(datatable_grapes)
-        datatable_case_grapes_ls.append(datatable_case_grapes)
     
+    # clean the memory
+    del datatable_grapes, datatable_case_grapes
     for global_name in global_package.keys():
         globals()[global_name] = global_package[global_name]
     
+
+    # [B]. get FNL data
     datatable_fnl = ddm_fnl.get_data()
     if run_mode == 'interp':
         print('Successfully interpolated FNL data from {} to {}'.format(start_ddate, end_ddate))
         exit()
     
+    
+    # [C]. get OBS data
     datatable_obs = ddm_obs.get_data()
+
+    print("Sucessfully loading all the data, start ploting")
 
     # exit()
 
     # start ploting
     for iexpr, expr_name in enumerate(exprs.keys()):
+        # Load data
+        print("从硬盘加载试验{}缓存".format(expr_name))
+        exdata_dir = os.path.join(exdata_root_dir, expr_name)
+        GRAPES_HASH = hashlist([exdata_dir, st_vars, st_levels, fcst, start_ddate, end_ddate, fcst_step, OBS_HASH])
+        GRAPES_DATA_PKLNAME = './pkl/GRAPES_{}.pkl'.format(GRAPES_HASH)
+        ddm_grapes = DATADumpManager('./', GRAPES_PKL, GRAPES_DATA_PKLNAME, get_GRAPES_data)
+        global_package, datatable_grapes, datatable_case_grapes = ddm_grapes.get_data(exdata_dir)
+        
+        # plot
         pic_dir = os.path.join(pic_root_dir, expr_name)
         makenewdir(pic_dir)
-        plot(pic_dir, datatable_grapes_ls[iexpr], datatable_case_grapes_ls[iexpr], expr_name)
-    
+        plot(pic_dir, datatable_grapes, datatable_case_grapes, expr_name)
+
+        # clean the memory
+        del global_package, datatable_grapes, datatable_case_grapes

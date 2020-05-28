@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-28 17:04:12
+@LastEditTime: 2020-05-28 17:09:15
 @Description  : process postvar
 '''
 import sys
@@ -478,6 +478,7 @@ if __name__ == "__main__":
         st_vars = plotable_vars
         fcst_step = 6
         FNL_PKL = False
+        GRAPES_PKL = False
 
     if run_mode == 'debug':
         FNL_PKL = False

@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-25 21:22:19
+@LastEditTime: 2020-05-28 09:33:24
 @Description  : process postvar
 '''
 import sys
@@ -465,9 +465,6 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
 
 # Main Program
 if __name__ == "__main__":
-    
-    # 参数设置
-    timelines   = gen_timelines(start_ddate, end_ddate, fcst_step)
 
     # mode settings
     GRAPES_PKL = True
@@ -492,6 +489,9 @@ if __name__ == "__main__":
     ddm_fnl = DATADumpManager('./', FNL_PKL, FNL_DATA_PKLNAME, get_FNL_data)
     ddm_obs = DATADumpManager('./', OBS_PKL, OBS_DATA_PKLNAME, get_OBS_data)
     
+    # 参数设置
+    timelines   = gen_timelines(start_ddate, end_ddate, fcst_step)
+
     # datatable dimension: (nvars, nfcsrtimes, nlevels, nlat, nlon)
     # [A]. get grapes experiment data
     # dump the data

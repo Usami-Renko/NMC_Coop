@@ -23,7 +23,7 @@ st_vars:  ['h']
 st_levels: [500.]
 
 # 预报时长
-fcst: [72] # hours
+fcst: [24, 72] # hours
 
 # 画图设置
 # 图片路径和类型

@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-28 09:33:24
+@LastEditTime: 2020-05-28 17:01:54
 @Description  : process postvar
 '''
 import sys
@@ -122,16 +122,19 @@ def get_GRAPES_data(exdata_dir):
     datatable = tmp_datatable / len(timelines)
 
     # get case data
-    datatable_case = np.zeros((len(case_ini_times), len(case_fcst_hours), len(lat), len(lon)), dtype='float32')
-    for iinit, case_ini_time in enumerate(case_ini_times):
-        init_index = timelines.index(case_ini_time)
-        data = data_list[init_index]
+    if plot_cases:
+        datatable_case = np.zeros((len(case_ini_times), len(case_fcst_hours), len(lat), len(lon)), dtype='float32')
+        for iinit, case_ini_time in enumerate(case_ini_times):
+            init_index = timelines.index(case_ini_time)
+            data = data_list[init_index]
 
-        ws = GRAPESWorkStation(data, grapes_varname)
-        fcst_indices = np.array(case_fcst_hours, dtype='int') // time_incr
-        var_instance = ws.get_var('24hrain', (fcst_indices, level_indices))          
-        datatable_case[iinit, ...] = var_instance.data
-        ws.close()
+            ws = GRAPESWorkStation(data, grapes_varname)
+            fcst_indices = np.array(case_fcst_hours, dtype='int') // time_incr
+            var_instance = ws.get_var('24hrain', (fcst_indices, level_indices))          
+            datatable_case[iinit, ...] = var_instance.data
+            ws.close()
+    else:
+        datatable_case = None
 
     # close the netCDF file handles and nc package for nasty issues with Nio
     for data in data_list:

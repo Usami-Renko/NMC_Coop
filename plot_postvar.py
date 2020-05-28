@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-28 17:01:54
+@LastEditTime: 2020-05-28 17:04:12
 @Description  : process postvar
 '''
 import sys
@@ -507,6 +507,8 @@ if __name__ == "__main__":
         global_package, datatable_grapes, datatable_case_grapes = ddm_grapes.get_data(exdata_dir)
         if iexpr == 0:
             datatable_grapes_zero = datatable_grapes
+        if run_mode == 'interp':
+            break
     # clean the memory
     del datatable_grapes, datatable_case_grapes
     for global_name in global_package.keys():

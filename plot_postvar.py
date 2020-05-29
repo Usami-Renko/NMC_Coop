@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-28 17:09:15
+@LastEditTime: 2020-05-29 10:09:56
 @Description  : process postvar
 '''
 import sys
@@ -524,7 +524,8 @@ if __name__ == "__main__":
     
     
     # [C]. get OBS data
-    datatable_obs = ddm_obs.get_data()
+    if plot_cases:
+        datatable_obs = ddm_obs.get_data()
 
     print("Sucessfully loading all the data, start ploting")
 

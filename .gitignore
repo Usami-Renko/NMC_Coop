@@ -13,6 +13,7 @@ grads/
 __pycache__/
 Cmodule/__pycache__/
 nwpc_data/
+obs_gridrain/
 
 **/test/**
 

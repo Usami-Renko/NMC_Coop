@@ -4,13 +4,14 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-29 10:09:56
+@LastEditTime: 2020-06-02 20:54:24
 @Description  : process postvar
 '''
 import sys
 sys.path.append('./Cmodule')
 sys.path.append('/g3/wanghao/Python/Cmodule/GRAPES_VS_FNL')
 import numpy as np
+import numpy.ma as ma
 import time
 import datetime as dt
 from gen_timelines import gen_timelines
@@ -269,7 +270,7 @@ def get_FNL_data():
 
 def get_OBS_data():
 
-    # 3.0 读取FNL数据
+    # 5.0 读取OBS数据
     print('5.0 开始读取OBS数据')
     t0 = time.time()
     
@@ -289,6 +290,58 @@ def get_OBS_data():
     print('读取OBS数据结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
     return datatable
+
+def get_GRIDRAIN_data():
+    
+    # 6.0 读取GRIDRAIN数据
+    print('6.0 开始读取GRIDRAIN数据')
+    t0 = time.time()
+    
+    from nwpc_data.grib.eccodes import load_field_from_file
+
+    time_indices_var = var_time_indices['24hrain']
+
+    sample = load_field_from_file(file_path=gridrain_sample, parameter="unknown", level_type="surface", level=0)
+    gridrain_lat = sample.coords['latitude']
+    gridrain_lon = sample.coords['longitude']
+
+    datacache = dict()
+    datatable = np.zeros((len(time_indices), len(gridrain_lat), len(gridrain_lon)), dtype='float32')
+
+    for iinittime, inittime_str in enumerate(timelines):
+        if run_mode != 'plot':
+            print('\t\t起报时间:{}'.format(inittime_str)) 
+        for ifcsttime, time_index in enumerate(time_indices_var):
+            gridrain_datetime = (dt.datetime.strptime(inittime_str, '%Y%m%d%H') + \
+                dt.timedelta(hours=int(time_indices_var[ifcsttime]*time_incr))).strftime('%Y%m%d')
+            
+            if gridrain_datetime in datacache.keys():
+                datatable[ifcsttime, ...] += datacache[gridrain_datetime]
+                continue
+
+            match = '{}/{}/*-{}*.GRB2'.format(gridrain_dir, gridrain_datetime, gridrain_datetime)
+            gridrain_files = glob.glob(match)
+
+            grdata_ls = list()
+            for gridrain_file in gridrain_files:
+                grfield = load_field_from_file(file_path=gridrain_file, parameter="unknown", level_type="surface", level=0)
+                grdata = grfield.values
+                grdata[grdata == grfield.attrs['GRIB_missingValue']] = 0.
+                grdata_ls.append(grdata)
+            dayrain = np.sum(grdata_ls, axis=0)
+
+            datacache[gridrain_datetime] = dayrain
+            datatable[ifcsttime, ...] += dayrain
+
+    # clean
+    for data in datacache.values():
+        del data
+    del datacache
+    del load_field_from_file
+    t1 = time.time()
+    print('读取GRIDRAIN数据结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
+
+    return datatable, gridrain_lat, gridrain_lon
 
 def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero, expr_name, iexpr):
 
@@ -346,10 +399,11 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
 
         print('开始作图: {}'.format(plot_types_name[plot_type]))
         for ivar, var in enumerate(st_vars):
-            print('\t变量: {}'.format(var))
-            # No FNL data for '24hrain'
-            if var in noFNL_vars and plot_type in ['F', 'GMF']:
+            # special case for GRIDRAIN data
+            if var in noFNL_vars and plot_type in ['F', 'GMF'] and \
+                not (var == '24hrain' and plot_type == 'F'):
                 continue
+            print('\t变量: {}'.format(var))
             varname = variable_name[var]
 
             time_indices_var = var_time_indices[var]
@@ -366,6 +420,9 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
             makenewdir(var_dir)
 
             for iarea in plot_areas_var:
+                # special case for GRIDRAIN data
+                if var == '24hrain' and plot_type == 'F' and iarea!='E_Asia':
+                    continue
                 print('\t\t区域: {}'.format(iarea))
                 for itime,time_index in enumerate(time_indices_var):
                     
@@ -381,7 +438,10 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                         if plot_type == 'G':
                             data = datatable_grapes[ivar, itime, ilevel, ...]
                         elif plot_type == 'F':
-                            data = datatable_fnl[ivar, itime, ilevel, ...]
+                            if var != '24hrain':
+                                data = datatable_fnl[ivar, itime, ilevel, ...]
+                            else:
+                                data = datatable_gridrain[itime, ...]
                         elif plot_type == 'GMF':
                             data = datatable_grapes[ivar, itime, ilevel, ...] - \
                                 datatable_fnl[ivar, itime, ilevel, ...]
@@ -412,6 +472,13 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                         else:
                             timestr = '{:0>3}'.format(time_index*time_incr)
                         
+                        # plot_lat, plot_lon, plot_typelabel
+                        if var == '24hrain' and plot_type == 'F':
+                            plot_lat, plot_lon = gridrain_lat, gridrain_lon
+                            plot_typelabel = 'OBS:CMP'
+                        else:
+                            plot_lat, plot_lon = lat, lon
+                            plot_typelabel = plot_types_name[plot_type]
                         
                         if plot_type == 'F':
                             fnl_start_ddate = (dt.datetime.strptime(start_ddate, '%Y%m%d%H') + dt.timedelta(hours=int(time_index*time_incr))).strftime("%Y%m%d%H")
@@ -420,9 +487,9 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                         # 3D or surface vars
                         if var_ndims[var] == 4:
                             if len(varname) < 20:
-                                title = '{} {}hPa {}'.format(plot_types_name[plot_type], int(level), varname)  # timestr
+                                title = '{} {}hPa {}'.format(plot_typelabel, int(level), varname)  # timestr
                             else:
-                                title = ['{} {}hPa'.format(plot_types_name[plot_type], int(level)),
+                                title = ['{} {}hPa'.format(plot_typelabel, int(level)),
                                          r'{}'.format(varname)]
                             if plot_type == 'F':
                                 subtitle = 'Init(UTC): {} - {}'.format(fnl_start_ddate, fnl_end_ddate)
@@ -433,12 +500,12 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                             print('\t\t\t'+pic_file)
 
                             # p.apply_async(plot_data, args=(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels))
-                            plot_data(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels, statistcs)
+                            plot_data(data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistcs)
                         elif var_ndims[var] == 3:
                             if len(varname) < 20:
-                                title    = '{} {}'.format(plot_types_name[plot_type], varname)
+                                title    = '{} {}'.format(plot_typelabel, varname)
                             else:
-                                title    = ['{}'.format(plot_types_name[plot_type]),
+                                title    = ['{}'.format(plot_typelabel),
                                             r'{}'.format(varname)]
                             if plot_type == 'F':
                                 subtitle = 'Init(UTC): {} - {}'.format(fnl_start_ddate, fnl_end_ddate)
@@ -448,7 +515,7 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
 
                             print('\t\t\t'+pic_file)
 
-                            plot_data(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels, statistcs)
+                            plot_data(data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistcs)
                             break
 
                     p.close()
@@ -473,6 +540,7 @@ if __name__ == "__main__":
     GRAPES_PKL = True
     FNL_PKL = True
     OBS_PKL = True
+    GRIDRAIN_PKL = True
 
     if run_mode == 'interp':
         st_vars = plotable_vars
@@ -484,14 +552,18 @@ if __name__ == "__main__":
         FNL_PKL = False
         GRAPES_PKL = False
         OBS_PKL = False
+        GRIDRAIN_PKL = False
 
     OBS_HASH = hashlist([case_ini_times, case_fcst_hours])
     FNL_HASH = hashlist([st_vars, st_levels, fcst, start_ddate, end_ddate, fcst_step])
+    GRIDRAIN_HASH = hashlist([start_ddate, end_ddate])
     OBS_DATA_PKLNAME = './pkl/OBS_{}.pkl'.format(OBS_HASH)
     FNL_DATA_PKLNAME = './pkl/FNL_{}.pkl'.format(FNL_HASH)
+    GRIDRAIN_DATA_PKLNAME = './pkl/GRIDRAIN_{}.pkl'.format(GRIDRAIN_HASH)
 
     ddm_fnl = DATADumpManager('./', FNL_PKL, FNL_DATA_PKLNAME, get_FNL_data)
     ddm_obs = DATADumpManager('./', OBS_PKL, OBS_DATA_PKLNAME, get_OBS_data)
+    ddm_gridrain = DATADumpManager('./', GRIDRAIN_PKL, GRIDRAIN_DATA_PKLNAME, get_GRIDRAIN_data) 
     
     # 参数设置
     timelines   = gen_timelines(start_ddate, end_ddate, fcst_step)
@@ -526,6 +598,12 @@ if __name__ == "__main__":
     # [C]. get OBS data
     if plot_cases:
         datatable_obs = ddm_obs.get_data()
+    
+
+    # [D]. get GRIDRAIN data
+    if '24hrain' in st_vars:
+        datatable_gridrain, gridrain_lat, gridrain_lon = ddm_gridrain.get_data()
+    
 
     print("Sucessfully loading all the data, start ploting")
 

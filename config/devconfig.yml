@@ -14,9 +14,13 @@ dump_dir: './temp/pkl/'
 remove_dump: False
 
 # 运行模式 interp / plot / debug
-run_mode: 'interp'
+run_mode: 'plot'
 nc_sample: './ex_data/CTRL/postvar2016010112.nc'
 # nc_sample: '/g3/wanghao/share/GRAPES_VS_FNL/ex_data/postvar2016010112.nc'
+
+# 格点雨量观测值路径 
+gridrain_dir: './obs_gridrain/'
+gridrain_sample: './obs_gridrain/20160101/Z_SURF_C_BABJ_20190919001107_P_CMPA_FAST_CHN_0P05_HOR-PRE-2016010100.GRB2'
 
 # 提取变量和层次
 ex_vars  : ['u','v','t','h','w','q2','rainc','rainnc', 'hfxa', 'qfxa', 't2m']

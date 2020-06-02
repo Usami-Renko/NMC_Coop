@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 15:11:40
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-25 20:27:04
+@LastEditTime: 2020-06-02 21:23:25
 '''
 
 
@@ -47,6 +47,22 @@ def _make_comp(pic_files, comp_file):
 
     return d
 
+def _make_comp2(pic_files, comp_file):
+
+    p = Image.open(pic_files[0])
+    f = Image.open(pic_files[1])
+    
+    if p.size[0] <= p.size[1] * 1.3:
+        d = Image.new('RGB', (p.size[0]*2, p.size[1]))
+        d.paste(p, (0, 0))
+        d.paste(f, (p.size[0], 0))
+    else:
+        d = Image.new('RGB', (p.size[0], p.size[1]*2))
+        d.paste(p, (0, 0))
+        d.paste(f, (0, p.size[1]))
+        
+    return d
+
 def make_comp_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):
 
     print("开始拼接图片")
@@ -56,28 +72,41 @@ def make_comp_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):
         time_indices_var = var_time_indices[var]
         ndim = var_ndims[var]
 
-        if var in noFNL_vars:
+        if var in noFNL_vars and var != '24hrain':
             continue
 
         var_dir = os.path.join(comp_dir, var)
         makenewdir(var_dir)
 
         for iarea in var_plot_areas[var]:
+            if var == '24hrain' and iarea != 'E_Asia':
+                continue
+
+            var_plot_types = copy(plot_types)
+            if var == '24hrain' and 'GMF' in plot_types:
+                var_plot_types.remove('GMF')
+            
+            print(var, var_plot_types)
+            
             for itime,time_index in enumerate(time_indices_var):
                 for ilevel,level in enumerate(st_levels):
                     if ndim == 4:
                         pic_files = ['{}/{}/{}_{}_{}hr_{}hpa_{}.png'.format(origin_dir, var, plot_type, iarea, time_index*time_incr, int(level), var) \
-                            for plot_type in plot_types]
+                            for plot_type in var_plot_types]
                         comp_file = 'comp_{}_{}hr_{}hpa_{}.png'.format(iarea, time_index*time_incr, int(level), var)
                     elif ndim == 3:
-                        pic_files = ['{}/{}/{}_{}_{}hr_{}.png'.format(origin_dir, var, plot_type, iarea, time_index*time_incr, var) for plot_type in plot_types]
+                        pic_files = ['{}/{}/{}_{}_{}hr_{}.png'.format(origin_dir, var, plot_type, iarea, time_index*time_incr, var) 
+                            for plot_type in var_plot_types]
                         comp_file = 'comp_{}_{}hr_{}.png'.format(iarea, time_index*time_incr, var)
                     
                     if not np.array([os.path.exists(pic_file) for pic_file in pic_files]).all():
                         print("[warning]: failed to make comp {} due to missing components".format(comp_file))
                         continue
-
-                    d = _make_comp(pic_files, comp_file)
+                    
+                    if len(var_plot_types) == 3:
+                        d = _make_comp(pic_files, comp_file)
+                    elif len(var_plot_types) == 2:
+                        d = _make_comp2(pic_files, comp_file)
                     d.save(os.path.join(comp_dir, var, comp_file))
 
 

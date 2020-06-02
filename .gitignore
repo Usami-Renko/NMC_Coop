@@ -5,6 +5,7 @@ fnl_data/
 ctl_des/
 87_fcst_ctl/
 nmc_obs/
+obs_gridrain/
 pic/
 pic_eg/
 doc/

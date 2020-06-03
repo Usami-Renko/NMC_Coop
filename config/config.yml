@@ -1,6 +1,6 @@
 # 时间信息
 start_ddate: '2016010112'  # yyyymndd
-end_ddate  : '2016010112'  # yyyymndd
+end_ddate  : '2016010212'  # yyyymndd
 
 # 起报时间间隔
 fcst_step: 24 # hours

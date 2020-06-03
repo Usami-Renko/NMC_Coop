@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-02 20:54:24
+@LastEditTime: 2020-06-03 08:21:46
 @Description  : process postvar
 '''
 import sys
@@ -301,6 +301,8 @@ def get_GRIDRAIN_data():
 
     time_indices_var = var_time_indices['24hrain']
 
+    if not os.path.exists(gridrain_sample):
+        raise IOError('{} gridrain sample not found'.format(gridrain_sample))
     sample = load_field_from_file(file_path=gridrain_sample, parameter="unknown", level_type="surface", level=0)
     gridrain_lat = sample.coords['latitude']
     gridrain_lon = sample.coords['longitude']
@@ -321,6 +323,9 @@ def get_GRIDRAIN_data():
 
             match = '{}/{}/*-{}*.GRB2'.format(gridrain_dir, gridrain_datetime, gridrain_datetime)
             gridrain_files = glob.glob(match)
+            if len( gridrain_files) != 24:
+                print(gridrain_files)
+                raise IOError('integrity of 24h gridrain for {} failed'.format(gridrain_datetime))
 
             grdata_ls = list()
             for gridrain_file in gridrain_files:

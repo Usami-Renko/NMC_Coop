@@ -23,7 +23,7 @@ gridrain_dir: './obs_gridrain/'
 gridrain_sample: './obs_gridrain/20160101/Z_SURF_C_BABJ_20190603001645_P_CMPA_NRT_CHN_0P05_HOR-PRE-2016010100.nc'
 
 # 蒙版文件路径
-mask_dir: './Cmodule/Chinamask/country1'
+mask_dir: './Cmodule/chinamask/country1'
 
 # 提取变量和层次
 ex_vars  : ['u','v','t','h','w','q2','rainc','rainnc', 'hfxa', 'qfxa', 't2m']

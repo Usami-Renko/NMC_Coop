@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-25 21:24:35
+@LastEditTime: 2020-06-03 16:18:08
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -15,6 +15,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import copy as cp
+import maskout
 from matplotlib import colors
 from numpy import ma
 import os
@@ -297,6 +298,11 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
             tick.label.set_rotation(45)
 
     CB.set_label(varname, fontsize=14)
+
+    # add mask here
+    if iarea == 'E_Asia' and var == '24hrain':
+        map.readshapefile(mask_dir,'whatevername',color='gray')
+        clip=maskout.shp2clip(CF,ax_cf,mask_dir,'China')
 
     plt.savefig('{}/{}/{}'.format(origin_dir, var, pic_file), bbox_inches='tight', dpi=plot_dpi)
     plt.close(fig)

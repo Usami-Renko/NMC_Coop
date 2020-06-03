@@ -25,6 +25,12 @@ gridrain_sample: './obs_gridrain/20160101/Z_SURF_C_BABJ_20190603001645_P_CMPA_NR
 # 蒙版文件路径
 mask_dir: './Cmodule/chinamask/country1'
 
+# 插值变量
+interp2fnl_vars : ['u', 'v', 't', 'h', 'q2']
+netcdf_path: '/usr/local/NETCDF/'
+fort_compiler: 'gfortran'
+real_bytes: 4
+
 # 提取变量和层次
 ex_vars  : ['u','v','t','h','w','q2','rainc','rainnc', 'hfxa', 'qfxa', 't2m']
 ex_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]

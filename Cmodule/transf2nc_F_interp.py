@@ -3,14 +3,37 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: wanghao
-@LastEditTime: 2020-05-08 15:22:55
+@LastEditors: Hejun Xie
+@LastEditTime: 2020-06-03 22:41:00
 @Description  : process postvar
 '''
 from read_info_from_ctl import read_info_from_ctl
 import os
 
-def transf2nc_F_interp(ctlfilename,interp_ctlfilename,ex_data,interp2fnl_data,ex_nc,ddate):
+def config_submodule(cong):
+    for key, value in cong.items():
+        globals()[key] = value
+
+def get_time_strlist(time):
+    segemntsize = 5
+    ntimes = len(time)
+    nsegments = len(time) // segemntsize
+    if len(time) % segemntsize != 0:
+        nsegments += 1
+    
+    segments = [time[isegment*segemntsize:(isegment+1)*segemntsize] \
+         if isegment < nsegments - 1 else time[isegment*segemntsize:] \
+         for isegment in range(nsegments)]
+    
+    time_strlist = [','.join(segment) for segment in segments]
+    time_strlist[0] = '(/' + time_strlist[0] + ',&'
+    for seg_idx in range(1, nsegments-1):
+        time_strlist[seg_idx] = '&' + time_strlist[seg_idx] + ',&'
+    time_strlist[-1] = '&' + time_strlist[-1] + '/)'
+    
+    return time_strlist
+
+def transf2nc_F_interp_(ctlfilename,interp_ctlfilename,ex_data,interp2fnl_data,ex_nc,ddate):
     ctlinfo = read_info_from_ctl(ctlfilename)
     interp2fnl_ctlinfo = read_info_from_ctl(interp_ctlfilename)
 
@@ -18,7 +41,7 @@ def transf2nc_F_interp(ctlfilename,interp_ctlfilename,ex_data,interp2fnl_data,ex
     interp_nlon,interp_nlat = interp2fnl_ctlinfo.dimensions['longitude'],interp2fnl_ctlinfo.dimensions['latitude']
     # print(ctlinfo.filename)
     time = [itime.strftime("%Y%m%d%H") for itime in ctlinfo.variables['time']]
-    time = ','.join(time)
+    time_strlist = get_time_strlist(time)
     levels = ctlinfo.variables['levels'][:]
     levels = ','.join([str(ilevel) for ilevel in levels]) 
    
@@ -39,7 +62,9 @@ def transf2nc_F_interp(ctlfilename,interp_ctlfilename,ex_data,interp2fnl_data,ex
                 'integer :: it,iz,iy,ix,n_rec',
                 '',
                 '! 当创建netCDF文件的时候，变量和维数都有一个对应的ID',
-                'integer :: ncid, x_dimid, y_dimid, z_dimid, t_dimid, interp2fnl_x_dimid, interp2fnl_y_dimid,dimids(NDIMS),dimids_1(NDIMS_1),interp2fnl_dimids(NDIMS),interp2fnl_dimids_1(NDIMS_1)',
+                'integer :: ncid, x_dimid, y_dimid, z_dimid, t_dimid, &', 
+                '& interp2fnl_x_dimid, interp2fnl_y_dimid,dimids(NDIMS),dimids_1(NDIMS_1), &',
+                '& interp2fnl_dimids(NDIMS),interp2fnl_dimids_1(NDIMS_1)',
                 'integer :: lon_varid, lat_varid, interp2fnl_lon_varid, interp2fnl_lat_varid, time_varid, level_varid',
                 'integer :: dimids_lon(1), dimids_lat(1), dimids_time(1), dimids_level(1)',
                 'integer :: interp2fnl_dimids_lon(1), interp2fnl_dimids_lat(1)',
@@ -83,7 +108,10 @@ def transf2nc_F_interp(ctlfilename,interp_ctlfilename,ex_data,interp2fnl_data,ex
                     fili.write('allocate({}(nx,ny,nt))\n'.format(ivar))
 
         fili.write('\n! 生成时间信息\n')
-        fili.write('time = (/{}/)\n'.format(time))
+        fili.write('time = {}\n'.format(time_strlist[0]))
+        if len(time_strlist) > 1:
+            for timestr in time_strlist[1:]:
+                fili.write('{}\n'.format(timestr))
         
         fili.write('\n! 生成层次信息\n')
         fili.write('level = (/{}/)\n'.format(levels))
@@ -105,7 +133,7 @@ def transf2nc_F_interp(ctlfilename,interp_ctlfilename,ex_data,interp2fnl_data,ex
 
         fili.write('\n! 往数据数组里写数据\n')
         fili.write('! 读取不需要插值的变量\n')
-        fili.write('open(99,file=trim(adjustl(infile)),form="unformatted",access="direct",recl=nx*ny)\n')
+        fili.write('open(99,file=trim(adjustl(infile)),form="unformatted",access="direct",recl=nx*ny*{})\n'.format(real_bytes))
         fili.write('n_rec = 0\n')
         fili.write('do it = 1, nt\n')
         for ivar in ctlinfo.varname:
@@ -131,7 +159,7 @@ def transf2nc_F_interp(ctlfilename,interp_ctlfilename,ex_data,interp2fnl_data,ex
         fili.write('close(99)\n')
         
         fili.write('\n! 读取插值变量\n')
-        fili.write('open(99,file=trim(adjustl(interp2fnl_infile)),form="unformatted",access="direct",recl=interp2fnl_nx*interp2fnl_ny)\n')
+        fili.write('open(99,file=trim(adjustl(interp2fnl_infile)),form="unformatted",access="direct",recl=interp2fnl_nx*interp2fnl_ny*{})\n'.format(real_bytes))
         fili.write('n_rec = 0\n')
         fili.write('do it = 1, nt\n')
         for ivar in interp2fnl_ctlinfo.varname:

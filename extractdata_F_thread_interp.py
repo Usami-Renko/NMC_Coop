@@ -10,7 +10,7 @@ sys.path.append('/g3/wanghao/Python/Cmodule/GRAPES_VS_FNL')
 from CTLExtract import CTLExtract
 from CTLReader import CTLReader
 from gen_timelines import gen_timelines
-from transf2nc_F_interp import transf2nc_F_interp
+from transf2nc_F_interp import transf2nc_F_interp_
 import os
 import datetime
 import time
@@ -127,14 +127,18 @@ def ETexe(ddate):
 
     # 3.0 Transfer to NetCDF Format 
     print('--- 3.0 begin transfer data ---')
-    transf2nc_F_interp(ex_ctl,interp2fnl_ctl,ex_data,interp2fnl_data,ex_nc,ddate)
-    # os.system('NETCDF=/g1/app/mathlib/netcdf/4.4.0/intel')
-    os.system('ifort grapes2nc_'+ddate+'.f90'+' -I${NETCDF}/include/ -L${NETCDF}/lib -lnetcdff -lnetcdf -o grapes2nc_'+ddate+'.exe')
-    os.system('./grapes2nc_{}.exe'.format(ddate)) 
+    transf2nc_F_interp_(ex_ctl,interp2fnl_ctl,ex_data,interp2fnl_data,ex_nc,ddate)
+    os.environ['NETCDF']=netcdf_path
+    command2 = '{} grapes2nc_'.format(fort_compiler)+ddate+'.f90'+ \
+        ' -I${NETCDF}/include/ -L${NETCDF}/lib -lnetcdff -lnetcdf -o grapes2nc_'+ddate+'.exe'
+    command3 = './grapes2nc_{}.exe'.format(ddate)
+    os.system(command2)
+    os.system(command3) 
     print('finish transfer data')
     
     os.system('rm {} {}'.format(ex_ctl, ex_data))
-    os.system('rm {} {}'.format(interp2fnl_ctl, interp2fnl_data))  
+    os.system('rm {} {}'.format(interp2fnl_ctl, interp2fnl_data))
+    os.systen('rm {} {}'.format('grapes2nc_'+ddate+'.f90', 'grapes2nc_'+ddate+'.exe'))  
 
 class ETWorker(Thread):
      def __init__(self, queue):
@@ -155,6 +159,9 @@ if __name__ == '__main__':
     cong = config_list(CONFIGPATH, ['config.yml', 'devconfig.yml'])
     for key, value in cong.items():
          locals()[key] = value
+    
+    import transf2nc_F_interp
+    transf2nc_F_interp.config_submodule(cong)
 
     # 参数设置
     ts = time.time()
@@ -177,7 +184,7 @@ if __name__ == '__main__':
         #创建一个主进程与工作进程通信
         queue = Queue()
         #创建31个工作线程
-        for x in range(11):
+        for x in range(2):
             worker = ETWorker(queue)
             #将daemon设置为True将会使主线程退出，即使所有worker都阻塞了
             worker.daemon = True

@@ -1,6 +1,6 @@
 # 时间信息
 start_ddate: '2016010112'  # yyyymndd
-end_ddate  : '2016010212'  # yyyymndd
+end_ddate  : '2016010112'  # yyyymndd
 
 # 起报时间间隔
 fcst_step: 24 # hours
@@ -25,7 +25,7 @@ st_vars:  ['h', '24hrain']
 st_levels: [500.]
 
 # 预报时长
-fcst: [0, 24] # hours
+fcst: [0] # hours
 
 # 画图设置
 # 图片路径和类型

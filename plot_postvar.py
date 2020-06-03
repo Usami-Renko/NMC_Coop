@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-03 08:21:46
+@LastEditTime: 2020-06-03 10:51:51
 @Description  : process postvar
 '''
 import sys
@@ -291,21 +291,81 @@ def get_OBS_data():
 
     return datatable
 
+# def get_GRIDRAIN_data():
+    
+#     # 6.0 读取GRIDRAIN数据
+#     print('6.0 开始读取GRIDRAIN数据')
+#     t0 = time.time()
+    
+#     from nwpc_data.grib.eccodes import load_field_from_file
+
+#     time_indices_var = var_time_indices['24hrain']
+
+#     if not os.path.exists(gridrain_sample):
+#         raise IOError('{} gridrain sample not found'.format(gridrain_sample))
+#     sample = load_field_from_file(file_path=gridrain_sample, parameter="unknown", level_type="surface", level=0)
+#     gridrain_lat = sample.coords['latitude']
+#     gridrain_lon = sample.coords['longitude']
+
+#     datacache = dict()
+#     datatable = np.zeros((len(time_indices), len(gridrain_lat), len(gridrain_lon)), dtype='float32')
+
+#     for iinittime, inittime_str in enumerate(timelines):
+#         if run_mode != 'plot':
+#             print('\t\t起报时间:{}'.format(inittime_str)) 
+#         for ifcsttime, time_index in enumerate(time_indices_var):
+#             gridrain_datetime = (dt.datetime.strptime(inittime_str, '%Y%m%d%H') + \
+#                 dt.timedelta(hours=int(time_indices_var[ifcsttime]*time_incr))).strftime('%Y%m%d')
+            
+#             if gridrain_datetime in datacache.keys():
+#                 datatable[ifcsttime, ...] += datacache[gridrain_datetime]
+#                 continue
+
+#             match = '{}/{}/*-{}*.GRB2'.format(gridrain_dir, gridrain_datetime, gridrain_datetime)
+#             gridrain_files = glob.glob(match)
+#             if len( gridrain_files) != 24:
+#                 print(gridrain_files)
+#                 raise IOError('integrity of 24h gridrain for {} failed'.format(gridrain_datetime))
+
+#             grdata_ls = list()
+#             for gridrain_file in gridrain_files:
+#                 grfield = load_field_from_file(file_path=gridrain_file, parameter="unknown", level_type="surface", level=0)
+#                 grdata = grfield.values
+#                 grdata[grdata == grfield.attrs['GRIB_missingValue']] = 0.
+#                 grdata_ls.append(grdata)
+#             dayrain = np.sum(grdata_ls, axis=0)
+
+#             datacache[gridrain_datetime] = dayrain
+#             datatable[ifcsttime, ...] += dayrain
+
+#     # clean
+#     for data in datacache.values():
+#         del data
+#     del datacache
+#     del load_field_from_file
+#     t1 = time.time()
+#     print('读取GRIDRAIN数据结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
+
+#     return datatable, gridrain_lat, gridrain_lon
+
 def get_GRIDRAIN_data():
     
     # 6.0 读取GRIDRAIN数据
     print('6.0 开始读取GRIDRAIN数据')
     t0 = time.time()
     
-    from nwpc_data.grib.eccodes import load_field_from_file
+    import netCDF4 as nc
 
     time_indices_var = var_time_indices['24hrain']
 
     if not os.path.exists(gridrain_sample):
         raise IOError('{} gridrain sample not found'.format(gridrain_sample))
-    sample = load_field_from_file(file_path=gridrain_sample, parameter="unknown", level_type="surface", level=0)
-    gridrain_lat = sample.coords['latitude']
-    gridrain_lon = sample.coords['longitude']
+    sample = nc.Dataset(gridrain_sample, 'r')
+    print(sample.variables.keys())
+    gridrain_lat = sample.variables['latitude'][:]
+    gridrain_lon = sample.variables['longitude'][:]
+
+    # exit()
 
     datacache = dict()
     datatable = np.zeros((len(time_indices), len(gridrain_lat), len(gridrain_lon)), dtype='float32')
@@ -321,7 +381,7 @@ def get_GRIDRAIN_data():
                 datatable[ifcsttime, ...] += datacache[gridrain_datetime]
                 continue
 
-            match = '{}/{}/*-{}*.GRB2'.format(gridrain_dir, gridrain_datetime, gridrain_datetime)
+            match = '{}/{}/*-{}*.nc'.format(gridrain_dir, gridrain_datetime, gridrain_datetime)
             gridrain_files = glob.glob(match)
             if len( gridrain_files) != 24:
                 print(gridrain_files)
@@ -329,20 +389,27 @@ def get_GRIDRAIN_data():
 
             grdata_ls = list()
             for gridrain_file in gridrain_files:
-                grfield = load_field_from_file(file_path=gridrain_file, parameter="unknown", level_type="surface", level=0)
-                grdata = grfield.values
-                grdata[grdata == grfield.attrs['GRIB_missingValue']] = 0.
+                handle = nc.Dataset(gridrain_file, 'r')
+                grdata = handle.variables['rain'][0,...]
+                grdata[grdata < 0.] = 0.
                 grdata_ls.append(grdata)
             dayrain = np.sum(grdata_ls, axis=0)
 
+            print(dayrain.max())
+            print(dayrain.min())
+            
             datacache[gridrain_datetime] = dayrain
             datatable[ifcsttime, ...] += dayrain
+
+    datatable = datatable / len(timelines)
+    print(datatable[0].max())
+    print(datatable[0].min())
 
     # clean
     for data in datacache.values():
         del data
     del datacache
-    del load_field_from_file
+    del nc
     t1 = time.time()
     print('读取GRIDRAIN数据结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
@@ -440,6 +507,15 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                     p = Pool(len(st_levels))
                     for ilevel,level in enumerate(st_levels):
 
+                        # [A]. find plot_lat, plot_lon, plot_typelabel
+                        if var == '24hrain' and plot_type == 'F':
+                            plot_lat, plot_lon = gridrain_lat, gridrain_lon
+                            plot_typelabel = 'OBS:CMP'
+                        else:
+                            plot_lat, plot_lon = lat, lon
+                            plot_typelabel = plot_types_name[plot_type]
+                        
+                        # [B]. find data
                         if plot_type == 'G':
                             data = datatable_grapes[ivar, itime, ilevel, ...]
                         elif plot_type == 'F':
@@ -451,9 +527,7 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                             data = datatable_grapes[ivar, itime, ilevel, ...] - \
                                 datatable_fnl[ivar, itime, ilevel, ...]
 
-                        statistcs = find_statistics(iarea, data, lon, lat)
-                        # print(statistcs)
-
+                        # [C]. find clevels
                         if var in clevel_custom.keys(): 
                             clevels = np.array(clevel_custom[var])
                         else:
@@ -466,10 +540,10 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                                 clevel_data = datatable_grapes[ivar, len(time_indices_var)-1, ilevel, ...] - \
                                     datatable_fnl[ivar, len(time_indices_var)-1, ilevel, ...]
                             
-                            clevels = find_clevels(iarea, clevel_data, lon, lat, dlevel, plot_type)
-                        
+                            clevels = find_clevels(iarea, clevel_data, plot_lon, plot_lat, dlevel, plot_type)
                         # print(clevels)
                         
+                        # [D]. find timestr
                         if var in daymean_vars:
                             timestr = '({:0>3}-{:0>3})'.format(time_index*time_incr-24, time_index*time_incr)
                         elif var in dayacc_vars:
@@ -477,13 +551,9 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                         else:
                             timestr = '{:0>3}'.format(time_index*time_incr)
                         
-                        # plot_lat, plot_lon, plot_typelabel
-                        if var == '24hrain' and plot_type == 'F':
-                            plot_lat, plot_lon = gridrain_lat, gridrain_lon
-                            plot_typelabel = 'OBS:CMP'
-                        else:
-                            plot_lat, plot_lon = lat, lon
-                            plot_typelabel = plot_types_name[plot_type]
+                        # [E]. find statistics
+                        statistcs = find_statistics(iarea, data, plot_lon, plot_lat)
+                        # print(statistcs)
                         
                         if plot_type == 'F':
                             fnl_start_ddate = (dt.datetime.strptime(start_ddate, '%Y%m%d%H') + dt.timedelta(hours=int(time_index*time_incr))).strftime("%Y%m%d%H")

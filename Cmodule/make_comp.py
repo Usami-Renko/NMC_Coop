@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 15:11:40
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-02 21:23:25
+@LastEditTime: 2020-06-03 10:56:26
 '''
 
 
@@ -54,12 +54,12 @@ def _make_comp2(pic_files, comp_file):
     
     if p.size[0] <= p.size[1] * 1.3:
         d = Image.new('RGB', (p.size[0]*2, p.size[1]))
-        d.paste(p, (0, 0))
-        d.paste(f, (p.size[0], 0))
+        d.paste(f, (0, 0))
+        d.paste(p, (p.size[0], 0))
     else:
         d = Image.new('RGB', (p.size[0], p.size[1]*2))
-        d.paste(p, (0, 0))
-        d.paste(f, (0, p.size[1]))
+        d.paste(f, (0, 0))
+        d.paste(p, (0, p.size[1]))
         
     return d
 

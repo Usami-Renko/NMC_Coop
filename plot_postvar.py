@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-03 18:43:11
+@LastEditTime: 2020-06-03 18:58:36
 @Description  : process postvar
 '''
 import sys
@@ -291,63 +291,6 @@ def get_OBS_data():
 
     return datatable
 
-# def get_GRIDRAIN_data():
-    
-#     # 6.0 读取GRIDRAIN数据
-#     print('6.0 开始读取GRIDRAIN数据')
-#     t0 = time.time()
-    
-#     from nwpc_data.grib.eccodes import load_field_from_file
-
-#     time_indices_var = var_time_indices['24hrain']
-
-#     if not os.path.exists(gridrain_sample):
-#         raise IOError('{} gridrain sample not found'.format(gridrain_sample))
-#     sample = load_field_from_file(file_path=gridrain_sample, parameter="unknown", level_type="surface", level=0)
-#     gridrain_lat = sample.coords['latitude']
-#     gridrain_lon = sample.coords['longitude']
-
-#     datacache = dict()
-#     datatable = np.zeros((len(time_indices), len(gridrain_lat), len(gridrain_lon)), dtype='float32')
-
-#     for iinittime, inittime_str in enumerate(timelines):
-#         if run_mode != 'plot':
-#             print('\t\t起报时间:{}'.format(inittime_str)) 
-#         for ifcsttime, time_index in enumerate(time_indices_var):
-#             gridrain_datetime = (dt.datetime.strptime(inittime_str, '%Y%m%d%H') + \
-#                 dt.timedelta(hours=int(time_indices_var[ifcsttime]*time_incr))).strftime('%Y%m%d')
-            
-#             if gridrain_datetime in datacache.keys():
-#                 datatable[ifcsttime, ...] += datacache[gridrain_datetime]
-#                 continue
-
-#             match = '{}/{}/*-{}*.GRB2'.format(gridrain_dir, gridrain_datetime, gridrain_datetime)
-#             gridrain_files = glob.glob(match)
-#             if len( gridrain_files) != 24:
-#                 print(gridrain_files)
-#                 raise IOError('integrity of 24h gridrain for {} failed'.format(gridrain_datetime))
-
-#             grdata_ls = list()
-#             for gridrain_file in gridrain_files:
-#                 grfield = load_field_from_file(file_path=gridrain_file, parameter="unknown", level_type="surface", level=0)
-#                 grdata = grfield.values
-#                 grdata[grdata == grfield.attrs['GRIB_missingValue']] = 0.
-#                 grdata_ls.append(grdata)
-#             dayrain = np.sum(grdata_ls, axis=0)
-
-#             datacache[gridrain_datetime] = dayrain
-#             datatable[ifcsttime, ...] += dayrain
-
-#     # clean
-#     for data in datacache.values():
-#         del data
-#     del datacache
-#     del load_field_from_file
-#     t1 = time.time()
-#     print('读取GRIDRAIN数据结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
-
-#     return datatable, gridrain_lat, gridrain_lon
-
 def get_GRIDRAIN_data():
     
     # 6.0 读取GRIDRAIN数据
@@ -361,7 +304,6 @@ def get_GRIDRAIN_data():
     if not os.path.exists(gridrain_sample):
         raise IOError('{} gridrain sample not found'.format(gridrain_sample))
     sample = nc.Dataset(gridrain_sample, 'r')
-    print(sample.variables.keys())
     gridrain_lat = sample.variables['latitude'][:]
     gridrain_lon = sample.variables['longitude'][:]
 
@@ -394,16 +336,11 @@ def get_GRIDRAIN_data():
                 grdata[grdata < 0.] = 0.
                 grdata_ls.append(grdata)
             dayrain = np.sum(grdata_ls, axis=0)
-
-            print(dayrain.max())
-            print(dayrain.min())
             
             datacache[gridrain_datetime] = dayrain
             datatable[ifcsttime, ...] += dayrain
 
     datatable = datatable / len(timelines)
-    print(datatable[0].max())
-    print(datatable[0].min())
 
     # clean
     for data in datacache.values():

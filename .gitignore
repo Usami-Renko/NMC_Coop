@@ -10,6 +10,7 @@ pic/
 pic_eg/
 doc/
 grads/
+deprecated/
 __pycache__/
 Cmodule/__pycache__/
 nwpc_data/

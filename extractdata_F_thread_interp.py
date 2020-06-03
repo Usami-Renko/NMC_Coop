@@ -5,6 +5,7 @@ Extract data from Grads data
 @author:wanghao
 """
 import sys
+sys.path.append('./Cmodule')
 sys.path.append('/g3/wanghao/Python/Cmodule/GRAPES_VS_FNL')
 from CTLExtract import CTLExtract
 from CTLReader import CTLReader
@@ -127,7 +128,7 @@ def ETexe(ddate):
     # 3.0 Transfer to NetCDF Format 
     print('--- 3.0 begin transfer data ---')
     transf2nc_F_interp(ex_ctl,interp2fnl_ctl,ex_data,interp2fnl_data,ex_nc,ddate)
-    os.system('NETCDF=/g1/app/mathlib/netcdf/4.4.0/intel')
+    # os.system('NETCDF=/g1/app/mathlib/netcdf/4.4.0/intel')
     os.system('ifort grapes2nc_'+ddate+'.f90'+' -I${NETCDF}/include/ -L${NETCDF}/lib -lnetcdff -lnetcdf -o grapes2nc_'+ddate+'.exe')
     os.system('./grapes2nc_{}.exe'.format(ddate)) 
     print('finish transfer data')

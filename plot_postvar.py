@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-03 17:57:25
+@LastEditTime: 2020-06-03 18:43:11
 @Description  : process postvar
 '''
 import sys
@@ -553,7 +553,18 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                         
                         # [E]. find statistics
                         if var == '24hrain' and iarea == 'E_Asia':
-                            st_data = clip_china_data(data, plot_lat, plot_lon)
+                            if plot_type == 'F':
+                                if 'clip_china_index_gridrain' not in globals().keys():
+                                    global clip_china_index_gridrain
+                                    st_data, clip_china_index_gridrain = clip_china_data(data, plot_lat, plot_lon)
+                                else:
+                                    st_data = data.flatten()[clip_china_index_gridrain]
+                            elif plot_type == 'G':
+                                if 'clip_china_index_grapes' not in globals().keys():
+                                    global clip_china_index_grapes
+                                    st_data, clip_china_index_grapes = clip_china_data(data, plot_lat, plot_lon)
+                                else:
+                                    st_data = data.flatten()[clip_china_index_grapes]
                         else:
                             st_data = data
 

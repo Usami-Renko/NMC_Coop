@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-03 17:48:56
+@LastEditTime: 2020-06-03 18:28:23
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -23,6 +23,8 @@ import maskout
 from matplotlib import colors
 from numpy import ma
 import os
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 def config_submodule(cong, pic_dir, expr_name):
 
@@ -196,7 +198,7 @@ def clip_china_data(data, lat, lon):
     data_world = gpd.sjoin(data,WORLD,how="inner")
     data_china = data_world[data_world["SOVEREIGN"] == "China"]
 
-    return data_china['data']
+    return data_china['data'], data_china.index
 
 def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels, statistics):
     

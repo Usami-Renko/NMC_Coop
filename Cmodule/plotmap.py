@@ -6,13 +6,17 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-03 16:18:08
+@LastEditTime: 2020-06-03 17:48:56
 '''
 
 from mpl_toolkits.basemap import Basemap
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
+import geopandas as gpd
+from shapely.geometry import Point
+import pandas as pd
+from pandas.core.frame import DataFrame
 import numpy as np
 import copy as cp
 import maskout
@@ -164,9 +168,35 @@ def find_clevels(iarea, data, lon, lat, dlevel, plot_type):
     return clevels
 
 def find_statistics(iarea, data, lon, lat):
-    data_visible = _clip_data(iarea, data, lon, lat)
+    if len(data.shape) == 2:
+        data_visible = _clip_data(iarea, data, lon, lat)
+    else:
+        data_visible = data
     Min, Max, Mean = data_visible.min(), data_visible.max(), data_visible.mean()
     return Min, Max, Mean
+
+def clip_china_data(data, lat, lon):
+    fdata = data.flatten()
+    TLAT, TLON = np.meshgrid(lat, lon)
+    LAT, LON = TLAT.T, TLON.T
+    fLAT, fLON = LAT.flatten(), LON.flatten()
+
+    c={"lat":fLAT, "lon":fLON, "data":fdata}
+    df=DataFrame(c)
+
+    WORLD = gpd.read_file(mask_dir+'.shp')
+
+    geometry = [Point(xy) for xy in zip(df.lon,df.lat)]
+
+    crs = {'init':'epsg:4326'}
+    data = gpd.GeoDataFrame(df,crs=crs,geometry=geometry)
+
+    WORLD.crs = data.crs
+
+    data_world = gpd.sjoin(data,WORLD,how="inner")
+    data_china = data_world[data_world["SOVEREIGN"] == "China"]
+
+    return data_china['data']
 
 def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels, statistics):
     

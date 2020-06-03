@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-03 11:12:14
+@LastEditTime: 2020-06-03 17:57:25
 @Description  : process postvar
 '''
 import sys
@@ -22,7 +22,7 @@ from multiprocessing import Pool
 from utils import DATADumpManager, config_list, hashlist, makenewdir, DumpDataSet
 from derived_vars import FNLWorkStation, GRAPESWorkStation
 from asciiio import read_obs
-from plotmap import plot_data, find_clevels, find_statistics, plot_case
+from plotmap import plot_data, find_clevels, find_statistics, plot_case, clip_china_data
 from make_comp import make_comp_pic, make_gif_pic
 
 # read the config file
@@ -552,8 +552,12 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                             timestr = '{:0>3}'.format(time_index*time_incr)
                         
                         # [E]. find statistics
-                        statistcs = find_statistics(iarea, data, plot_lon, plot_lat)
-                        # print(statistcs)
+                        if var == '24hrain' and iarea == 'E_Asia':
+                            st_data = clip_china_data(data, plot_lat, plot_lon)
+                        else:
+                            st_data = data
+
+                        statistcs = find_statistics(iarea, st_data, plot_lon, plot_lat)
                         
                         # [F]. get FNL datetime
                         if plot_type == 'F':

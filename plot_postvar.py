@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-03 10:51:51
+@LastEditTime: 2020-06-03 11:12:14
 @Description  : process postvar
 '''
 import sys
@@ -555,9 +555,16 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                         statistcs = find_statistics(iarea, data, plot_lon, plot_lat)
                         # print(statistcs)
                         
+                        # [F]. get FNL datetime
                         if plot_type == 'F':
-                            fnl_start_ddate = (dt.datetime.strptime(start_ddate, '%Y%m%d%H') + dt.timedelta(hours=int(time_index*time_incr))).strftime("%Y%m%d%H")
-                            fnl_end_ddate = (dt.datetime.strptime(end_ddate, '%Y%m%d%H') + dt.timedelta(hours=int(time_index*time_incr))).strftime("%Y%m%d%H")
+                            fnl_start_dt = dt.datetime.strptime(start_ddate, '%Y%m%d%H') + dt.timedelta(hours=int(time_index*time_incr))
+                            fnl_end_dt = dt.datetime.strptime(end_ddate, '%Y%m%d%H') + dt.timedelta(hours=int(time_index*time_incr))
+                            if var == '24hrain':
+                                fnl_start_ddate = fnl_start_dt.strftime("%Y%m%d")
+                                fnl_end_ddate = fnl_end_dt.strftime("%Y%m%d")
+                            else:
+                                fnl_start_ddate = fnl_start_dt.strftime("%Y%m%d%H")
+                                fnl_end_ddate = fnl_end_dt.strftime("%Y%m%d%H")
 
                         # 3D or surface vars
                         if var_ndims[var] == 4:

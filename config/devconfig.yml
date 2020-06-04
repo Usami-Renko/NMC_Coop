@@ -11,9 +11,9 @@ fnl_dir: './temp/fnl_data_tmp/'
 # FNL加速硬盘缓冲区
 dump_dir: './temp/pkl/'
 # dump_dir: '/g3/das_xp/DATA/fnl/fnl_pkl/'
-remove_dump: False
+remove_dump: True
 
-# 运行模式 interp / plot / debug
+# 运行模式 plot / debug
 run_mode: 'plot'
 nc_sample: './ex_data/CTRL/postvar2016010112.nc'
 # nc_sample: '/g3/wanghao/share/GRAPES_VS_FNL/ex_data/postvar2016010112.nc'

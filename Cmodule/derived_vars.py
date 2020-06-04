@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 18:57:38
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-19 17:40:58
+@LastEditTime: 2020-06-04 22:50:07
 '''
 
 import numpy as np
@@ -168,8 +168,21 @@ class FNLWorkStation(_VarWorkStation):
 
         return interp_data
     
-    def get_var(self, varname, indices=None, interp=False):
+    def _strip_data(self, data_class):
+        '''
+        remove polar points of the FNL data and flip the latitude axis
+        '''
+
+        data_class.data = data_class.data[:, -2:0:-1, :]
+        data_class.coordinates['latitude'] = data_class.coordinates['latitude'][-2:0:-1]
+
+        return data_class
+    
+    def get_var(self, varname, indices=None, interp=False, strip=False):
         data_class = super(FNLWorkStation, self).get_var(varname, indices)
+
+        if strip:
+            return self._strip_data(data_class)
 
         if not interp:
             return data_class

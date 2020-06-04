@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-03 18:58:36
+@LastEditTime: 2020-06-04 23:01:13
 @Description  : process postvar
 '''
 import sys
@@ -82,6 +82,7 @@ def get_GRAPES_data(exdata_dir):
     print('postvar数据读取结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
     lat, lon  = sample.variables['latitude'][:], sample.variables['longitude'][:]
+    interp2fnl_lat, interp2fnl_lon = sample.variables['interp2fnl_latitude'][:], sample.variables['interp2fnl_longitude'][:]
     TLAT, TLON  = np.meshgrid(lat, lon)
     levels    = sample.variables['levels'][:].tolist()
     times     = sample.variables['times'][:]
@@ -97,7 +98,7 @@ def get_GRAPES_data(exdata_dir):
     if run_mode == 'interp':
         global_package = dict()
         global_names = ['time_indices', 'time_incr', 
-                    'levels', 'TLON', 'TLAT', 'lon', 'lat', 
+                    'levels', 'TLON', 'TLAT', 'lon', 'lat','interp2fnl_lat', 'interp2fnl_lon' 
                     'var_time_indices']
         for global_name in global_names:
             global_package[global_name] = locals()[global_name]
@@ -109,18 +110,29 @@ def get_GRAPES_data(exdata_dir):
     print('2.0 对指定预报面高度列表和指定的预报时效列表做平均')
     t0 = time.time()
 
-    tmp_datatable = np.zeros((len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
+    # [A]. initialize the datatable
+    datatable = {}
+    for var in st_vars:
+        if var not in noFNL_vars:
+            datatable[var] = np.zeros((len(time_indices), len(st_levels), len(interp2fnl_lat), len(interp2fnl_lon)), dtype='float32')
+        else:
+            datatable[var] = np.zeros((len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
+
+    # [B]. fill in the datatable
     for idata, data in enumerate(data_list):
         ws = GRAPESWorkStation(data, grapes_varname)
-        for ivar, var in enumerate(st_vars):
+        for var in st_vars:
             time_indices_var = var_time_indices[var]
             var_instance = ws.get_var(var, (time_indices_var, level_indices)).data
             if var_ndims[var] == 4:
-                tmp_datatable[ivar, :len(time_indices_var), ...] += var_instance
+                datatable[var][:len(time_indices_var), ...] += var_instance
             elif var_ndims[var] == 3:
-                tmp_datatable[ivar, :len(time_indices_var), 0, ...] += var_instance
+                datatable[var][:len(time_indices_var), 0, ...] += var_instance
         ws.close()
-    datatable = tmp_datatable / len(timelines)
+    
+    # [C]. get mean datatable
+    for var in st_vars:
+        datatable[var] /= len(timelines)
 
     # get case data
     if plot_cases:
@@ -140,7 +152,6 @@ def get_GRAPES_data(exdata_dir):
     # close the netCDF file handles and nc package for nasty issues with Nio
     for data in data_list:
         data.close()
-    del tmp_datatable
     del nc
 
     t1 = time.time()
@@ -148,7 +159,7 @@ def get_GRAPES_data(exdata_dir):
 
     global_package = dict()
     global_names = ['time_indices', 'time_incr', 
-                    'levels', 'TLON', 'TLAT', 'lon', 'lat', 
+                    'levels', 'TLON', 'TLAT', 'lon', 'lat', 'interp2fnl_lat', 'interp2fnl_lon', 
                     'var_time_indices']
     for global_name in global_names:
         global_package[global_name] = locals()[global_name]
@@ -191,8 +202,8 @@ def get_FNL_data():
     t1 = time.time()
     print('读取FNL数据结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
-    # 4.0 对FNL数据进行插值
-    print('4.0 对FNL数据进行插值')
+    # 4.0 对FNL数据进行计算平均
+    print('4.0 对FNL数据计算平均')
     t0 = time.time()
     
     sample_file = list(fnl_data_dic.values())[0]
@@ -206,40 +217,34 @@ def get_FNL_data():
     fnl_levels = sample_field.coords['isobaricInhPa'].values.tolist()
 
     # if run in interp-mode, then we interp all the levels in ex_levels 
-    level_indices_fnl_interp = np.array([fnl_levels.index(ex_level) for ex_level in ex_levels], dtype='int')
-    level_indices_fnl_plot = np.array([fnl_levels.index(st_level) for st_level in st_levels], dtype='int')
+    level_indices_fnl = np.array([fnl_levels.index(st_level) for st_level in st_levels], dtype='int')
 
-    select_table = np.zeros((len(ex_levels)), dtype='bool')
-    for iindex, level_index_fnl_interp in enumerate(level_indices_fnl_interp):
-        if level_index_fnl_interp in level_indices_fnl_plot:
-            select_table[iindex] = True
-
-    tmp_datatable = np.zeros((len(st_vars), len(time_indices), len(st_levels), len(lat), len(lon)), dtype='float32')
-
+    # [A]. initialize the datatable
+    datatable = {}
+    for var in st_vars:
+        if var not in noFNL_vars:
+            datatable[var] = np.zeros((len(time_indices), len(st_levels), len(interp2fnl_lat), len(interp2fnl_lon)), dtype='float32')
+    
+    # [B]. fill in the datatable
     # time_indices always have the largest dimension among var_time_indices
     def get_FNL_worker(var, fnl_datetime):
-        if run_mode == 'plot':
-            msg = "FNL interpolated data {}_{}.pkl not found, please report this to developers of this script, ploting abort...".format(
-                var, fnl_datetime)
-            raise IOError(msg)
-
         ws = FNLWorkStation(fnl_data_dic[fnl_datetime], fnl_varname, TLAT.T, TLON.T, sample_field)
-        FNL_data = ws.get_var(var, level_indices_fnl_interp, interp=True).data
+        FNL_data = ws.get_var(var, level_indices_fnl, interp=False, strip=True).data
         ws.close()
         return FNL_data
 
     dds = DumpDataSet(dump_dir, get_FNL_worker)
-    for ivar, var in enumerate(st_vars):
-        if run_mode != 'plot':
+    for var in st_vars:
+        if run_mode == 'debug':
             print('\t变量:{}'.format(var)) 
         if var in noFNL_vars:
             continue
-                
+
         time_indices_var = var_time_indices[var]
         ndim = var_ndims[var]
 
         for iinittime, inittime_str in enumerate(timelines):
-            if run_mode != 'plot':
+            if run_mode == 'debug':
                 print('\t\t起报时间:{}'.format(inittime_str)) 
             for ifcsttime, time_index in enumerate(time_indices_var):
                 fnl_datetime = (dt.datetime.strptime(inittime_str, '%Y%m%d%H') + \
@@ -248,22 +253,24 @@ def get_FNL_data():
                 FNL_data = dds.get_data(var, fnl_datetime)
 
                 if ndim == 4:
-                    tmp_datatable[ivar, ifcsttime, ...] += FNL_data[select_table]               
+                    datatable[var][ifcsttime, ...] += FNL_data               
                 elif ndim == 3:
-                    tmp_datatable[ivar, ifcsttime, 0, ...] += FNL_data
+                    datatable[var][ifcsttime, 0, ...] += FNL_data
 
     if remove_dump:
         dds.close()
     
-    datatable = tmp_datatable / len(timelines)
+    # [C]. get mean datatable
+    for var in st_vars:
+        if var not in noFNL_vars:
+            datatable[var] /= len(timelines)
 
     # close the file handle    
     del fnl_data_dic
-    del tmp_datatable
     del load_field_from_file
 
     t1 = time.time()
-    print('对FNL数据进行插值, 用时{} seconds.'.format(str(t1-t0)[:7]))
+    print('对FNL数据计算平均, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
     return datatable
 
@@ -448,34 +455,37 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                         if var == '24hrain' and plot_type == 'F':
                             plot_lat, plot_lon = gridrain_lat, gridrain_lon
                             plot_typelabel = 'OBS:CMP'
-                        else:
+                        elif var in noFNL_vars:
                             plot_lat, plot_lon = lat, lon
+                            plot_typelabel = plot_types_name[plot_type]
+                        else:
+                            plot_lat, plot_lon = interp2fnl_lat, interp2fnl_lon
                             plot_typelabel = plot_types_name[plot_type]
                         
                         # [B]. find data
                         if plot_type == 'G':
-                            data = datatable_grapes[ivar, itime, ilevel, ...]
+                            data = datatable_grapes[var][itime, ilevel, ...]
                         elif plot_type == 'F':
                             if var != '24hrain':
-                                data = datatable_fnl[ivar, itime, ilevel, ...]
+                                data = datatable_fnl[var][itime, ilevel, ...]
                             else:
                                 data = datatable_gridrain[itime, ...]
                         elif plot_type == 'GMF':
-                            data = datatable_grapes[ivar, itime, ilevel, ...] - \
-                                datatable_fnl[ivar, itime, ilevel, ...]
+                            data = datatable_grapes[var][itime, ilevel, ...] - \
+                                datatable_fnl[var][itime, ilevel, ...]
 
                         # [C]. find clevels
                         if var in clevel_custom.keys(): 
                             clevels = np.array(clevel_custom[var])
                         else:
                             if var in noFNL_vars:
-                                clevel_data = datatable_grapes_zero[ivar, itime, ilevel, ...]
+                                clevel_data = datatable_grapes_zero[var][itime, ilevel, ...]
                             elif plot_type in ['G', 'F']:
-                                clevel_data = datatable_fnl[ivar, itime, ilevel, ...]
+                                clevel_data = datatable_fnl[var][itime, ilevel, ...]
                             elif plot_type in ['GMF']:
                                 # the biggest forecast range have large clevels
-                                clevel_data = datatable_grapes[ivar, len(time_indices_var)-1, ilevel, ...] - \
-                                    datatable_fnl[ivar, len(time_indices_var)-1, ilevel, ...]
+                                clevel_data = datatable_grapes[var][len(time_indices_var)-1, ilevel, ...] - \
+                                    datatable_fnl[var][len(time_indices_var)-1, ilevel, ...]
                             
                             clevels = find_clevels(iarea, clevel_data, plot_lon, plot_lat, dlevel, plot_type)
                         # print(clevels)
@@ -628,6 +638,7 @@ if __name__ == "__main__":
         print('Successfully interpolated FNL data from {} to {}'.format(start_ddate, end_ddate))
         exit()
     
+    # exit()
     
     # [C]. get OBS data
     if plot_cases:

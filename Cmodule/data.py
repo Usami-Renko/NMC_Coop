@@ -3,7 +3,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-30 17:18:42
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-19 17:42:10
+@LastEditTime: 2020-06-04 21:49:36
 '''
 
 import numpy as np
@@ -334,9 +334,11 @@ class GRAPESSlicedData(_DataClass):
         return cp
     
     def _assign_raw_coordinates(self):
-        self.raw_dims = ['times', 'levels', 'latitude', 'longitude']
+        self.raw_dims = ['times', 'levels', 'latitude', 'longitude',
+        'interp2fnl_latitude', 'interp2fnl_longitude']
         self.raw_dims_map = {'nlevel':'levels', 'ntime':'times',
-                            'nlat':'latitude', 'nlon':'longitude'}
+                            'nlat':'latitude', 'nlon':'longitude',
+        'interp2fnl_nlat':'interp2fnl_latitude', 'interp2fnl_nlon':'interp2fnl_longitude'}
         self.raw_coordinates = OrderedDict()
         for raw_dim in self.raw_dims:
             self.raw_coordinates[raw_dim] = self.filehandle.variables[raw_dim][:]

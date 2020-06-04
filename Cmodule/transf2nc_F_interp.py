@@ -3,8 +3,8 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: wanghao
-@LastEditTime: 2020-06-04 09:00:48
+@LastEditors: Hejun Xie
+@LastEditTime: 2020-06-04 10:56:41
 @Description  : process postvar
 '''
 from read_info_from_ctl import read_info_from_ctl
@@ -46,9 +46,9 @@ def transf2nc_F_interp_(ctlfilename,interp_ctlfilename,ex_data,interp2fnl_data,e
     levels = ','.join([str(ilevel) for ilevel in levels])
 
     if platform == 'PC':
-        real_bytes == 4
+        real_bytes = 4
     if platform == 'Pi':
-        real_bytes == 1
+        real_bytes = 1
 
     with open('grapes2nc_{}.f90'.format(ddate),'w') as fili:
         sec_1 = ['program grapes2nc',

@@ -128,11 +128,11 @@ def ETexe(ddate):
     # 3.0 Transfer to NetCDF Format 
     print('--- 3.0 begin transfer data ---')
     if platform == 'PC':
-        netcdf_path: '/usr/local/NETCDF/'
-        fort_compiler: 'gfortran'
+        netcdf_path = '/usr/local/NETCDF/'
+        fort_compiler = 'gfortran'
     if platform == 'Pi':
-        netcdf_path: '/g1/app/mathlib/netcdf/4.4.0/intel'
-        fort_compiler: 'ifort'
+        netcdf_path = '/g1/app/mathlib/netcdf/4.4.0/intel'
+        fort_compiler = 'ifort'
     transf2nc_F_interp_(ex_ctl,interp2fnl_ctl,ex_data,interp2fnl_data,ex_nc,ddate)
     os.environ['NETCDF']=netcdf_path
     command2 = '{} grapes2nc_'.format(fort_compiler)+ddate+'.f90'+ \

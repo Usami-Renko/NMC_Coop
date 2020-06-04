@@ -144,7 +144,7 @@ def ETexe(ddate):
     
     os.system('rm {} {}'.format(ex_ctl, ex_data))
     os.system('rm {} {}'.format(interp2fnl_ctl, interp2fnl_data))
-    os.systen('rm {} {}'.format('grapes2nc_'+ddate+'.f90', 'grapes2nc_'+ddate+'.exe'))  
+    os.system('rm {} {}'.format('grapes2nc_'+ddate+'.f90', 'grapes2nc_'+ddate+'.exe'))  
 
 class ETWorker(Thread):
     def __init__(self, queue):
@@ -190,7 +190,7 @@ if __name__ == '__main__':
         #创建一个主进程与工作进程通信
         queue = Queue()
         #创建31个工作线程
-        for x in range(2):
+        for x in range(nthreads):
             worker = ETWorker(queue)
             #将daemon设置为True将会使主线程退出，即使所有worker都阻塞了
             worker.daemon = True

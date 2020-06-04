@@ -127,6 +127,12 @@ def ETexe(ddate):
 
     # 3.0 Transfer to NetCDF Format 
     print('--- 3.0 begin transfer data ---')
+    if platform == 'PC':
+        netcdf_path: '/usr/local/NETCDF/'
+        fort_compiler: 'gfortran'
+    if platform == 'Pi':
+        netcdf_path: '/g1/app/mathlib/netcdf/4.4.0/intel'
+        fort_compiler: 'ifort'
     transf2nc_F_interp_(ex_ctl,interp2fnl_ctl,ex_data,interp2fnl_data,ex_nc,ddate)
     os.environ['NETCDF']=netcdf_path
     command2 = '{} grapes2nc_'.format(fort_compiler)+ddate+'.f90'+ \
@@ -141,16 +147,16 @@ def ETexe(ddate):
     os.systen('rm {} {}'.format('grapes2nc_'+ddate+'.f90', 'grapes2nc_'+ddate+'.exe'))  
 
 class ETWorker(Thread):
-     def __init__(self, queue):
-         Thread.__init__(self)
-         self.queue = queue
-                     
-     def run(self):
-         while True:
-             # 从队列中获取任务并扩展tuple
-             riqi = self.queue.get()
-             ETexe(riqi)
-             self.queue.task_done()
+    def __init__(self, queue):
+        Thread.__init__(self)
+        self.queue = queue
+                    
+    def run(self):
+        while True:
+            # 从队列中获取任务并扩展tuple
+            riqi = self.queue.get()
+            ETexe(riqi)
+            self.queue.task_done()
 
 # Main Program
 if __name__ == '__main__':
@@ -158,7 +164,7 @@ if __name__ == '__main__':
     CONFIGPATH = './config/' # default config path
     cong = config_list(CONFIGPATH, ['config.yml', 'devconfig.yml'])
     for key, value in cong.items():
-         locals()[key] = value
+        locals()[key] = value
     
     import transf2nc_F_interp
     transf2nc_F_interp.config_submodule(cong)

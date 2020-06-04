@@ -27,9 +27,6 @@ mask_dir: './Cmodule/chinamask/country1'
 
 # 插值变量
 interp2fnl_vars : ['u', 'v', 't', 'h', 'q2']
-netcdf_path: '/usr/local/NETCDF/'
-fort_compiler: 'gfortran'
-real_bytes: 4
 
 # 提取变量和层次
 ex_vars  : ['u','v','t','h','w','q2','rainc','rainnc', 'hfxa', 'qfxa', 't2m']

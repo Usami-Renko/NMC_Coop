@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-04 23:01:13
+@LastEditTime: 2020-06-05 10:02:44
 @Description  : process postvar
 '''
 import sys
@@ -166,6 +166,16 @@ def get_GRAPES_data(exdata_dir):
 
     return global_package, datatable, datatable_case
 
+
+def deletelevel(oldfile):
+    year = oldfile.split('/')[-2]
+    filename = oldfile.split('/')[-1]
+    makenewdir(os.path.join(temp_fnl_dir, year))
+    newfile = os.path.join(temp_fnl_dir, year, filename)
+    command = 'cdo delete,name=gh,t,level=1500,4000 {} {}'.format(oldfile, newfile)
+    os.system(command)
+    return newfile
+
 def get_FNL_data():
 
     # 3.0 读取FNL数据
@@ -209,7 +219,7 @@ def get_FNL_data():
     sample_file = list(fnl_data_dic.values())[0]
     sample_field = load_field_from_file(
         file_path = sample_file,
-        parameter = "t",
+        parameter = "u",
         level_type = "isobaricInhPa",
         level = None,
     )
@@ -228,6 +238,8 @@ def get_FNL_data():
     # [B]. fill in the datatable
     # time_indices always have the largest dimension among var_time_indices
     def get_FNL_worker(var, fnl_datetime):
+        if temp_fnl_dir not in fnl_data_dic[fnl_datetime]:
+            fnl_data_dic[fnl_datetime] = deletelevel(fnl_data_dic[fnl_datetime])
         ws = FNLWorkStation(fnl_data_dic[fnl_datetime], fnl_varname, TLAT.T, TLON.T, sample_field)
         FNL_data = ws.get_var(var, level_indices_fnl, interp=False, strip=True).data
         ws.close()
@@ -259,6 +271,7 @@ def get_FNL_data():
 
     if remove_dump:
         dds.close()
+        os.system('rm -rf {}/*'.format(temp_fnl_dir))
     
     # [C]. get mean datatable
     for var in st_vars:

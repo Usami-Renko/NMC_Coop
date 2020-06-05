@@ -5,7 +5,8 @@ platform: 'PC'    # 'Pi'
 # platforn: 'Pi'
 
 # FNL数据路径
-fnl_dir: './temp/fnl_data_tmp/'
+fnl_dir: './fnl_data/'
+temp_fnl_dir: './temp/fnl_data_tmp/'
 # fnl_dir: '/g1/COMMONDATA/obs/EXPR/NWPC/glob/fnl/'
 
 # FNL加速硬盘缓冲区
@@ -14,7 +15,7 @@ dump_dir: './temp/pkl/'
 remove_dump: True
 
 # 运行模式 plot / debug
-run_mode: 'plot'
+run_mode: 'debug'
 nc_sample: './ex_data/CTRL/postvar2016010112.nc'
 # nc_sample: '/g3/wanghao/share/GRAPES_VS_FNL/ex_data/postvar2016010112.nc'
 

@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-05 10:15:45
+@LastEditTime: 2020-06-05 15:34:00
 @Description  : process postvar
 '''
 import sys
@@ -94,17 +94,6 @@ def get_GRAPES_data(exdata_dir):
     var_time_indices = dict()
     for ivar, var in enumerate(st_vars):
         var_time_indices[var] = get_time_indices(var, time_indices, time_incr, times)
-    
-    if run_mode == 'interp':
-        global_package = dict()
-        global_names = ['time_indices', 'time_incr', 
-                    'levels', 'TLON', 'TLAT', 'lon', 'lat','interp2fnl_lat', 'interp2fnl_lon' 
-                    'var_time_indices']
-        for global_name in global_names:
-            global_package[global_name] = locals()[global_name]
-        
-        return global_package, None, None        
-
 
     # 2.0 对指定高度和指定的预报时效做平均
     print('2.0 对指定预报面高度列表和指定的预报时效列表做平均')
@@ -347,6 +336,7 @@ def get_GRIDRAIN_data():
             gridrain_files = glob.glob(match)
             if len( gridrain_files) != 24:
                 print(gridrain_files)
+                print(len( gridrain_files))
                 raise IOError('integrity of 24h gridrain for {} failed'.format(gridrain_datetime))
 
             grdata_ls = list()
@@ -637,8 +627,6 @@ if __name__ == "__main__":
         global_package, datatable_grapes, datatable_case_grapes = ddm_grapes.get_data(exdata_dir)
         if iexpr == 0:
             datatable_grapes_zero = datatable_grapes
-        if run_mode == 'interp':
-            break
     # clean the memory
     del datatable_grapes, datatable_case_grapes
     for global_name in global_package.keys():
@@ -647,12 +635,8 @@ if __name__ == "__main__":
 
     # [B]. get FNL data
     datatable_fnl = ddm_fnl.get_data()
-    if run_mode == 'interp':
-        print('Successfully interpolated FNL data from {} to {}'.format(start_ddate, end_ddate))
-        exit()
     
     # exit()
-    
     # [C]. get OBS data
     if plot_cases:
         datatable_obs = ddm_obs.get_data()

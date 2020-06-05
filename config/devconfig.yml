@@ -15,7 +15,7 @@ dump_dir: './temp/pkl/'
 remove_dump: True
 
 # 运行模式 plot / debug
-run_mode: 'debug'
+run_mode: 'plot'
 nc_sample: './ex_data/CTRL/postvar2016010112.nc'
 # nc_sample: '/g3/wanghao/share/GRAPES_VS_FNL/ex_data/postvar2016010112.nc'
 

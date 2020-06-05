@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-05 10:02:44
+@LastEditTime: 2020-06-05 10:15:45
 @Description  : process postvar
 '''
 import sys
@@ -271,7 +271,7 @@ def get_FNL_data():
 
     if remove_dump:
         dds.close()
-        os.system('rm -rf {}/*'.format(temp_fnl_dir))
+        os.system('rm {}/*/*.grib2'.format(temp_fnl_dir))
     
     # [C]. get mean datatable
     for var in st_vars:

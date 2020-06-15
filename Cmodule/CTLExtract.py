@@ -15,7 +15,7 @@ import os
 NUMBER = '[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?'
 
 class CTLExtract(object):
-    def __init__(self,ctlfilename,varname,Ex_levels,extract_ctl,extract_data,ddate):
+    def __init__(self,ctlfilename,varname,Ex_levels,extract_ctl,extract_data,ddate,itype=None):
         self.variables = {}
         self.dimensions = {}
         self.crement = {}
@@ -25,7 +25,8 @@ class CTLExtract(object):
         self.Ex_levels  = Ex_levels
         self.extract_ctl  = extract_ctl
         self.extract_data = extract_data
-        self.ddate = ddate
+        self.ddate        = ddate
+        self.itype        = itype
 
         #将ctl文件信息读入一个巨大的字符串中便于之后应用
         with open(self.ctlfilename,'r') as f:
@@ -94,8 +95,11 @@ class CTLExtract(object):
                 self.dimensions[ivarname] = 1
 
     def _extract_data(self):
-
-        extract_gs = 'extract_{}.gs'.format(self.ddate)
+        
+        if self.itype:
+            extract_gs = 'extract_{}_{}.gs'.format(self.itype,self.ddate)
+        else:
+            extract_gs = 'extract_{}.gs'.format(self.ddate)
         
         # 
         level_index = []

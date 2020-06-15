@@ -5,8 +5,8 @@
 @Description: some utilities for that package
 @Author: Hejun Xie
 @Date: 2020-04-22 18:55:54
-@LastEditors: Hejun Xie
-@LastEditTime: 2020-05-25 19:30:08
+@LastEditors: wanghao
+@LastEditTime: 2020-06-15 09:07:43
 '''
 # -*- coding: utf-8 -*-
 
@@ -103,7 +103,7 @@ class DumpDataSet(object):
 
 def makenewdir(mydir):
     if not os.path.exists(mydir):
-        os.system("mkdir {}".format(mydir))
+        os.system("mkdir -p {}".format(mydir))
         os.system("chmod -R o-w {}".format(mydir))
 
 def config(config_path, config_file):
@@ -131,3 +131,14 @@ def hashlist(objectlist):
         obj_string += str(object)
     
     return hashlib.md5(obj_string.encode()).hexdigest()
+
+def def_interp_grid(itype):
+    with open('{}_grid'.format(itype),'w') as f:
+        f.write('gridtype = lonlat\n')
+        f.write('xsize = 360\n')
+        f.write('ysize = 179\n')
+        f.write('xfirst = 0\n') 
+        f.write('xinc   = 1.0\n')
+        f.write('yfirst = -89.0\n')
+        f.write('yinc   = 1.0\n')
+    f.close()

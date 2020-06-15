@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-05 15:34:00
+@LastEditTime: 2020-06-15 11:56:51
 @Description  : process postvar
 '''
 import sys
@@ -81,12 +81,13 @@ def get_GRAPES_data(exdata_dir):
     t1 = time.time()
     print('postvar数据读取结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
-    lat, lon  = sample.variables['latitude'][:], sample.variables['longitude'][:]
-    interp2fnl_lat, interp2fnl_lon = sample.variables['interp2fnl_latitude'][:], sample.variables['interp2fnl_longitude'][:]
+    lat, lon  = sample.variables['lat'][:], sample.variables['lon'][:]
+    interp2fnl_lat, interp2fnl_lon = sample.variables['lat_2'][:], sample.variables['lon_2'][:]
     TLAT, TLON  = np.meshgrid(lat, lon)
-    levels    = sample.variables['levels'][:].tolist()
-    times     = sample.variables['times'][:]
-    time_incr = int(float(sample.variables['times'].incr))
+    levels    = sample.variables['lev'][:].tolist()
+    times     = sample.variables['time'][:]
+    times = [(dt.datetime(1,1,1) + dt.timedelta(hours=time) - dt.timedelta(days=2)).strftime('%Y%m%d%H') for time in times]
+    time_incr = int(sample.variables['time'][1] - sample.variables['time'][0]) # hour
     
     time_indices = np.array([int(i/time_incr) for i in fcst], dtype='int')
     level_indices = np.array([levels.index(st_level) for st_level in st_levels], dtype='int')

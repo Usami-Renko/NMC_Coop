@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 18:57:38
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-04 22:50:07
+@LastEditTime: 2020-06-15 11:47:23
 '''
 
 import numpy as np
@@ -250,7 +250,7 @@ class GRAPESWorkStation(_VarWorkStation):
 
     def __init__(self, filehandle, dic_varname):
         super(GRAPESWorkStation, self).__init__(filehandle, dic_varname)
-        self.time_incr = int(float(self.filehandle.variables['times'].incr))        
+        self.time_incr = int(self.filehandle.variables['time'][1] - self.filehandle.variables['time'][0])        
 
     def _get_raw_var(self, varname):
         time_indices, level_indices = self.indices

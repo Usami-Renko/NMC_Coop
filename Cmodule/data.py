@@ -3,7 +3,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-30 17:18:42
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-04 21:49:36
+@LastEditTime: 2020-06-15 11:54:14
 '''
 
 import numpy as np
@@ -334,11 +334,11 @@ class GRAPESSlicedData(_DataClass):
         return cp
     
     def _assign_raw_coordinates(self):
-        self.raw_dims = ['times', 'levels', 'latitude', 'longitude',
-        'interp2fnl_latitude', 'interp2fnl_longitude']
-        self.raw_dims_map = {'nlevel':'levels', 'ntime':'times',
-                            'nlat':'latitude', 'nlon':'longitude',
-        'interp2fnl_nlat':'interp2fnl_latitude', 'interp2fnl_nlon':'interp2fnl_longitude'}
+        self.raw_dims = ['time', 'lev', 'lat', 'lon',
+        'lat_2', 'lon_2']
+        self.raw_dims_map = {'lev':'lev', 'time':'time',
+                            'lat':'lat', 'lon':'lon',
+        'lat_2':'lat_2', 'lon_2':'lon_2'}
         self.raw_coordinates = OrderedDict()
         for raw_dim in self.raw_dims:
             self.raw_coordinates[raw_dim] = self.filehandle.variables[raw_dim][:]
@@ -350,16 +350,16 @@ class GRAPESSlicedData(_DataClass):
         self.dimensions = self.filehandle.variables[self.varname].dimensions
         self.ndim = len(self.dimensions)
 
-        if 'nlevel' not in self.dimensions:
+        if 'lev' not in self.dimensions:
             self.surface = True
         
         self.raw_indices = OrderedDict()
         
         for dimension in self.dimensions:
             dim_name = self.raw_dims_map[dimension]
-            if dim_name == 'levels':
+            if dim_name == 'lev':
                 self.raw_indices[dim_name] = self.level_indices
-            elif dim_name == 'times':
+            elif dim_name == 'time':
                 self.raw_indices[dim_name] = self.time_indices
             else:
                 self.raw_indices[dim_name] = range(len(self.raw_coordinates[dim_name]))    

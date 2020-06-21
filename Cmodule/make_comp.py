@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 15:11:40
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-03 10:56:26
+@LastEditTime: 2020-06-21 09:40:49
 '''
 
 
@@ -19,7 +19,7 @@ import numpy as np
 
 def config_submodule(cong, pic_dir):
 
-    global origin_dir, comp_dir, gif_dir
+    global origin_dir, zonalmean_dir, comp_dir, gif_dir
 
     for key, value in cong.items():
         globals()[key] = value
@@ -27,6 +27,10 @@ def config_submodule(cong, pic_dir):
     origin_dir = os.path.join(pic_dir, origin)
     comp_dir = os.path.join(pic_dir, comp)
     gif_dir = os.path.join(pic_dir, gif)
+    zonalmean_dir = os.path.join(pic_dir, zonalmean)
+    
+    if plot_zonalmean:
+        st_levels = ex_levels
 
 def _make_comp(pic_files, comp_file):
 
@@ -89,6 +93,8 @@ def make_comp_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):
             print(var, var_plot_types)
             
             for itime,time_index in enumerate(time_indices_var):
+                
+                # [I]. make comp for isobaric surface
                 for ilevel,level in enumerate(st_levels):
                     if ndim == 4:
                         pic_files = ['{}/{}/{}_{}_{}hr_{}hpa_{}.png'.format(origin_dir, var, plot_type, iarea, time_index*time_incr, int(level), var) \
@@ -107,6 +113,22 @@ def make_comp_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):
                         d = _make_comp(pic_files, comp_file)
                     elif len(var_plot_types) == 2:
                         d = _make_comp2(pic_files, comp_file)
+                    d.save(os.path.join(comp_dir, var, comp_file))
+                
+                # [II]. make comp for zonal mean 
+                if plot_zonalmean:
+                    if var in noFNL_vars or iarea != 'Global':
+                        continue
+
+                    pic_files = ['{}/{}/{}_{}_{}hr_zonalmean_{}.png'.format(zonalmean_dir, var, plot_type, iarea, time_index*time_incr, var) \
+                            for plot_type in var_plot_types]
+                    comp_file = 'comp_{}_{}hr_zonalmean_{}.png'.format(iarea, time_index*time_incr, var)
+
+                    if not np.array([os.path.exists(pic_file) for pic_file in pic_files]).all():
+                        print("[warning]: failed to make comp {} due to missing components".format(comp_file))
+                        continue
+
+                    d = _make_comp(pic_files, comp_file)
                     d.save(os.path.join(comp_dir, var, comp_file))
 
 

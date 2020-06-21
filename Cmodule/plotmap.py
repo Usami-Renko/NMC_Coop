@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-03 18:28:23
+@LastEditTime: 2020-06-21 09:44:19
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -28,13 +28,14 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 def config_submodule(cong, pic_dir, expr_name):
 
-    global origin_dir, case_dir, plot_expr
+    global origin_dir, case_dir, zonalmean_dir, plot_expr
 
     for key, value in cong.items():
         globals()[key] = value
 
     origin_dir = os.path.join(pic_dir, origin)
     case_dir = os.path.join(pic_dir, case)
+    zonalmean_dir = os.path.join(pic_dir, zonalmean)
     plot_expr = expr_name
 
 def area_region(area):
@@ -111,6 +112,28 @@ def _add_title(ax, title, subtitle, statistics, figsize, plot_type):
         ax.text(0.08, 0.00, "MEAN: {:>.2f}".format(statistics[2]), fontsize=8, ha='right', va='center')
 
 
+def _add_title_zonal(ax, title, subtitle, figsize, plot_type):
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+
+    ax.set_xticks([])
+    ax.set_yticks([])
+    
+    if isinstance(title, list):
+        if figsize[0] < figsize[1] * 1.4:
+            ax.text(0.5, 0.80, title[0], fontsize=20, ha='center', va='center')
+            ax.text(0.5, 0.40, title[1], fontsize=16, ha='center', va='center')
+        else:
+            ax.text(0.5, 0.60, title[0] + ' ' + title[1], fontsize=18, ha='center', va='center')
+    else:
+        ax.text(0.5, 0.50, title, fontsize=22, ha='center', va='center')
+    ax.text(0.5, 0.00, subtitle, fontsize=14, ha='center', va='center')
+
+    if plot_type in ['GMF', 'G']:
+        ax.text(0.14, 0.30, "{}".format(plot_expr), fontsize=14, weight='bold', ha='right', va='center')
+
 def _clip_data(iarea, data, lon, lat):
 
     slat,elat,slon,elon = area_region(iarea)
@@ -125,6 +148,11 @@ def _clip_data(iarea, data, lon, lat):
 
     return data_visible
 
+def _clip_data_zonal(iarea, data, lat):
+    slat,elat,slon,elon = area_region(iarea)
+    lat_index = [float_index(lat, slat), float_index(lat, elat)]
+    data_visible = data[:, lat_index[0]:lat_index[1]+1]
+    return data_visible
 
 def _find_clevels_rec(data, dlevel, plot_type):
     
@@ -169,6 +197,16 @@ def find_clevels(iarea, data, lon, lat, dlevel, plot_type):
     
     return clevels
 
+def find_clevels_zonal(iarea, data, lat, dlevel, plot_type):
+    data_visible = _clip_data_zonal(iarea, data, lat)
+    data_visible_copy = cp.copy(data_visible)
+    clevels = _find_clevels_rec(data_visible_copy, dlevel, plot_type)
+    if len(clevels) > 20:
+        step = len(clevels) // 20
+        clevels = clevels[::step]
+    
+    return clevels
+
 def find_statistics(iarea, data, lon, lat):
     if len(data.shape) == 2:
         data_visible = _clip_data(iarea, data, lon, lat)
@@ -199,6 +237,68 @@ def clip_china_data(data, lat, lon):
     data_china = data_world[data_world["SOVEREIGN"] == "China"]
 
     return data_china['data'], data_china.index
+
+def plot_data_zonal(post_data, plot_type, var, varname, lat, iarea, title, subtitle, pic_file, clevels):
+    plt.rcParams['font.family'] = 'serif'
+
+    TLAT, TLEVEL = np.meshgrid(lat, ex_levels)
+    slat,elat,slon,elon = area_region(iarea)
+
+    figsize=(14, 10)
+    
+    fig = plt.figure(figsize=figsize)
+
+    ax_title = fig.add_axes([0.1, 0.90, 0.82, 0.08])
+    ax_cf = fig.add_axes([0.16, 0.14, 0.76, 0.72])
+    ax_cb = fig.add_axes([0.1, 0.05, 0.85, 0.03])
+
+    _add_title_zonal(ax_title, title, subtitle, figsize, plot_type)
+
+    origin = 'lower'
+    extend = 'both'
+
+    if plot_type == 'GMF':
+        cmap = 'RdBu_r'
+    else:
+        cmap = 'jet'
+
+    if var in ['q'] and plot_type in ['G', 'F']:
+        post_data = ma.masked_where(post_data <= 0.00, post_data)
+        extend = 'max'
+
+    if len(clevels) < 3:
+        print("[warning]: clevels too short for this var at this level, abort...".format())
+        return
+    
+    norm = None
+
+    ticks = clevels
+    ticklabels = [str(clevel) for clevel in clevels]
+
+    latticks = [-60, -30, 0, 30, 60]
+    latticklabels = ['60S', '30S', 'EQ', '30N', '60N']
+    leveltickelabels = [str(leveltick) for leveltick in levelticks]
+
+    CF = ax_cf.contourf(TLAT.T, TLEVEL.T, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend=extend, norm=norm)
+    
+    ax_cf.invert_yaxis()
+
+    ax_cf.set_xticks(latticks)
+    ax_cf.set_xticklabels(latticklabels, fontsize=14)
+    ax_cf.set_yticks(levelticks)
+    ax_cf.set_yticklabels(leveltickelabels, fontsize=14)
+    
+    CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal', ticks=ticks)
+    CB.ax.set_xticklabels(ticklabels)
+    for tick in CB.ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(10)
+        tick.label.set_rotation(45)
+
+    CB.set_label(varname, fontsize=14)
+    
+    plt.savefig('{}/{}/{}'.format(zonalmean_dir, var, pic_file), bbox_inches='tight', dpi=plot_dpi)
+    plt.close(fig)
+
 
 def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels, statistics):
     

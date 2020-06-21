@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-15 11:56:51
+@LastEditTime: 2020-06-21 09:27:51
 @Description  : process postvar
 '''
 import sys
@@ -22,7 +22,8 @@ from multiprocessing import Pool
 from utils import DATADumpManager, config_list, hashlist, makenewdir, DumpDataSet
 from derived_vars import FNLWorkStation, GRAPESWorkStation
 from asciiio import read_obs
-from plotmap import plot_data, find_clevels, find_statistics, plot_case, clip_china_data
+from plotmap import plot_data, find_clevels, find_statistics, plot_case, clip_china_data, \
+                    plot_data_zonal, find_clevels_zonal
 from make_comp import make_comp_pic, make_gif_pic
 
 # read the config file
@@ -371,6 +372,7 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
     comp_dir = os.path.join(pic_dir, comp)
     gif_dir = os.path.join(pic_dir, gif)
     case_dir = os.path.join(pic_dir, case)
+    zonalmean_dir = os.path.join(pic_dir, zonalmean)
 
     # config submodules
     import plotmap, make_comp
@@ -382,6 +384,8 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
     if clean_plot:
         os.system('rm -rf {}/*'.format(pic_dir))
     makenewdir(origin_dir)
+    if plot_zonalmean:
+        makenewdir(zonalmean_dir)
     
     if plot_cases:
         makenewdir(case_dir)
@@ -436,8 +440,12 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                 raise KeyError('plot_area not defined for var:{}'.format(var))
             var_plot_areas[var] = plot_areas_var
 
-            var_dir = os.path.join(origin_dir, var)
-            makenewdir(var_dir)
+            var_dir_origin = os.path.join(origin_dir, var)
+            makenewdir(var_dir_origin)
+
+            if plot_zonalmean:
+                var_dir_zonalmean = os.path.join(zonalmean_dir, var)
+                makenewdir(var_dir_zonalmean)
 
             for iarea in plot_areas_var:
                 # special case for GRIDRAIN data
@@ -452,9 +460,10 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                         elif plot_type == 'GMF':
                             dlevel = clevel_step_PMF[var]
 
+                    # [I]. plot data on isobaric surfaces
                     p = Pool(len(st_levels))
                     for ilevel,level in enumerate(st_levels):
-
+                        # continue
                         # [A]. find plot_lat, plot_lon, plot_typelabel
                         if var == '24hrain' and plot_type == 'F':
                             plot_lat, plot_lon = gridrain_lat, gridrain_lon
@@ -568,6 +577,65 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
 
                     p.close()
                     p.join()
+
+                    # [II]. plot zonal averaged data
+                    if plot_zonalmean:
+                        if var in noFNL_vars or iarea != 'Global':
+                            continue
+
+                        # [A]. find plot_lat, plot_lon, plot_typelabel
+                        plot_lat, plot_lon = interp2fnl_lat, interp2fnl_lon
+                        plot_typelabel = plot_types_name[plot_type]
+                    
+                        # [B]. find data
+                        if plot_type == 'G':
+                            data = datatable_grapes[var][itime, ...]
+                        elif plot_type == 'F':
+                            data = datatable_fnl[var][itime, ...]
+                        elif plot_type == 'GMF':
+                            data = datatable_grapes[var][itime, ...] - \
+                                datatable_fnl[var][itime, ...]
+                        # perform zonal average
+                        data = np.mean(data, axis=2)
+
+                        # [C]. find clevels
+                        if plot_type in ['G', 'F']:
+                            clevel_data = datatable_fnl[var][itime, ...]
+                        elif plot_type in ['GMF']:
+                            # the biggest forecast range have large clevels
+                            clevel_data = datatable_grapes[var][len(time_indices_var)-1, ...] - \
+                                datatable_fnl[var][len(time_indices_var)-1, ...]
+                        # perform zonal average
+                        clevel_data = np.mean(clevel_data, axis=2)
+                        
+                        clevels = find_clevels_zonal(iarea, clevel_data, plot_lat, dlevel, plot_type)
+                        
+                        # [D]. find timestr
+                        timestr = '{:0>3}'.format(time_index*time_incr)
+
+                        # [F]. get FNL datetime
+                        if plot_type == 'F':
+                            fnl_start_dt = dt.datetime.strptime(start_ddate, '%Y%m%d%H') + dt.timedelta(hours=int(time_index*time_incr))
+                            fnl_end_dt = dt.datetime.strptime(end_ddate, '%Y%m%d%H') + dt.timedelta(hours=int(time_index*time_incr))
+                            fnl_start_ddate = fnl_start_dt.strftime("%Y%m%d%H")
+                            fnl_end_ddate = fnl_end_dt.strftime("%Y%m%d%H")
+                        
+                        if len(varname) < 20:
+                            title = '{} Zonal Mean {}'.format(plot_typelabel, varname)  # timestr
+                        else:
+                            title = ['{} Zonal Mean'.format(plot_typelabel), r'{}'.format(varname)]
+                        if plot_type == 'F':
+                            subtitle = 'Init(UTC): {} - {}'.format(fnl_start_ddate, fnl_end_ddate)
+                        else:
+                            subtitle = 'Init(UTC): {}+{}H - {}+{}H'.format(start_ddate,timestr,end_ddate,timestr)
+                        pic_file = '{}_{}_{}hr_zonalmean_{}.png'.format(plot_type, iarea, time_index*time_incr, var)
+
+                        plot_data_zonal(data, plot_type, var, varname, plot_lat, iarea, title, subtitle, pic_file, clevels)
+
+                        print('\t\t\t'+pic_file)
+                        
+                        # exit()
+
     
     if iexpr == 0:
         fnl_pics = glob.glob("{}/*/F_*.png".format(origin_dir))
@@ -601,6 +669,9 @@ if __name__ == "__main__":
         GRAPES_PKL = False
         OBS_PKL = False
         GRIDRAIN_PKL = False
+    
+    if plot_zonalmean:
+        st_levels = ex_levels
 
     OBS_HASH = hashlist([case_ini_times, case_fcst_hours])
     FNL_HASH = hashlist([st_vars, st_levels, fcst, start_ddate, end_ddate, fcst_step])

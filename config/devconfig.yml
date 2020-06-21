@@ -156,7 +156,12 @@ make_gif: False
 origin: 'origin'
 # 拼图路径
 comp: 'comp'
+# 纬圈平均路径
+zonalmean: 'zonalmean'
 # 动图路径
 gif: 'gif'
 # 案例图路径
 case: 'case'
+
+# zonal mean level ticks
+levelticks: [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]

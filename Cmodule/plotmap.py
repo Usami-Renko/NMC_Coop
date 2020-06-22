@@ -5,8 +5,8 @@
 @Description: plot the countoured map of a given variable
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
-@LastEditors: wanghao
-@LastEditTime: 2020-06-22 16:24:37
+@LastEditors: Hejun Xie
+@LastEditTime: 2020-06-22 20:20:18
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -100,38 +100,19 @@ def _add_title(ax, title, subtitle, statistics, figsize, plot_type):
         ax.text(0.5, 0.50, title, fontsize=22, ha='center', va='center')
     ax.text(0.5, 0.00, subtitle, fontsize=14, ha='center', va='center')
 
-    if plot_type in ['GMF', 'G']:
-        ax.text(0.08, 0.90, "MIN: {:>.2f}".format(statistics[0]), fontsize=8, ha='right', va='center')
-        ax.text(0.08, 0.60, "MAX: {:>.2f}".format(statistics[1]), fontsize=8, ha='right', va='center')
-        ax.text(0.08, 0.30, "MEAN: {:>.2f}".format(statistics[2]), fontsize=8, ha='right', va='center')
-        ax.text(0.08, 0.00, "{}".format(plot_expr), fontsize=10, weight='bold', ha='right', va='center')
-    elif plot_type == 'F':
-        ax.text(0.08, 0.60, "MIN: {:>.2f}".format(statistics[0]), fontsize=8, ha='right', va='center')
-        ax.text(0.08, 0.30, "MAX: {:>.2f}".format(statistics[1]), fontsize=8, ha='right', va='center')
-        ax.text(0.08, 0.00, "MEAN: {:>.2f}".format(statistics[2]), fontsize=8, ha='right', va='center')
-
-
-def _add_title_zonal(ax, title, subtitle, figsize, plot_type):
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_visible(False)
-    ax.spines['bottom'].set_visible(False)
-
-    ax.set_xticks([])
-    ax.set_yticks([])
-    
-    if isinstance(title, list):
-        if figsize[0] < figsize[1] * 1.4:
-            ax.text(0.5, 0.80, title[0], fontsize=20, ha='center', va='center')
-            ax.text(0.5, 0.40, title[1], fontsize=16, ha='center', va='center')
-        else:
-            ax.text(0.5, 0.60, title[0] + ' ' + title[1], fontsize=18, ha='center', va='center')
+    if statistics is None:
+        if plot_type in ['GMF', 'G']:
+            ax.text(0.14, 0.30, "{}".format(plot_expr), fontsize=14, weight='bold', ha='right', va='center')
     else:
-        ax.text(0.5, 0.50, title, fontsize=22, ha='center', va='center')
-    ax.text(0.5, 0.00, subtitle, fontsize=14, ha='center', va='center')
-
-    if plot_type in ['GMF', 'G']:
-        ax.text(0.14, 0.30, "{}".format(plot_expr), fontsize=14, weight='bold', ha='right', va='center')
+        if plot_type in ['GMF', 'G']:
+            ax.text(0.08, 0.90, "MIN: {:>.2f}".format(statistics[0]), fontsize=8, ha='right', va='center')
+            ax.text(0.08, 0.60, "MAX: {:>.2f}".format(statistics[1]), fontsize=8, ha='right', va='center')
+            ax.text(0.08, 0.30, "MEAN: {:>.2f}".format(statistics[2]), fontsize=8, ha='right', va='center')
+            ax.text(0.08, 0.00, "{}".format(plot_expr), fontsize=10, weight='bold', ha='right', va='center')
+        elif plot_type == 'F':
+            ax.text(0.08, 0.60, "MIN: {:>.2f}".format(statistics[0]), fontsize=8, ha='right', va='center')
+            ax.text(0.08, 0.30, "MAX: {:>.2f}".format(statistics[1]), fontsize=8, ha='right', va='center')
+            ax.text(0.08, 0.00, "MEAN: {:>.2f}".format(statistics[2]), fontsize=8, ha='right', va='center')
 
 def _clip_data(iarea, data, lon, lat):
 
@@ -253,7 +234,7 @@ def plot_data_zonal(post_data, plot_type, var, varname, lat, iarea, title, subti
     ax_cf = fig.add_axes([0.16, 0.14, 0.76, 0.72])
     ax_cb = fig.add_axes([0.1, 0.05, 0.85, 0.03])
 
-    _add_title_zonal(ax_title, title, subtitle, figsize, plot_type)
+    _add_title(ax_title, title, subtitle, None, figsize, plot_type)
 
     origin = 'lower'
     extend = 'both'

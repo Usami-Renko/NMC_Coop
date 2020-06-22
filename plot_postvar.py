@@ -3,8 +3,8 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: wanghao
-@LastEditTime: 2020-06-22 16:24:06
+@LastEditors: Hejun Xie
+@LastEditTime: 2020-06-22 20:17:19
 @Description  : process postvar
 '''
 import sys
@@ -517,23 +517,26 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                             timestr = '{:0>3}'.format(time_index*time_incr)
                         
                         # [E]. find statistics
-                        if var == '24hrain' and iarea == 'E_Asia':
-                            if plot_type == 'F':
-                                if 'clip_china_index_gridrain' not in globals().keys():
-                                    global clip_china_index_gridrain
-                                    st_data, clip_china_index_gridrain = clip_china_data(data, plot_lat, plot_lon)
-                                else:
-                                    st_data = data.flatten()[clip_china_index_gridrain]
-                            elif plot_type == 'G':
-                                if 'clip_china_index_grapes' not in globals().keys():
-                                    global clip_china_index_grapes
-                                    st_data, clip_china_index_grapes = clip_china_data(data, plot_lat, plot_lon)
-                                else:
-                                    st_data = data.flatten()[clip_china_index_grapes]
-                        else:
-                            st_data = data
+                        if platform == 'PC':
+                            if var == '24hrain' and iarea == 'E_Asia':
+                                if plot_type == 'F':
+                                    if 'clip_china_index_gridrain' not in globals().keys():
+                                        global clip_china_index_gridrain
+                                        st_data, clip_china_index_gridrain = clip_china_data(data, plot_lat, plot_lon)
+                                    else:
+                                        st_data = data.flatten()[clip_china_index_gridrain]
+                                elif plot_type == 'G':
+                                    if 'clip_china_index_grapes' not in globals().keys():
+                                        global clip_china_index_grapes
+                                        st_data, clip_china_index_grapes = clip_china_data(data, plot_lat, plot_lon)
+                                    else:
+                                        st_data = data.flatten()[clip_china_index_grapes]
+                            else:
+                                st_data = data
 
-                        statistcs = find_statistics(iarea, st_data, plot_lon, plot_lat)
+                            statistcs = find_statistics(iarea, st_data, plot_lon, plot_lat)
+                        elif platform == 'Pi':
+                            statistcs = None
                         
                         # [F]. get FNL datetime
                         if plot_type == 'F':

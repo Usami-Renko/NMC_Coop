@@ -1,6 +1,6 @@
 # 时间信息
 start_ddate: '2016010112'  # yyyymndd
-end_ddate  : '2016010512'  # yyyymndd
+end_ddate  : '2016010212'  # yyyymndd
 
 # 起报时间间隔
 fcst_step: 24 # hours
@@ -20,15 +20,15 @@ exdata_root_dir: './ex_data/'
 # 可供选择的变量和层次: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
 #                     [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
 # st_vars: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
-st_vars:  ['u', 'q']
-# st_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.]
-st_levels: [500.]
+st_vars:  ['24hrain']
+# plot_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.]
+plot_levels: [500.]
 
 # 绘制纬圈平均
 plot_zonalmean: True
 
 # 预报时长
-fcst: [24,72] # hours
+fcst: [0] # hours
 
 # 画图设置
 # 图片路径和类型
@@ -54,7 +54,7 @@ clean_plot: True
 plot_areas:
   "u v t h w q": ['Global']
   "shf phf" : ['Global']
-  "24hrain" : ['Global', 'E_Asia']
+  "24hrain" : ['Global']
   "t2m" : ['Global']
 
 plot_types: ['G', 'F', 'GMF']

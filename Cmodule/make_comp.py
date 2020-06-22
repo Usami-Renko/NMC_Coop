@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 15:11:40
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-21 09:40:49
+@LastEditTime: 2020-06-22 15:24:11
 '''
 
 
@@ -19,7 +19,7 @@ import numpy as np
 
 def config_submodule(cong, pic_dir):
 
-    global origin_dir, zonalmean_dir, comp_dir, gif_dir
+    global origin_dir, zonalmean_dir, comp_dir, gif_dir, st_levels
 
     for key, value in cong.items():
         globals()[key] = value
@@ -28,9 +28,11 @@ def config_submodule(cong, pic_dir):
     comp_dir = os.path.join(pic_dir, comp)
     gif_dir = os.path.join(pic_dir, gif)
     zonalmean_dir = os.path.join(pic_dir, zonalmean)
-    
+
     if plot_zonalmean:
         st_levels = ex_levels
+    else:
+        st_levels = plot_levels
 
 def _make_comp(pic_files, comp_file):
 
@@ -95,7 +97,8 @@ def make_comp_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):
             for itime,time_index in enumerate(time_indices_var):
                 
                 # [I]. make comp for isobaric surface
-                for ilevel,level in enumerate(st_levels):
+                for level in plot_levels:
+                    ilevel = st_levels.index(level)
                     if ndim == 4:
                         pic_files = ['{}/{}/{}_{}_{}hr_{}hpa_{}.png'.format(origin_dir, var, plot_type, iarea, time_index*time_incr, int(level), var) \
                             for plot_type in var_plot_types]

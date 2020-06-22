@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-21 09:27:51
+@LastEditTime: 2020-06-22 15:55:03
 @Description  : process postvar
 '''
 import sys
@@ -462,8 +462,13 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
 
                     # [I]. plot data on isobaric surfaces
                     p = Pool(len(st_levels))
-                    for ilevel,level in enumerate(st_levels):
+                    for level in plot_levels:
                         # continue
+                        if var_ndims[var] == 4:
+                            ilevel = st_levels.index(level)
+                        else:
+                            ilevel = 0
+                        
                         # [A]. find plot_lat, plot_lon, plot_typelabel
                         if var == '24hrain' and plot_type == 'F':
                             plot_lat, plot_lon = gridrain_lat, gridrain_lon
@@ -672,6 +677,8 @@ if __name__ == "__main__":
     
     if plot_zonalmean:
         st_levels = ex_levels
+    else:
+        st_levels = plot_levels
 
     OBS_HASH = hashlist([case_ini_times, case_fcst_hours])
     FNL_HASH = hashlist([st_vars, st_levels, fcst, start_ddate, end_ddate, fcst_step])

@@ -5,15 +5,14 @@
 @Description: plot the countoured map of a given variable
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
-@LastEditors: Hejun Xie
-@LastEditTime: 2020-06-21 09:44:19
+@LastEditors: wanghao
+@LastEditTime: 2020-06-22 16:24:37
 '''
 
 from mpl_toolkits.basemap import Basemap
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
-import geopandas as gpd
 from shapely.geometry import Point
 import pandas as pd
 from pandas.core.frame import DataFrame
@@ -216,6 +215,8 @@ def find_statistics(iarea, data, lon, lat):
     return Min, Max, Mean
 
 def clip_china_data(data, lat, lon):
+    import geopandas as gpd
+
     fdata = data.flatten()
     TLAT, TLON = np.meshgrid(lat, lon)
     LAT, LON = TLAT.T, TLON.T

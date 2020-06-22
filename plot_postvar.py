@@ -3,8 +3,8 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: Hejun Xie
-@LastEditTime: 2020-06-22 15:55:03
+@LastEditors: wanghao
+@LastEditTime: 2020-06-22 16:24:06
 @Description  : process postvar
 '''
 import sys
@@ -723,9 +723,9 @@ if __name__ == "__main__":
 
     # [D]. get GRIDRAIN data
     if '24hrain' in st_vars:
-        datatable_gridrain, gridrain_lat, gridrain_lon = ddm_gridrain.get_data()
+        if 'E_Asia' in cong['plot_areas']['24hrain']:
+            datatable_gridrain, gridrain_lat, gridrain_lon = ddm_gridrain.get_data()
     
-
     print("Sucessfully loading all the data, start ploting")
 
     # exit()

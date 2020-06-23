@@ -28,7 +28,6 @@ mask_dir: './Cmodule/chinamask/country1'
 
 # 插值变量
 def_interp2fnl_vars: ['u', 'v', 't', 'h', 'q2']
-nthreads: 1
 
 # 提取变量和层次
 ex_vars  : ['u','v','t','h','w','q2','rainc','rainnc', 'hfxa', 'qfxa', 't2m']
@@ -118,6 +117,23 @@ clevel_step:
 clevel_step_PMF:
   u: 1
   v: 1
+  t: 0.5
+  h: 10
+  q: 0.1
+
+clevel_step_zonalmean:
+  u: 2
+  v: 0.2
+  t: 1
+  h: 40
+  q: 0.1
+  t2m: 1
+  shf: 10
+  phf: 10
+
+clevel_step_PMF_zonalmean:
+  u: 1
+  v: 0.1
   t: 0.5
   h: 10
   q: 0.1

@@ -1,6 +1,6 @@
 # 时间信息
 start_ddate: '2016010112'  # yyyymndd
-end_ddate  : '2016010212'  # yyyymndd
+end_ddate  : '2016010512'  # yyyymndd
 
 # 起报时间间隔
 fcst_step: 24 # hours
@@ -16,11 +16,14 @@ exprs:
 # GRAPES数据转换路径
 exdata_root_dir: './ex_data/'
 
+# 转化的线程数
+nthreads: 1
+
 # 统计绘图变量和层次:
 # 可供选择的变量和层次: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
 #                     [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
 # st_vars: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
-st_vars:  ['24hrain', 'u']
+st_vars:  ['u', 'v', '24hrain']
 # plot_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.]
 plot_levels: [500.]
 
@@ -28,7 +31,7 @@ plot_levels: [500.]
 plot_zonalmean: True
 
 # 预报时长
-fcst: [0] # hours
+fcst: [0, 24] # hours
 
 # 画图设置
 # 图片路径和类型
@@ -46,9 +49,9 @@ clean_plot: True
 #   "t2m" : ['Global']
 
 plot_areas:
-  "u v t h w q": ['Global', 'E_Asia']
+  "u v t h w q": ['Global']
   "shf phf" : ['Global']
-  "24hrain" : ['Global', 'E_Asia']
+  "24hrain" : ['Global']
   "t2m" : ['Global']
 
 plot_types: ['G', 'F', 'GMF']

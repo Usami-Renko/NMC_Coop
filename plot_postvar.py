@@ -4,9 +4,12 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-22 20:17:19
-@Description  : process postvar
+@LastEditTime: 2020-06-23 19:08:40
+@Description: Process and plot postvar
+Version: 1.9.0-alpha
+Release Date: 2020/6/23
 '''
+
 import sys
 sys.path.append('./Cmodule')
 sys.path.append('/g3/wanghao/Python/Cmodule/GRAPES_VS_FNL')
@@ -453,14 +456,13 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                     continue
                 print('\t\t区域: {}'.format(iarea))
                 for itime,time_index in enumerate(time_indices_var):
-                    
+                    # [I]. plot data on isobaric surfaces
                     if var not in clevel_custom.keys():
                         if plot_type in ['G', 'F']:    
                             dlevel = clevel_step[var]
                         elif plot_type == 'GMF':
                             dlevel = clevel_step_PMF[var]
-
-                    # [I]. plot data on isobaric surfaces
+                    
                     p = Pool(len(st_levels))
                     for level in plot_levels:
                         # continue
@@ -587,6 +589,12 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                     p.join()
 
                     # [II]. plot zonal averaged data
+                    if var not in clevel_custom.keys():
+                        if plot_type in ['G', 'F']:    
+                            dlevel = clevel_step_zonalmean[var]
+                        elif plot_type == 'GMF':
+                            dlevel = clevel_step_PMF_zonalmean[var]
+                    
                     if plot_zonalmean:
                         if var in noFNL_vars or iarea != 'Global':
                             continue

@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-22 20:20:18
+@LastEditTime: 2020-06-23 19:12:26
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -396,15 +396,7 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     ticks = clevels
     ticklabels = [str(clevel) for clevel in clevels]
 
-    # for Pi
-    if platform == 'Pi':
-        if var == '24hrain':
-            colors_24hrain = ['#000080','#0034FF','#30FFC7','#8AFF6D','#D1FF26','#FBF100','#FFC800','#FFAB00','#FF8900','#FF6400','#FF3000','#BB0000','#800000']
-            CF = map.contourf(x, y, post_data.T, levels=clevels, colors=colors_24hrain, origin=origin, extend=extend)
-        else:
-            CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend=extend, norm=norm)
-    else:
-        CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend=extend, norm=norm)
+    CF = map.contourf(x, y, post_data.T, levels=clevels, cmap=cmap, origin=origin, extend=extend, norm=norm)
     CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal', ticks=ticks)
     CB.ax.set_xticklabels(ticklabels)
     for tick in CB.ax.xaxis.get_major_ticks():

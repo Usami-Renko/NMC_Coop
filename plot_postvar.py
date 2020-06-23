@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-23 19:08:40
+@LastEditTime: 2020-06-23 22:27:23
 @Description: Process and plot postvar
 Version: 1.9.0-alpha
 Release Date: 2020/6/23
@@ -519,26 +519,26 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                             timestr = '{:0>3}'.format(time_index*time_incr)
                         
                         # [E]. find statistics
-                        if platform == 'PC':
-                            if var == '24hrain' and iarea == 'E_Asia':
-                                if plot_type == 'F':
-                                    if 'clip_china_index_gridrain' not in globals().keys():
-                                        global clip_china_index_gridrain
-                                        st_data, clip_china_index_gridrain = clip_china_data(data, plot_lat, plot_lon)
-                                    else:
-                                        st_data = data.flatten()[clip_china_index_gridrain]
-                                elif plot_type == 'G':
-                                    if 'clip_china_index_grapes' not in globals().keys():
-                                        global clip_china_index_grapes
-                                        st_data, clip_china_index_grapes = clip_china_data(data, plot_lat, plot_lon)
-                                    else:
-                                        st_data = data.flatten()[clip_china_index_grapes]
-                            else:
-                                st_data = data
+                        if var == '24hrain' and iarea == 'E_Asia':
+                            if plot_type == 'F':
+                                if 'clip_china_index_gridrain' not in globals().keys():
+                                    global clip_china_index_gridrain
+                                    st_data, clip_china_index_gridrain = clip_china_data(data, plot_lat, plot_lon)
+                                else:
+                                    st_data = data.flatten()[clip_china_index_gridrain]
+                            elif plot_type == 'G':
+                                if 'clip_china_index_grapes' not in globals().keys():
+                                    global clip_china_index_grapes
+                                    st_data, clip_china_index_grapes = clip_china_data(data, plot_lat, plot_lon)
+                                else:
+                                    st_data = data.flatten()[clip_china_index_grapes]
+                        else:
+                            st_data = data
 
-                            statistcs = find_statistics(iarea, st_data, plot_lon, plot_lat)
-                        elif platform == 'Pi':
-                            statistcs = None
+                        if platform == 'Pi' and var == '24hrain' and iarea == 'E_Asia':
+                            statistics = None
+                        else: 
+                            statistics = find_statistics(iarea, st_data, plot_lon, plot_lat)
                         
                         # [F]. get FNL datetime
                         if plot_type == 'F':
@@ -567,7 +567,7 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                             print('\t\t\t'+pic_file)
 
                             # p.apply_async(plot_data, args=(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels))
-                            plot_data(data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistcs)
+                            plot_data(data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistics)
                         elif var_ndims[var] == 3:
                             if len(varname) < 20:
                                 title    = '{} {}'.format(plot_typelabel, varname)
@@ -582,7 +582,7 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
 
                             print('\t\t\t'+pic_file)
 
-                            plot_data(data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistcs)
+                            plot_data(data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistics)
                             break
 
                     p.close()

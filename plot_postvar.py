@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-23 22:27:23
+@LastEditTime: 2020-06-24 09:31:19
 @Description: Process and plot postvar
 Version: 1.9.0-alpha
 Release Date: 2020/6/23
@@ -519,7 +519,7 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                             timestr = '{:0>3}'.format(time_index*time_incr)
                         
                         # [E]. find statistics
-                        if var == '24hrain' and iarea == 'E_Asia':
+                        if var == '24hrain' and iarea == 'E_Asia' and platform != 'Pi':
                             if plot_type == 'F':
                                 if 'clip_china_index_gridrain' not in globals().keys():
                                     global clip_china_index_gridrain

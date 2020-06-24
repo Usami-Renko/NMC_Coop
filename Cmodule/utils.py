@@ -142,3 +142,24 @@ def def_interp_grid(itype):
         f.write('yfirst = -89.0\n')
         f.write('yinc   = 1.0\n')
     f.close()
+
+def gen_cmp_pre_ctl(ddate):
+    makenewdir('./temp/cmp_pre_ctls')
+    with open('./temp/cmp_pre_ctls/cmp_pre_{}.ctl'.format(ddate),'w') as f:
+        f.write('dset SURF_CLI_CHN_MERGE_CMP_PRE_HOUR_GRID_0.10-{}.grd\n'.format(ddate))
+        f.write('undef -999.0\n')
+        f.write('options   little_endian\n')
+        f.write('title  China Hourly Merged Precipitation Analysis\n')
+        f.write('xdef  700 linear  70.05  0.10\n')
+        f.write('ydef  440 linear  15.05  0.10\n')
+        f.write('zdef     1 levels 1\n')
+        f.write('tdef 1 linear 00Z01jun2015 1hr\n')
+        f.write('vars 2\n')
+        f.write('crain      1 00  CH01   combined analysis (mm/Hour)\n')
+        f.write('gsamp      1 00  CH02   gauge numbers\n')
+        f.write('endvars')
+    f.close()
+
+ # unit test
+if __name__ == "__main__":
+    gen_cmp_pre_ctl('2019081819') 

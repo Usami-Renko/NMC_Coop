@@ -30,8 +30,11 @@ class CTLReader(object):
 
         p = re.compile("%s\s+(.*)" % ('dset'))
         m = p.search(self.ctl)
-        path = os.path.dirname(ctlfilename)
-        self.filename = path + os.sep + m.group(1)[1:]
+        if m.group(1)[0] == '^':
+            path = os.path.dirname(ctlfilename)
+            self.filename = path + os.sep + m.group(1)[1:]
+        else:
+            self.filename = m.group(1)[:]
         print(self.filename)
 
         self._read_dimensions() #获取ctl中的维度信息

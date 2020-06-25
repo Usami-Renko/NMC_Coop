@@ -5,8 +5,8 @@
 @Description: some utilities for that package
 @Author: Hejun Xie
 @Date: 2020-04-22 18:55:54
-@LastEditors: wanghao
-@LastEditTime: 2020-06-15 09:07:43
+@LastEditors: Hejun Xie
+@LastEditTime: 2020-06-25 07:54:03
 '''
 # -*- coding: utf-8 -*-
 
@@ -146,7 +146,7 @@ def def_interp_grid(itype):
 def gen_cmp_pre_ctl(ddate):
     makenewdir('./temp/cmp_pre_ctls')
     with open('./temp/cmp_pre_ctls/cmp_pre_{}.ctl'.format(ddate),'w') as f:
-        f.write('dset SURF_CLI_CHN_MERGE_CMP_PRE_HOUR_GRID_0.10-{}.grd\n'.format(ddate))
+        f.write('dset ^SURF_CLI_CHN_MERGE_CMP_PRE_HOUR_GRID_0.10-{}.grd\n'.format(ddate))
         f.write('undef -999.0\n')
         f.write('options   little_endian\n')
         f.write('title  China Hourly Merged Precipitation Analysis\n')

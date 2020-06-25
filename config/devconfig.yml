@@ -131,12 +131,39 @@ clevel_step_zonalmean:
   shf: 10
   phf: 10
 
-clevel_step_PMF_zonalmean:
-  u: 1
-  v: 0.1
-  t: 0.5
-  h: 10
-  q: 0.1
+symlognorm_params_zonalmean_PMF:
+  u:
+    linthresh: 1
+    linscale: 1.0
+    vmin: -8
+    vmax: 8
+  v:
+    linthresh: 0.10
+    linscale: 0.6
+    vmin: -1.0
+    vmax: 1.0
+  t:
+    linthresh: 1
+    linscale: 1.0
+    vmin: -4
+    vmax: 4
+  h:
+    linthresh: 10
+    linscale: 1.0
+    vmin: -120
+    vmax: 120
+  q:
+    linthresh: 0.10
+    linscale: 1.0
+    vmin: -1.0
+    vmax: 1.0
+
+# clevel_step_PMF_zonalmean:
+#   u: 1
+#   v: 0.1
+#   t: 0.5
+#   h: 10
+#   q: 0.1
 
 # 自定义clevels
 clevel_custom:

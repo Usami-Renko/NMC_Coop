@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-23 19:12:26
+@LastEditTime: 2020-06-25 16:10:47
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -252,7 +252,10 @@ def plot_data_zonal(post_data, plot_type, var, varname, lat, iarea, title, subti
         print("[warning]: clevels too short for this var at this level, abort...".format())
         return
     
-    norm = None
+    if var in symlognorm_params_zonalmean_PMF.keys() and plot_type == 'GMF':
+        norm=colors.SymLogNorm(**symlognorm_params_zonalmean_PMF[var] if symlognorm_params_zonalmean_PMF[var] is not None else {})
+    else:
+        norm = None
 
     ticks = clevels
     ticklabels = [str(clevel) for clevel in clevels]

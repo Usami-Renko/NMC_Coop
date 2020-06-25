@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-24 09:31:19
+@LastEditTime: 2020-06-25 15:51:35
 @Description: Process and plot postvar
 Version: 1.9.0-alpha
 Release Date: 2020/6/23
@@ -589,12 +589,9 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                     p.join()
 
                     # [II]. plot zonal averaged data
-                    if var not in clevel_custom.keys():
-                        if plot_type in ['G', 'F']:    
-                            dlevel = clevel_step_zonalmean[var]
-                        elif plot_type == 'GMF':
-                            dlevel = clevel_step_PMF_zonalmean[var]
-                    
+                    if plot_type in ['G', 'F']:    
+                        dlevel = clevel_step_zonalmean[var]
+                
                     if plot_zonalmean:
                         if var in noFNL_vars or iarea != 'Global':
                             continue
@@ -617,14 +614,11 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                         # [C]. find clevels
                         if plot_type in ['G', 'F']:
                             clevel_data = datatable_fnl[var][itime, ...]
+                            # perform zonal average
+                            clevel_data = np.mean(clevel_data, axis=2)
+                            clevels = find_clevels_zonal(iarea, clevel_data, plot_lat, dlevel, plot_type)
                         elif plot_type in ['GMF']:
-                            # the biggest forecast range have large clevels
-                            clevel_data = datatable_grapes[var][len(time_indices_var)-1, ...] - \
-                                datatable_fnl[var][len(time_indices_var)-1, ...]
-                        # perform zonal average
-                        clevel_data = np.mean(clevel_data, axis=2)
-                        
-                        clevels = find_clevels_zonal(iarea, clevel_data, plot_lat, dlevel, plot_type)
+                            clevels = clevel_zonalmean_PMF[var]
                         
                         # [D]. find timestr
                         timestr = '{:0>3}'.format(time_index*time_incr)

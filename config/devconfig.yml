@@ -15,13 +15,19 @@ dump_dir: './temp/pkl/'
 remove_dump: True
 
 # 运行模式 plot / debug
-run_mode: 'plot'
+run_mode: 'deubg'
 nc_sample: './ex_data/CTRL/postvar2016010112.nc'
 # nc_sample: '/g3/wanghao/share/GRAPES_VS_FNL/ex_data/postvar2016010112.nc'
 
 # 格点雨量观测值路径 
-gridrain_dir: './obs_gridrain_test/'
-gridrain_sample: './obs_gridrain/20160101/Z_SURF_C_BABJ_20190603001645_P_CMPA_NRT_CHN_0P05_HOR-PRE-2016010100.nc'
+use_gridrain_type: 'type2'
+gridrain:
+  type1:
+    gridrain_dir: './obs_gridrain_test/'
+    gridrain_sample: './obs_gridrain/20160101/Z_SURF_C_BABJ_20190603001645_P_CMPA_NRT_CHN_0P05_HOR-PRE-2016010100.nc'
+  type2:
+    gridrain_dir: './cmp_pre_gridrain/'
+    gridrain_sample: './cmp_pre_gridrain/SURF_CLI_CHN_MERGE_CMP_PRE_HOUR_GRID_0.10-2016010100.grd'
 
 # 蒙版文件路径
 mask_dir: './Cmodule/chinamask/country1'

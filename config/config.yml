@@ -23,7 +23,7 @@ nthreads: 1
 # 可供选择的变量和层次: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
 #                     [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.,50.,10.]
 # st_vars: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
-st_vars:  ['u', 'v', 'h']
+st_vars:  ['24hrain']
 # plot_levels: [1000.,925.,850.,700.,600.,500.,400.,300.,200.,100.]
 plot_levels: [500.]
 
@@ -59,7 +59,7 @@ clean_plot: True
 plot_areas:
   "u v t h w q": ['Global']
   "shf phf" : ['Global']
-  "24hrain" : ['Global']
+  "24hrain" : ['Global', 'E_Asia']
   "t2m" : ['Global']
 
 plot_types: ['G', 'F', 'GMF']

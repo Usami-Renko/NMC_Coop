@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-25 15:51:35
+@LastEditTime: 2020-06-25 18:06:04
 @Description: Process and plot postvar
 Version: 1.9.0-alpha
 Release Date: 2020/6/23
@@ -305,22 +305,66 @@ def get_OBS_data():
 
     return datatable
 
+def get_gridrain_data(datafile, datatype, sample=False):
+    '''
+    Input:
+        datafile: filename of gridrain data, contain the time stamp as: YYMMDDHH
+        datatype: 'type1' or 'type2', see config.yaml
+        sample: True or False
+    
+    Output:
+        if sample == False then return rain data
+        if sample == True then return latitude and longitude
+    '''
+
+
+    if datatype == 'type1':
+        rootgrp = nc.Dataset(datafile, 'r')
+    elif datatype == 'type2':
+        ddate = os.path.basename(datafile).split('.')[-2].split('-')[-1]
+        gen_cmp_pre_ctl(ddate)
+        ctlfile = './temp/cmp_pre_ctls/cmp_pre_{}.ctl'.format(ddate)
+        bnrfile_from = '{}/SURF_CLI_CHN_MERGE_CMP_PRE_HOUR_GRID_0.10-{}.grd'.format(
+            gridrain[datatype]['gridrain_dir'], ddate
+        )
+        bnrfile_to = '{}/SURF_CLI_CHN_MERGE_CMP_PRE_HOUR_GRID_0.10-{}.grd'.format(
+            './temp/cmp_pre_ctls', ddate
+        )
+        os.system('cp {} {}'.format(bnrfile_from, bnrfile_to))
+        rootgrp = CTLReader(ctlfile, ['crain'])
+    
+    if sample:
+        return rootgrp.variables['latitude'][:], rootgrp.variables['longitude'][:]
+    else:
+        if datatype == 'type1':
+            grdata = rootgrp.variables['rain'][0, ...]
+        elif datatype == 'type2':
+            grdata = rootgrp.variables['crain'][0][0, ...]
+        grdata[grdata < 0.] = 0.
+        return grdata
+
 def get_GRIDRAIN_data():
     
     # 6.0 读取GRIDRAIN数据
     print('6.0 开始读取GRIDRAIN数据')
     t0 = time.time()
-    
-    import netCDF4 as nc
+
+    if use_gridrain_type == 'type1':
+        global nc
+        import netCDF4 as nc
+    elif use_gridrain_type == 'type2':
+        global CTLReader, gen_cmp_pre_ctl
+        from CTLReader import CTLReader
+        from utils import gen_cmp_pre_ctl
 
     time_indices_var = var_time_indices['24hrain']
 
-    if not os.path.exists(gridrain_sample):
+    if not os.path.exists(gridrain[use_gridrain_type]['gridrain_sample']):
         raise IOError('{} gridrain sample not found'.format(gridrain_sample))
-    sample = nc.Dataset(gridrain_sample, 'r')
-    gridrain_lat = sample.variables['latitude'][:]
-    gridrain_lon = sample.variables['longitude'][:]
+    
+    gridrain_lat, gridrain_lon = get_gridrain_data(gridrain[use_gridrain_type]['gridrain_sample'], use_gridrain_type, sample=True)
 
+    rain = get_gridrain_data(gridrain[use_gridrain_type]['gridrain_sample'], use_gridrain_type, False)
     # exit()
 
     datacache = dict()
@@ -336,8 +380,12 @@ def get_GRIDRAIN_data():
             if gridrain_datetime in datacache.keys():
                 datatable[ifcsttime, ...] += datacache[gridrain_datetime]
                 continue
-
-            match = '{}/{}/*-{}*.nc'.format(gridrain_dir, gridrain_datetime, gridrain_datetime)
+            
+            if use_gridrain_type == 'type1':
+                match = '{}/{}/*-{}*.nc'.format(gridrain[use_gridrain_type]['gridrain_dir'], gridrain_datetime, gridrain_datetime)
+            elif use_gridrain_type == 'type2':
+                match = '{}/*-{}*.grd'.format(gridrain[use_gridrain_type]['gridrain_dir'], gridrain_datetime)
+            
             gridrain_files = glob.glob(match)
             if len( gridrain_files) != 24:
                 print(gridrain_files)
@@ -346,9 +394,7 @@ def get_GRIDRAIN_data():
 
             grdata_ls = list()
             for gridrain_file in gridrain_files:
-                handle = nc.Dataset(gridrain_file, 'r')
-                grdata = handle.variables['rain'][0,...]
-                grdata[grdata < 0.] = 0.
+                grdata = get_gridrain_data(gridrain_file, use_gridrain_type, sample=False)
                 grdata_ls.append(grdata)
             dayrain = np.sum(grdata_ls, axis=0)
             
@@ -361,7 +407,10 @@ def get_GRIDRAIN_data():
     for data in datacache.values():
         del data
     del datacache
-    del nc
+    if use_gridrain_type == 'type1':
+        del nc
+    elif use_gridrain_type == 'type2':
+        del CTLReader, gen_cmp_pre_ctl
     t1 = time.time()
     print('读取GRIDRAIN数据结束, 用时{} seconds.'.format(str(t1-t0)[:7]))
 
@@ -589,12 +638,12 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                     p.join()
 
                     # [II]. plot zonal averaged data
-                    if plot_type in ['G', 'F']:    
-                        dlevel = clevel_step_zonalmean[var]
-                
                     if plot_zonalmean:
                         if var in noFNL_vars or iarea != 'Global':
                             continue
+
+                        if plot_type in ['G', 'F']:    
+                            dlevel = clevel_step_zonalmean[var]
 
                         # [A]. find plot_lat, plot_lon, plot_typelabel
                         plot_lat, plot_lon = interp2fnl_lat, interp2fnl_lon

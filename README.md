@@ -3,9 +3,9 @@
  * @Author: Hejun Xie
  * @Date: 2020-04-23 20:31:50
  * @LastEditors: wanghao
- * @LastEditTime: 2020-05-11 16:26:05
+ * @LastEditTime: 2020-06-26 14:03:21
  -->
-# GRAPES预报场与FNL分析场诊断画图脚本V1.3
+# GRAPES预报场与FNL分析场诊断画图脚本V1.9.0
 
 ----------
 Developers and Contributors
@@ -14,6 +14,11 @@ Developers and Contributors
 #### 王皓 - 中国气象局数值预报中心
  
 #### 谢和俊 - 浙江大学地球科学学院
+
+# version info
+1.9.0  alpha
+
+1.9.1  增加快速融合降水观测
 
 ## 1、数据提取模块
 

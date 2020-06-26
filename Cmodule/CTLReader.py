@@ -35,7 +35,8 @@ class CTLReader(object):
             self.filename = path + os.sep + m.group(1)[1:]
         else:
             self.filename = m.group(1)[:]
-        print(self.filename)
+        if not os.path.exists(self.filename):
+            raise IOError('{} is not exist.'.format(self.filename))
 
         self._read_dimensions() #获取ctl中的维度信息
         self._read_data(self.varname)

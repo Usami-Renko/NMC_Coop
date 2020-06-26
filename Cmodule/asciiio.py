@@ -77,8 +77,9 @@ def generate_generalctl(timelines, datadir):
         ctl_lines = _transfer_generalctl(template_ctl_lines, initdatetime)
         ctl_filename = 'post.ctl_' + initdatetime.strftime("%Y%m%d%H")
         ctl_path = os.path.join(datadir, ctl_filename)
-        print(u'生成CTL文件:{}'.format(ctl_path))
-        _write_file(ctl_path, ctl_lines)
+        if not os.path.exists(ctl_path):
+            print(u'生成CTL文件:{}'.format(ctl_path))
+            _write_file(ctl_path, ctl_lines)
 
 if __name__ == "__main__":
     datadir = '../87_fcst_ctl/'

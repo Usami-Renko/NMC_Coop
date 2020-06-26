@@ -3,10 +3,10 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: Hejun Xie
-@LastEditTime: 2020-06-25 18:06:04
+@LastEditors: wanghao
+@LastEditTime: 2020-06-25 23:14:24
 @Description: Process and plot postvar
-Version: 1.9.0-alpha
+Version: 1.9.1-alpha
 Release Date: 2020/6/23
 '''
 
@@ -322,15 +322,9 @@ def get_gridrain_data(datafile, datatype, sample=False):
         rootgrp = nc.Dataset(datafile, 'r')
     elif datatype == 'type2':
         ddate = os.path.basename(datafile).split('.')[-2].split('-')[-1]
-        gen_cmp_pre_ctl(ddate)
         ctlfile = './temp/cmp_pre_ctls/cmp_pre_{}.ctl'.format(ddate)
-        bnrfile_from = '{}/SURF_CLI_CHN_MERGE_CMP_PRE_HOUR_GRID_0.10-{}.grd'.format(
-            gridrain[datatype]['gridrain_dir'], ddate
-        )
-        bnrfile_to = '{}/SURF_CLI_CHN_MERGE_CMP_PRE_HOUR_GRID_0.10-{}.grd'.format(
-            './temp/cmp_pre_ctls', ddate
-        )
-        os.system('cp {} {}'.format(bnrfile_from, bnrfile_to))
+        gen_cmp_pre_ctl(ctlfile,ddate,gridrain[datatype]['gridrain_dir'])
+
         rootgrp = CTLReader(ctlfile, ['crain'])
     
     if sample:
@@ -512,7 +506,6 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                         elif plot_type == 'GMF':
                             dlevel = clevel_step_PMF[var]
                     
-                    p = Pool(len(st_levels))
                     for level in plot_levels:
                         # continue
                         if var_ndims[var] == 4:
@@ -615,7 +608,6 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
 
                             print('\t\t\t'+pic_file)
 
-                            # p.apply_async(plot_data, args=(data, plot_type, var, varname, lon, lat, iarea, title, subtitle, pic_file, clevels))
                             plot_data(data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistics)
                         elif var_ndims[var] == 3:
                             if len(varname) < 20:
@@ -633,9 +625,6 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
 
                             plot_data(data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistics)
                             break
-
-                    p.close()
-                    p.join()
 
                     # [II]. plot zonal averaged data
                     if plot_zonalmean:
@@ -737,9 +726,9 @@ if __name__ == "__main__":
     OBS_HASH = hashlist([case_ini_times, case_fcst_hours])
     FNL_HASH = hashlist([st_vars, st_levels, fcst, start_ddate, end_ddate, fcst_step])
     GRIDRAIN_HASH = hashlist([start_ddate, end_ddate])
-    OBS_DATA_PKLNAME = './pkl/OBS_{}.pkl'.format(OBS_HASH)
-    FNL_DATA_PKLNAME = './pkl/FNL_{}.pkl'.format(FNL_HASH)
-    GRIDRAIN_DATA_PKLNAME = './pkl/GRIDRAIN_{}.pkl'.format(GRIDRAIN_HASH)
+    OBS_DATA_PKLNAME = './temp/pkl/OBS_{}.pkl'.format(OBS_HASH)
+    FNL_DATA_PKLNAME = './temp/pkl/FNL_{}.pkl'.format(FNL_HASH)
+    GRIDRAIN_DATA_PKLNAME = './temp/pkl/GRIDRAIN_{}.pkl'.format(GRIDRAIN_HASH)
 
     ddm_fnl = DATADumpManager('./', FNL_PKL, FNL_DATA_PKLNAME, get_FNL_data)
     ddm_obs = DATADumpManager('./', OBS_PKL, OBS_DATA_PKLNAME, get_OBS_data)
@@ -755,7 +744,7 @@ if __name__ == "__main__":
         print("计算试验{}".format(expr_name))
         exdata_dir = os.path.join(exdata_root_dir, expr_name)
         GRAPES_HASH = hashlist([exdata_dir, st_vars, st_levels, fcst, start_ddate, end_ddate, fcst_step, OBS_HASH])
-        GRAPES_DATA_PKLNAME = './pkl/GRAPES_{}.pkl'.format(GRAPES_HASH)
+        GRAPES_DATA_PKLNAME = './temp/pkl/GRAPES_{}.pkl'.format(GRAPES_HASH)
         ddm_grapes = DATADumpManager('./', GRAPES_PKL, GRAPES_DATA_PKLNAME, get_GRAPES_data)
         global_package, datatable_grapes, datatable_case_grapes = ddm_grapes.get_data(exdata_dir)
         if iexpr == 0:
@@ -790,7 +779,7 @@ if __name__ == "__main__":
         print("从硬盘加载试验{}缓存".format(expr_name))
         exdata_dir = os.path.join(exdata_root_dir, expr_name)
         GRAPES_HASH = hashlist([exdata_dir, st_vars, st_levels, fcst, start_ddate, end_ddate, fcst_step, OBS_HASH])
-        GRAPES_DATA_PKLNAME = './pkl/GRAPES_{}.pkl'.format(GRAPES_HASH)
+        GRAPES_DATA_PKLNAME = './temp/pkl/GRAPES_{}.pkl'.format(GRAPES_HASH)
         ddm_grapes = DATADumpManager('./', GRAPES_PKL, GRAPES_DATA_PKLNAME, get_GRAPES_data)
         global_package, datatable_grapes, datatable_case_grapes = ddm_grapes.get_data(exdata_dir)
         

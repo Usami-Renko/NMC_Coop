@@ -143,10 +143,11 @@ def def_interp_grid(itype):
         f.write('yinc   = 1.0\n')
     f.close()
 
-def gen_cmp_pre_ctl(ddate):
-    makenewdir('./temp/cmp_pre_ctls')
-    with open('./temp/cmp_pre_ctls/cmp_pre_{}.ctl'.format(ddate),'w') as f:
-        f.write('dset ^SURF_CLI_CHN_MERGE_CMP_PRE_HOUR_GRID_0.10-{}.grd\n'.format(ddate))
+def gen_cmp_pre_ctl(ctlfile,ddate,gridrain_dir):
+    (filepath, tempfilename) = os.path.split(ctlfile)
+    makenewdir(filepath)
+    with open(ctlfile,'w') as f:
+        f.write('dset {}/SURF_CLI_CHN_MERGE_CMP_PRE_HOUR_GRID_0.10-{}.grd\n'.format(gridrain_dir,ddate))
         f.write('undef -999.0\n')
         f.write('options   little_endian\n')
         f.write('title  China Hourly Merged Precipitation Analysis\n')

@@ -2,22 +2,20 @@
 
 # 平台
 platform: 'PC'    # 'Pi'
-# platforn: 'Pi'
+# platform: 'Pi'
 
 # FNL数据路径
 fnl_dir: './fnl_data/'
-temp_fnl_dir: './temp/fnl_data_tmp/'
 # fnl_dir: '/g1/COMMONDATA/obs/EXPR/NWPC/glob/fnl/'
+temp_fnl_dir: './temp/fnl_data_tmp/'
+
 
 # FNL加速硬盘缓冲区
-dump_dir: './temp/pkl/'
-# dump_dir: '/g3/das_xp/DATA/fnl/fnl_pkl/'
+dump_dir: './temp/fnl_pkl/'
 remove_dump: True
 
 # 运行模式 plot / debug
 run_mode: 'deubg'
-nc_sample: './ex_data/CTRL/postvar2016010112.nc'
-# nc_sample: '/g3/wanghao/share/GRAPES_VS_FNL/ex_data/postvar2016010112.nc'
 
 # 格点雨量观测值路径 
 use_gridrain_type: 'type2'
@@ -27,10 +25,13 @@ gridrain:
     gridrain_sample: './obs_gridrain/20160101/Z_SURF_C_BABJ_20190603001645_P_CMPA_NRT_CHN_0P05_HOR-PRE-2016010100.nc'
   type2:
     gridrain_dir: './cmp_pre_gridrain/'
+    # gridrain_dir: '/g11/phy_xp/COMMDATA/rainfall/china/nmic/'
     gridrain_sample: './cmp_pre_gridrain/SURF_CLI_CHN_MERGE_CMP_PRE_HOUR_GRID_0.10-2016010100.grd'
+    #  gridrain_sample: '/g11/phy_xp/COMMDATA/rainfall/china/nmic/SURF_CLI_CHN_MERGE_CMP_PRE_HOUR_GRID_0.10-2016010100.grd'
 
 # 蒙版文件路径
 mask_dir: './Cmodule/chinamask/country1'
+# mask_dir: '/g3/wanghao/Python/Cmodule/GRAPES_VS_FNL/chinamask/country1'
 
 # 插值变量
 def_interp2fnl_vars: ['u', 'v', 't', 'h', 'q2']

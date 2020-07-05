@@ -15,7 +15,7 @@ dump_dir: './temp/fnl_pkl/'
 remove_dump: True
 
 # 运行模式 plot / debug
-run_mode: 'deubg'
+run_mode: 'debug'
 
 # 格点雨量观测值路径 
 use_gridrain_type: 'type2'

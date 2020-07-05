@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-25 16:10:47
+@LastEditTime: 2020-07-05 22:52:35
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -253,7 +253,9 @@ def plot_data_zonal(post_data, plot_type, var, varname, lat, iarea, title, subti
         return
     
     if var in symlognorm_params_zonalmean_PMF.keys() and plot_type == 'GMF':
-        norm=colors.SymLogNorm(**symlognorm_params_zonalmean_PMF[var] if symlognorm_params_zonalmean_PMF[var] is not None else {})
+        symlogdict=symlognorm_params_zonalmean_PMF[var]
+        symlogdict['base'] = np.e
+        norm=colors.SymLogNorm(**symlogdict if symlognorm_params_zonalmean_PMF[var] is not None else {})
     else:
         norm = None
 

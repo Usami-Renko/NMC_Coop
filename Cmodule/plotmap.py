@@ -254,7 +254,8 @@ def plot_data_zonal(post_data, plot_type, var, varname, lat, iarea, title, subti
     
     if var in symlognorm_params_zonalmean_PMF.keys() and plot_type == 'GMF':
         symlogdict=symlognorm_params_zonalmean_PMF[var]
-        symlogdict['base'] = np.e
+        if platform == 'PC':
+            symlogdict['base'] = np.e
         norm=colors.SymLogNorm(**symlogdict if symlognorm_params_zonalmean_PMF[var] is not None else {})
     else:
         norm = None

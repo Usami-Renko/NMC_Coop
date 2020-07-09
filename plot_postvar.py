@@ -6,7 +6,7 @@
 @LastEditors: Hejun Xie
 @LastEditTime: 2020-07-09 12:07:43
 @Description: Process and plot postvar
-Version: 1.9.1-alpha
+Version: 1.9.2-alpha
 Release Date: 2020/6/23
 '''
 

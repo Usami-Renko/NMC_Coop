@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-07-05 22:52:35
+@LastEditTime: 2020-07-09 11:24:10
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -101,10 +101,10 @@ def _add_title(ax, title, subtitle, statistics, figsize, plot_type):
     ax.text(0.5, 0.00, subtitle, fontsize=14, ha='center', va='center')
 
     if statistics is None:
-        if plot_type in ['GMF', 'G']:
+        if plot_type in ['GMF', 'G', 'GMG']:
             ax.text(0.14, 0.30, "{}".format(plot_expr), fontsize=14, weight='bold', ha='right', va='center')
     else:
-        if plot_type in ['GMF', 'G']:
+        if plot_type in ['GMF', 'G', 'GMG']:
             ax.text(0.08, 0.90, "MIN: {:>.2f}".format(statistics[0]), fontsize=8, ha='right', va='center')
             ax.text(0.08, 0.60, "MAX: {:>.2f}".format(statistics[1]), fontsize=8, ha='right', va='center')
             ax.text(0.08, 0.30, "MEAN: {:>.2f}".format(statistics[2]), fontsize=8, ha='right', va='center')
@@ -151,11 +151,11 @@ def _find_clevels_rec(data, dlevel, plot_type):
         data_max = data_max // dlevel * dlevel
         data_min = data_min // dlevel * dlevel
     
-    if plot_type in ['GMF']:
+    if plot_type in ['GMF', 'GMG']:
         data_max = data_max // dlevel * dlevel + dlevel / 2
         data_min = data_min // dlevel * dlevel - dlevel / 2
 
-    if plot_type == 'GMF':
+    if plot_type in ['GMF', 'GMG']:
         if abs(data_max) > abs(data_min):
             data_min = - data_max
         else:
@@ -239,7 +239,7 @@ def plot_data_zonal(post_data, plot_type, var, varname, lat, iarea, title, subti
     origin = 'lower'
     extend = 'both'
 
-    if plot_type == 'GMF':
+    if plot_type in ['GMF', 'GMG']:
         cmap = 'RdBu_r'
     else:
         cmap = 'jet'
@@ -375,7 +375,7 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
 
     # some settings 
     
-    if plot_type == 'GMF':
+    if plot_type in ['GMF', 'GMG']:
         cmap = 'RdBu_r'
     else:
         cmap = 'jet'

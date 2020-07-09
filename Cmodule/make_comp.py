@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 15:11:40
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-06-22 15:24:11
+@LastEditTime: 2020-07-09 11:59:02
 '''
 
 
@@ -15,6 +15,7 @@ from copy import copy
 import os
 from utils import makenewdir
 import numpy as np
+import glob
 
 
 def config_submodule(cong, pic_dir):
@@ -34,7 +35,49 @@ def config_submodule(cong, pic_dir):
     else:
         st_levels = plot_levels
 
+def sort_components(pic_file):
+
+    plot_type = pic_file.split('/')[-1].split('.')[-2].split('_')[0]
+    if plot_type == 'G':
+        return 0
+    elif plot_type == 'F':
+        return 1
+    elif plot_type == 'GMF':
+        return 2
+    elif plot_type == 'GMG':
+        return 3
+    else:
+        raise ValueError("unknown plot_type: {}".format(plot_type))
+
 def _make_comp(pic_files, comp_file):
+
+    pic_files.sort(key=sort_components)
+
+    if len(pic_files) == 2:
+        return _make_comp2(pic_files, comp_file)
+    elif len(pic_files) == 3:
+        return _make_comp3(pic_files, comp_file)
+    elif len(pic_files) == 4:
+        return _make_comp4(pic_files, comp_file)
+    else:
+        raise ValueError("Too many or too little components to make comp: {}".format(comp_file))
+
+def _make_comp4(pic_files, comp_file):
+
+    p = Image.open(pic_files[0])
+    f = Image.open(pic_files[1])
+    pmf = Image.open(pic_files[2])
+    pmp = Image.open(pic_files[3])
+    
+    d = Image.new('RGB', (p.size[0]*2, p.size[1]*2))
+    d.paste(p,   (0,         0))
+    d.paste(f,   (p.size[0], 0))
+    d.paste(pmf, (0,         p.size[1]))
+    d.paste(pmp, (p.size[0], p.size[1]))
+
+    return d
+
+def _make_comp3(pic_files, comp_file):
 
     p = Image.open(pic_files[0])
     f = Image.open(pic_files[1])
@@ -100,36 +143,25 @@ def make_comp_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):
                 for level in plot_levels:
                     ilevel = st_levels.index(level)
                     if ndim == 4:
-                        pic_files = ['{}/{}/{}_{}_{}hr_{}hpa_{}.png'.format(origin_dir, var, plot_type, iarea, time_index*time_incr, int(level), var) \
-                            for plot_type in var_plot_types]
+                        match = '{}/{}/*_{}_{}hr_{}hpa_{}.png'.format(origin_dir, var, iarea, time_index*time_incr, int(level), var)
+                        pic_files = glob.glob(match)
                         comp_file = 'comp_{}_{}hr_{}hpa_{}.png'.format(iarea, time_index*time_incr, int(level), var)
                     elif ndim == 3:
-                        pic_files = ['{}/{}/{}_{}_{}hr_{}.png'.format(origin_dir, var, plot_type, iarea, time_index*time_incr, var) 
-                            for plot_type in var_plot_types]
+                        match = '{}/{}/*_{}_{}hr_{}.png'.format(origin_dir, var, iarea, time_index*time_incr, var) 
+                        pic_files = glob.glob(match)
                         comp_file = 'comp_{}_{}hr_{}.png'.format(iarea, time_index*time_incr, var)
                     
-                    if not np.array([os.path.exists(pic_file) for pic_file in pic_files]).all():
-                        print("[warning]: failed to make comp {} due to missing components".format(comp_file))
-                        continue
-                    
-                    if len(var_plot_types) == 3:
-                        d = _make_comp(pic_files, comp_file)
-                    elif len(var_plot_types) == 2:
-                        d = _make_comp2(pic_files, comp_file)
+                    d = _make_comp(pic_files, comp_file)
                     d.save(os.path.join(comp_dir, var, comp_file))
                 
                 # [II]. make comp for zonal mean 
                 if plot_zonalmean:
                     if var in noFNL_vars or iarea != 'Global':
                         continue
-
-                    pic_files = ['{}/{}/{}_{}_{}hr_zonalmean_{}.png'.format(zonalmean_dir, var, plot_type, iarea, time_index*time_incr, var) \
-                            for plot_type in var_plot_types]
+                    
+                    match = '{}/{}/*_{}_{}hr_zonalmean_{}.png'.format(zonalmean_dir, var, iarea, time_index*time_incr, var)
+                    pic_files = glob.glob(match)
                     comp_file = 'comp_{}_{}hr_zonalmean_{}.png'.format(iarea, time_index*time_incr, var)
-
-                    if not np.array([os.path.exists(pic_file) for pic_file in pic_files]).all():
-                        print("[warning]: failed to make comp {} due to missing components".format(comp_file))
-                        continue
 
                     d = _make_comp(pic_files, comp_file)
                     d.save(os.path.join(comp_dir, var, comp_file))

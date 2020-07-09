@@ -3,8 +3,8 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: wanghao
-@LastEditTime: 2020-06-25 23:14:24
+@LastEditors: Hejun Xie
+@LastEditTime: 2020-07-09 12:07:43
 @Description: Process and plot postvar
 Version: 1.9.1-alpha
 Release Date: 2020/6/23
@@ -465,6 +465,10 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                 print(command)
                 os.system(command)
             continue
+        
+        # skip CTRL for GMG
+        if iexpr == 0 and plot_type == 'GMG':
+            continue
 
 
         print('开始作图: {}'.format(plot_types_name[plot_type]))
@@ -503,7 +507,7 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                     if var not in clevel_custom.keys():
                         if plot_type in ['G', 'F']:    
                             dlevel = clevel_step[var]
-                        elif plot_type == 'GMF':
+                        elif plot_type in ['GMF', 'GMG']:
                             dlevel = clevel_step_PMF[var]
                     
                     for level in plot_levels:
@@ -535,6 +539,9 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                         elif plot_type == 'GMF':
                             data = datatable_grapes[var][itime, ilevel, ...] - \
                                 datatable_fnl[var][itime, ilevel, ...]
+                        elif plot_type == 'GMG':
+                            data = datatable_grapes[var][itime, ilevel, ...] - \
+                                datatable_grapes_zero[var][itime, ilevel, ...]
 
                         # [C]. find clevels
                         if var in clevel_custom.keys(): 
@@ -544,7 +551,7 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                                 clevel_data = datatable_grapes_zero[var][itime, ilevel, ...]
                             elif plot_type in ['G', 'F']:
                                 clevel_data = datatable_fnl[var][itime, ilevel, ...]
-                            elif plot_type in ['GMF']:
+                            elif plot_type in ['GMF', 'GMG']:
                                 # the biggest forecast range have large clevels
                                 clevel_data = datatable_grapes[var][len(time_indices_var)-1, ilevel, ...] - \
                                     datatable_fnl[var][len(time_indices_var)-1, ilevel, ...]
@@ -646,6 +653,9 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                         elif plot_type == 'GMF':
                             data = datatable_grapes[var][itime, ...] - \
                                 datatable_fnl[var][itime, ...]
+                        elif plot_type == 'GMG':
+                            data = datatable_grapes[var][itime, ...] - \
+                                datatable_grapes_zero[var][itime, ...]
                         # perform zonal average
                         data = np.mean(data, axis=2)
 
@@ -655,7 +665,7 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                             # perform zonal average
                             clevel_data = np.mean(clevel_data, axis=2)
                             clevels = find_clevels_zonal(iarea, clevel_data, plot_lat, dlevel, plot_type)
-                        elif plot_type in ['GMF']:
+                        elif plot_type in ['GMF', 'GMG']:
                             clevels = clevel_zonalmean_PMF[var]
                         
                         # [D]. find timestr
@@ -686,7 +696,7 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
 
     
     if iexpr == 0:
-        fnl_pics = glob.glob("{}/*/F_*.png".format(origin_dir))
+        fnl_pics = glob.glob("{}/*/F_*.png".format(origin_dir)) + glob.glob("{}/*/F_*.png".format(zonalmean_dir))
 
     if make_comp:
         makenewdir(comp_dir)

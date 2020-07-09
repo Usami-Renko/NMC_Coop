@@ -1,7 +1,7 @@
 # configure file for developers
 
 # 平台
-platform: 'PC'    # 'Pi'
+platform: 'Pi'    # 'Pi'
 # platform: 'Pi'
 
 # FNL数据路径
@@ -15,7 +15,7 @@ dump_dir: './temp/fnl_pkl/'
 remove_dump: True
 
 # 运行模式 plot / debug
-run_mode: 'debug'
+run_mode: 'plot'
 
 # 格点雨量观测值路径 
 use_gridrain_type: 'type2'

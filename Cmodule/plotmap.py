@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-20 18:46:33
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-07-09 11:24:10
+@LastEditTime: 2020-07-09 17:29:42
 '''
 
 from mpl_toolkits.basemap import Basemap
@@ -220,6 +220,12 @@ def clip_china_data(data, lat, lon):
 
     return data_china['data'], data_china.index
 
+def adapt_symlogdict(symlogdict):
+    if platform == 'PC':
+        symlogdict['base'] = np.e
+    
+    return symlogdict
+
 def plot_data_zonal(post_data, plot_type, var, varname, lat, iarea, title, subtitle, pic_file, clevels):
     plt.rcParams['font.family'] = 'serif'
 
@@ -253,10 +259,7 @@ def plot_data_zonal(post_data, plot_type, var, varname, lat, iarea, title, subti
         return
     
     if var in symlognorm_params_zonalmean_PMF.keys() and plot_type == 'GMF':
-        symlogdict=symlognorm_params_zonalmean_PMF[var]
-        if platform == 'PC':
-            symlogdict['base'] = np.e
-        norm=colors.SymLogNorm(**symlogdict if symlognorm_params_zonalmean_PMF[var] is not None else {})
+        norm=colors.SymLogNorm(**adapt_symlogdict(symlognorm_params_zonalmean_PMF[var]) if symlognorm_params_zonalmean_PMF[var] is not None else {})
     else:
         norm = None
 
@@ -381,7 +384,7 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     else:
         cmap = 'jet'
     
-    if var in ['24hrain']:
+    if plot_type in ['G', 'F'] and var in ['24hrain']:
         post_data = ma.masked_where(post_data <= 0.01, post_data)
     
     if var in ['q'] and plot_type in ['G', 'F']:
@@ -392,10 +395,12 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
         print("[warning]: clevels too short for this var at this level, abort...".format())
         return
 
-    if var in lognorm_params.keys():
+    if plot_type in ['G', 'F'] and var in lognorm_params.keys():
         norm = colors.LogNorm(**lognorm_params[var] if lognorm_params[var] is not None else {})
-    elif var in symlognorm_params.keys():
-        norm=colors.SymLogNorm(**symlognorm_params[var] if symlognorm_params[var] is not None else {})
+    elif plot_type in ['G', 'F'] and var in symlognorm_params.keys():
+        norm = colors.SymLogNorm(**adapt_symlogdict(symlognorm_params[var]) if symlognorm_params[var] is not None else {})
+    elif plot_type in ['GMF', 'GMG'] and var in symlognorm_params_PMF.keys():
+        norm = colors.SymLogNorm(**adapt_symlogdict(symlognorm_params_PMF[var]) if symlognorm_params_PMF[var] is not None else {})
     else:
         norm = None
 
@@ -406,8 +411,8 @@ def plot_data(post_data, plot_type, var, varname, lon, lat, iarea, title, subtit
     CB = fig.colorbar(CF, cax=ax_cb, orientation='horizontal', ticks=ticks)
     CB.ax.set_xticklabels(ticklabels)
     for tick in CB.ax.xaxis.get_major_ticks():
-            tick.label.set_fontsize(10)
-            tick.label.set_rotation(45)
+        tick.label.set_fontsize(10)
+        tick.label.set_rotation(45)
 
     CB.set_label(varname, fontsize=14)
 

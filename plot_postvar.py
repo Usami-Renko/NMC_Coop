@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-07-09 12:07:43
+@LastEditTime: 2020-07-09 17:28:57
 @Description: Process and plot postvar
 Version: 1.9.2-alpha
 Release Date: 2020/6/23
@@ -544,8 +544,11 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                                 datatable_grapes_zero[var][itime, ilevel, ...]
 
                         # [C]. find clevels
-                        if var in clevel_custom.keys(): 
+                        if plot_type in ['G', 'F'] and var in clevel_custom.keys(): 
                             clevels = np.array(clevel_custom[var])
+                        elif plot_type in ['GMF', 'GMG'] and var in clevel_custom_PMF.keys():
+                            clevels = np.array(clevel_custom_PMF[var])
+                            # print(clevels)
                         else:
                             if var in noFNL_vars:
                                 clevel_data = datatable_grapes_zero[var][itime, ilevel, ...]

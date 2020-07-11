@@ -4,12 +4,13 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-07-09 17:28:57
+@LastEditTime: 2020-07-11 10:25:35
 @Description: Process and plot postvar
 Version: 1.9.2-alpha
 Release Date: 2020/6/23
 '''
 
+# Global import
 import sys
 sys.path.append('./Cmodule')
 sys.path.append('/g3/wanghao/Python/Cmodule/GRAPES_VS_FNL')
@@ -20,8 +21,9 @@ import datetime as dt
 from gen_timelines import gen_timelines
 import os
 import glob
-from multiprocessing import Pool
+import multiprocessing as mp
 
+# Local import
 from utils import DATADumpManager, config_list, hashlist, makenewdir, DumpDataSet
 from derived_vars import FNLWorkStation, GRAPESWorkStation
 from asciiio import read_obs
@@ -510,6 +512,9 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                         elif plot_type in ['GMF', 'GMG']:
                             dlevel = clevel_step_PMF[var]
                     
+                    # Initialize the multiprocessing pool
+                    pool = mp.Pool(processes = mp.cpu_count(), maxtasksperchild=1)
+                    
                     for level in plot_levels:
                         # continue
                         if var_ndims[var] == 4:
@@ -548,7 +553,6 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                             clevels = np.array(clevel_custom[var])
                         elif plot_type in ['GMF', 'GMG'] and var in clevel_custom_PMF.keys():
                             clevels = np.array(clevel_custom_PMF[var])
-                            # print(clevels)
                         else:
                             if var in noFNL_vars:
                                 clevel_data = datatable_grapes_zero[var][itime, ilevel, ...]
@@ -618,7 +622,9 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
 
                             print('\t\t\t'+pic_file)
 
-                            plot_data(data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistics)
+                            args = (data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistics)
+                            pool.apply_async(plot_data, args)
+                            # plot_data(data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistics)
                         elif var_ndims[var] == 3:
                             if len(varname) < 20:
                                 title    = '{} {}'.format(plot_typelabel, varname)
@@ -635,6 +641,10 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
 
                             plot_data(data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistics)
                             break
+                    
+                    # Gather processes of multiprocess
+                    pool.close()
+                    pool.join()
 
                     # [II]. plot zonal averaged data
                     if plot_zonalmean:
@@ -787,6 +797,9 @@ if __name__ == "__main__":
     # exit()
 
     # start ploting
+    print('7.0 开始画图')
+    t0 = time.time()
+
     for iexpr, expr_name in enumerate(exprs.keys()):
         # Load data
         print("从硬盘加载试验{}缓存".format(expr_name))
@@ -803,3 +816,6 @@ if __name__ == "__main__":
 
         # clean the memory
         del global_package, datatable_grapes, datatable_case_grapes
+    
+    t1 = time.time()
+    print('画图结束, 用时{} seconds.'.format(str(t1-t0)[:7]))

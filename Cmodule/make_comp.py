@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 15:11:40
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-07-11 15:06:39
+@LastEditTime: 2020-07-11 15:07:44
 '''
 
 
@@ -60,9 +60,9 @@ def _make_comp(pic_files, comp_file):
     elif len(pic_files) == 4:
         return _make_comp4(pic_files, comp_file)
     elif len(pic_files) < 2:
-        print("[warning] Too little components to make comp: {}".format(comp_file))
+        print("[warning]: Too little components to make comp: {}".format(comp_file))
     else:
-        raise ValueError("Too many little components to make comp: {}".format(comp_file))
+        raise ValueError("Too many components to make comp: {}".format(comp_file))
 
 def _make_comp4(pic_files, comp_file):
 

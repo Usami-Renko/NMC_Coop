@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 15:11:40
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-07-11 15:07:44
+@LastEditTime: 2020-07-11 20:54:57
 '''
 
 
@@ -154,7 +154,8 @@ def make_comp_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):
                         comp_file = 'comp_{}_{}hr_{}.png'.format(iarea, time_index*time_incr, var)
                     
                     d = _make_comp(pic_files, comp_file)
-                    d.save(os.path.join(comp_dir, var, comp_file))
+                    if d is not None:
+                        d.save(os.path.join(comp_dir, var, comp_file))
                 
                 # [II]. make comp for zonal mean 
                 if plot_zonalmean:
@@ -166,7 +167,8 @@ def make_comp_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):
                     comp_file = 'comp_{}_{}hr_zonalmean_{}.png'.format(iarea, time_index*time_incr, var)
 
                     d = _make_comp(pic_files, comp_file)
-                    d.save(os.path.join(comp_dir, var, comp_file))
+                    if d is not None:
+                        d.save(os.path.join(comp_dir, var, comp_file))
 
 
 def make_gif_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):

@@ -127,6 +127,9 @@ clevel_step_PMF:
   t: 0.5
   h: 10
   q: 0.1
+  t2m: 0.5
+  shf: 5
+  phf: 5
 
 clevel_step_zonalmean:
   u: 2
@@ -134,9 +137,6 @@ clevel_step_zonalmean:
   t: 1
   h: 40
   q: 0.1
-  t2m: 1
-  shf: 10
-  phf: 10
 
 symlognorm_params_PMF:
   24hrain:

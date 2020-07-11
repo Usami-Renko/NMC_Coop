@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-07-11 10:25:35
+@LastEditTime: 2020-07-11 22:04:30
 @Description: Process and plot postvar
 Version: 1.9.2-alpha
 Release Date: 2020/6/23
@@ -506,11 +506,10 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                 print('\t\t区域: {}'.format(iarea))
                 for itime,time_index in enumerate(time_indices_var):
                     # [I]. plot data on isobaric surfaces
-                    if var not in clevel_custom.keys():
-                        if plot_type in ['G', 'F']:    
-                            dlevel = clevel_step[var]
-                        elif plot_type in ['GMF', 'GMG']:
-                            dlevel = clevel_step_PMF[var]
+                    if var not in clevel_custom.keys() and plot_type in ['G', 'F']: 
+                        dlevel = clevel_step[var]
+                    elif var not in clevel_custom_PMF.keys() and plot_type in ['GMF', 'GMG']:
+                        dlevel = clevel_step_PMF[var]
                     
                     # Initialize the multiprocessing pool
                     pool = mp.Pool(processes = mp.cpu_count(), maxtasksperchild=1)

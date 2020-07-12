@@ -1,7 +1,7 @@
 # configure file for developers
 
 # 平台
-platform: 'Pi'    # 'Pi'
+platform: 'PC'    # 'Pi'
 # platform: 'Pi'
 
 # FNL数据路径
@@ -144,6 +144,21 @@ symlognorm_params_PMF:
     linscale: 1.5
     vmin: -25
     vmax: 25
+  w:
+    linthresh: 1.0
+    linscale: 1.5
+    vmin: -40
+    vmax: 40
+  shf:
+    linthresh: 10.0
+    linscale: 1.5
+    vmin: -200
+    vmax: 200
+  phf:
+    linthresh: 10.0
+    linscale: 1.5
+    vmin: -200
+    vmax: 200
 
 symlognorm_params_zonalmean_PMF:
   u:
@@ -181,6 +196,11 @@ clevel_custom:
 
 clevel_custom_PMF:
   24hrain: [-25,-13,-4,-0.1,-0.01,0.01,0.1,4,13,25]
+  w: [-40, -20, -10, -5, -2, -1, -0.5, 0.5, 1, 2, 5, 10, 20, 40]
+  phf: [-200, -100, -50, -25, -10, -5, -1, 1, 5, 10, 25, 50, 100, 200]
+  shf: [-200, -100, -50, -25, -10, -5, -1, 1, 5, 10, 25, 50, 100, 200]
+  t2m: [-5, -4, -3, -2, -1, -0.5, 0.5, 1, 2, 3, 4, 5]
+
 
 # 一些特殊变量
 # avoid ploting initial

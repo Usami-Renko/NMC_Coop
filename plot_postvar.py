@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-07-11 22:04:30
+@LastEditTime: 2020-07-12 11:55:50
 @Description: Process and plot postvar
 Version: 1.9.2-alpha
 Release Date: 2020/6/23
@@ -563,7 +563,6 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                                     datatable_fnl[var][len(time_indices_var)-1, ilevel, ...]
                             
                             clevels = find_clevels(iarea, clevel_data, plot_lon, plot_lat, dlevel, plot_type)
-                        # print(clevels)
                         
                         # [D]. find timestr
                         if var in daymean_vars:

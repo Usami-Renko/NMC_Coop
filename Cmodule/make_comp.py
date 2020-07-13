@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-04-26 15:11:40
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-07-11 20:54:57
+@LastEditTime: 2020-07-13 16:43:55
 '''
 
 
@@ -16,7 +16,7 @@ import os
 from utils import makenewdir
 import numpy as np
 import glob
-
+import multiprocessing as mp
 
 def config_submodule(cong, pic_dir):
 
@@ -49,20 +49,23 @@ def sort_components(pic_file):
     else:
         raise ValueError("unknown plot_type: {}".format(plot_type))
 
-def _make_comp(pic_files, comp_file):
+def _make_comp(pic_files, comp_file, var):
 
     pic_files.sort(key=sort_components)
 
     if len(pic_files) == 2:
-        return _make_comp2(pic_files, comp_file)
+        d =  _make_comp2(pic_files, comp_file)
     elif len(pic_files) == 3:
-        return _make_comp3(pic_files, comp_file)
+        d =  _make_comp3(pic_files, comp_file)
     elif len(pic_files) == 4:
-        return _make_comp4(pic_files, comp_file)
+        d = _make_comp4(pic_files, comp_file)
     elif len(pic_files) < 2:
         print("[warning]: Too little components to make comp: {}".format(comp_file))
     else:
         raise ValueError("Too many components to make comp: {}".format(comp_file))
+    
+    if d is not None:
+        d.save(os.path.join(comp_dir, var, comp_file))
 
 def _make_comp4(pic_files, comp_file):
 
@@ -140,6 +143,8 @@ def make_comp_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):
             print(var, var_plot_types)
             
             for itime,time_index in enumerate(time_indices_var):
+
+                pool = mp.Pool(processes = mp.cpu_count(), maxtasksperchild=1)
                 
                 # [I]. make comp for isobaric surface
                 for level in plot_levels:
@@ -153,9 +158,12 @@ def make_comp_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):
                         pic_files = glob.glob(match)
                         comp_file = 'comp_{}_{}hr_{}.png'.format(iarea, time_index*time_incr, var)
                     
-                    d = _make_comp(pic_files, comp_file)
-                    if d is not None:
-                        d.save(os.path.join(comp_dir, var, comp_file))
+                    # _make_comp(pic_files, comp_file, var)
+                    args = (pic_files, comp_file, var)
+                    pool.apply_async(_make_comp, args)
+                
+                pool.close()
+                pool.join()
                 
                 # [II]. make comp for zonal mean 
                 if plot_zonalmean:
@@ -166,9 +174,7 @@ def make_comp_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):
                     pic_files = glob.glob(match)
                     comp_file = 'comp_{}_{}hr_zonalmean_{}.png'.format(iarea, time_index*time_incr, var)
 
-                    d = _make_comp(pic_files, comp_file)
-                    if d is not None:
-                        d.save(os.path.join(comp_dir, var, comp_file))
+                    _make_comp(pic_files, comp_file, var)
 
 
 def make_gif_pic(var_time_indices, var_ndims, var_plot_areas, time_incr):

@@ -4,7 +4,7 @@
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
 @LastEditors: wanghao
-@LastEditTime: 2020-07-14 16:36:34
+@LastEditTime: 2020-07-14 16:47:28
 @Description: Process and plot postvar
 Version: 1.9.3-alpha
 Release Date: 2020/6/23
@@ -620,7 +620,7 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
 
                             print('\t\t\t'+pic_file)
                             
-                            if multi_process:
+                            if multi_plot_process:
                                 args = (data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistics)
                                 pool.apply_async(plot_data, args)
                             else:

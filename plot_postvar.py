@@ -3,10 +3,10 @@
 '''
 @Author: wanghao
 @Date: 2019-12-09 16:52:02
-@LastEditors: Hejun Xie
-@LastEditTime: 2020-07-12 11:55:50
+@LastEditors: wanghao
+@LastEditTime: 2020-07-14 16:36:34
 @Description: Process and plot postvar
-Version: 1.9.2-alpha
+Version: 1.9.3-alpha
 Release Date: 2020/6/23
 '''
 
@@ -512,7 +512,7 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                         dlevel = clevel_step_PMF[var]
                     
                     # Initialize the multiprocessing pool
-                    pool = mp.Pool(processes = mp.cpu_count(), maxtasksperchild=1)
+                    pool = mp.Pool(processes = 10, maxtasksperchild=1)
                     
                     for level in plot_levels:
                         # continue
@@ -619,10 +619,12 @@ def plot(pic_dir, datatable_grapes, datatable_case_grapes, datatable_grapes_zero
                             pic_file = '{}_{}_{}hr_{}hpa_{}.png'.format(plot_type, iarea, time_index*time_incr, int(level), var)
 
                             print('\t\t\t'+pic_file)
-
-                            args = (data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistics)
-                            pool.apply_async(plot_data, args)
-                            # plot_data(data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistics)
+                            
+                            if multi_process:
+                                args = (data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistics)
+                                pool.apply_async(plot_data, args)
+                            else:
+                                plot_data(data, plot_type, var, varname, plot_lon, plot_lat, iarea, title, subtitle, pic_file, clevels, statistics)
                         elif var_ndims[var] == 3:
                             if len(varname) < 20:
                                 title    = '{} {}'.format(plot_typelabel, varname)

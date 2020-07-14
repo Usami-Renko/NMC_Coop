@@ -82,6 +82,9 @@ variable_name:
 # 可画图变量
 plotable_vars: ['u','v','t','h','w','q','24hrain','t2m', 'shf', 'phf']
 
+# 是否启用多进程作图
+multi_process: False
+
 var_ndims:
   u: 4
   v: 4

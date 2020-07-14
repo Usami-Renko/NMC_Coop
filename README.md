@@ -3,9 +3,10 @@
  * @Author: Hejun Xie
  * @Date: 2020-04-23 20:31:50
  * @LastEditors: wanghao
- * @LastEditTime: 2020-07-09 16:45:23
+ * @LastEditTime: 2020-07-14 16:42:08
  -->
-# GRAPES预报场与FNL分析场诊断画图脚本V1.9.0
+# GVMmdiag(GRAPES VS Multimodel comparative diagnosis) V1.9.3
+GRAPES与多模式比较诊断
 
 ----------
 Developers and Contributors
@@ -21,6 +22,8 @@ Developers and Contributors
 1.9.1  增加快速融合降水观测
 
 1.9.2  增加试验间作差功能
+
+1.9.3  增加多进程绘图图选项，加快绘图速度
 
 ## 1、数据提取模块
 
